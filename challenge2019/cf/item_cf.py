@@ -1,8 +1,11 @@
-from challenge2019.utils.Compute_Similarity_Python import Compute_Similarity_Python
 import numpy as np
 
-class itemCollaborativeFiltering():
-    def __init__(self, knn = 100, shrink = 5, similarity="cosine"):
+from Base.Similarity.Compute_Similarity import Compute_Similarity_Python
+from utils.run import Runner
+
+
+class ItemCollaborativeFiltering():
+    def __init__(self, knn=100, shrink=5, similarity="cosine"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
@@ -10,10 +13,11 @@ class itemCollaborativeFiltering():
         self.SM_item = None
 
     def create_similarity_matrix(self):
-        similarity_matrix = Compute_Similarity_Python(self, topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
-        return similarity_matrix.compute_similarity()
+        similarity_object = Compute_Similarity_Python(self.URM, topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
+        return similarity_object.compute_similarity()
 
     def fit(self, URM):
+        self.URM = URM
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
 
@@ -31,3 +35,7 @@ class itemCollaborativeFiltering():
                                     assume_unique=True, invert=True)
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
+
+
+recommender = ItemCollaborativeFiltering()
+Runner.run(recommender, True)

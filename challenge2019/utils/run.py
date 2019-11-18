@@ -1,8 +1,8 @@
 import pandas as pd
 from tqdm import tqdm
 
-from challenge2019.utils.evaluator import Evaluator
-from challenge2019.utils.utils import Utils
+from .evaluator import Evaluator
+from .utils import Utils
 
 
 
@@ -10,16 +10,28 @@ from challenge2019.utils.utils import Utils
 class Runner(object):
 
     @staticmethod
-    def run(is_test=True):
+    def run(recommender, is_test=True):
         URM_csv = pd.read_csv("../dataset/data_train.csv")
-        util = Utils(URM_csv)
-        URM = util.get_urm_from_csv()
+        utils = Utils(URM_csv)
+        URM = utils.get_urm_from_csv()
 
-        dio = Evaluator()
+        evaluator = Evaluator()
+        evaluator.random_split(URM, URM_csv)
 
         if is_test:
             print("Starting testing phase..")
+            print("MAP@10 : {}".format(evaluator.eval_recommender(recommender)))
 
-        dio.random_split(URM, URM_csv)
+        else:
+            recommender.fit(URM)
+            submission_file = open('../dataset/submission.csv','w')
 
-Runner.run()
+            submission_file.write('user_id,item_list\n')
+            for user in tqdm(utils.get_target_user_list()):
+                user_recommendations = recommender.recommend(user)
+                user_recommendations = " ".join(str(x) for x in user_recommendations)
+                submission_file.write(str(user) + ',' + user_recommendations + '\n')
+            submission_file.close()
+
+
+
