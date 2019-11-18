@@ -1,7 +1,7 @@
 import numpy
 from tqdm import tqdm
 
-train = open("recsys-polimi-2018-master/data/train.csv", "r")
+train = open("recsys-polimi-2019/challenge2019/dataset/data_train.csv", "r")
 train = list(train)[1:]
 
 occurrencies  = numpy.empty(20635, dtype=int)
