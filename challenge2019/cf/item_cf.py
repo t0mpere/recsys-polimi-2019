@@ -1,4 +1,4 @@
-from challenge2019.lib.Compute_Similarity_Python import Compute_Similarity_Python
+from challenge2019.utils.Compute_Similarity_Python import Compute_Similarity_Python
 import numpy as np
 
 class itemCollaborativeFiltering():
