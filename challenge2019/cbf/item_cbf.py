@@ -4,7 +4,7 @@ from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Simi
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
-class ContentBasedFiltering():
+class ItemContentBasedFiltering():
     def __init__(self, knn=100, shrink=5, similarity="cosine"):
         self.knn = knn
         self.shrink = shrink
@@ -20,9 +20,9 @@ class ContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self):
+    def fit(self, URM):
         utils = Utils()
-        self.URM = utils.get_urm_from_csv()
+        self.URM = URM
         self.ICM_asset = utils.get_icm_asset_from_csv()
         self.ICM_price = utils.get_icm_price_from_csv()
         self.ICM_sub_class = utils.get_icm_sub_class_from_csv()
@@ -32,21 +32,22 @@ class ContentBasedFiltering():
 
         self.SM_asset = self.create_similarity_matrix(self.ICM_asset)
         self.SM_price = self.create_similarity_matrix(self.ICM_price)
-        self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class)
+        #self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class)
 
     def get_expected_ratings(self, user_id):
         user_id = int(user_id)
         liked_items = self.URM[user_id]
-
-        asset_weight = 0.3
-        price_weight = 0.3
+        asset_weight = 0.5
+        price_weight = 0.5
         sub_class_weight = 0.4
 
-        expected_ratings_assets = liked_items.dot(self.SM_asset)
-        expected_ratings_price = liked_items.dot(self.SM_price)
-        expected_ratings_sub_class = liked_items.dot(self.SM_sub_class)
+        expected_ratings_assets = liked_items.dot(self.SM_asset).toarray().ravel()
+        expected_ratings_price = liked_items.dot(self.SM_price).toarray().ravel()
+        #expected_ratings_sub_class = liked_items.dot(self.SM_sub_class)
 
-        expected_ratings = (expected_ratings_assets * asset_weight) + (expected_ratings_price * price_weight) + (expected_ratings_sub_class * sub_class_weight)
+        expected_ratings = (expected_ratings_assets * asset_weight)\
+                            + (expected_ratings_price * price_weight)
+                           #+ (expected_ratings_sub_class * sub_class_weight)
 
         return expected_ratings
 
@@ -60,5 +61,5 @@ class ContentBasedFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-recommender = ContentBasedFiltering()
-Runner.run(recommender, False)
+recommender = ItemContentBasedFiltering()
+Runner.run(recommender, True)

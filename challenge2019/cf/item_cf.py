@@ -17,11 +17,10 @@ class ItemCollaborativeFiltering():
         similarity_object = Compute_Similarity_Python(self.URM, topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self):
+    def fit(self,URM):
         print("Starting calculating similarity")
 
-        utils = Utils()
-        self.URM = utils.get_urm_from_csv()
+        self.URM = URM
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
 
@@ -42,4 +41,4 @@ class ItemCollaborativeFiltering():
 
 
 recommender = ItemCollaborativeFiltering()
-Runner.run(recommender, False)
+Runner.run(recommender, True)
