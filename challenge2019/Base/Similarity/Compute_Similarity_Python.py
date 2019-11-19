@@ -9,7 +9,7 @@ Created on 23/10/17
 import numpy as np
 import time, sys
 import scipy.sparse as sps
-from Base.Recommender_utils import check_matrix
+from challenge2019.Base.Recommender_utils import check_matrix
 
 
 

@@ -54,7 +54,8 @@ class Evaluator(object):
 
         # Cumulative sum: precision at 1, at 2, at 3 ...
         p_at_k = is_relevant * np.cumsum(is_relevant, dtype=np.float32) / (1 + np.arange(len(is_relevant)))
-        # print(p_at_k, is_relevant, recommended_items, relevant_items)
+        print(p_at_k, is_relevant, recommended_items, relevant_items)
+
         map_score = np.sum(p_at_k) / np.min([len(relevant_items), len(is_relevant)])
         if map_score > 0: print(map_score)
         return map_score
