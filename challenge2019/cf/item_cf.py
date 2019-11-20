@@ -40,5 +40,5 @@ class ItemCollaborativeFiltering():
         return recommended_items[0:at]
 
 
-recommender = ItemCollaborativeFiltering()
-Runner.run(recommender, True)
+#recommender = ItemCollaborativeFiltering()
+#Runner.run(recommender, True)
