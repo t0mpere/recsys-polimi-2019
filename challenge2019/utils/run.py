@@ -23,7 +23,7 @@ class Runner(object):
 
         else:
 
-            recommender.fit()
+            recommender.fit(URM)
             submission_file = open('../dataset/submission.csv','w')
             print("Starting recommend ")
             submission_file.write('user_id,item_list\n')

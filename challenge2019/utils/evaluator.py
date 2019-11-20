@@ -22,8 +22,8 @@ class Evaluator(object):
     def random_split(self, URM, URM_csv):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
-        print(len(URM.data))
-        for user_index in tqdm(user_indexes,desc="Splitting dataset: "):
+        print("Splitting using random 20%\n---------------------")
+        for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
             # FOREACH USER
             item_left = len(URM[user_index].data)
 
@@ -45,7 +45,34 @@ class Evaluator(object):
             else:
                 self.test_dictionary[user_index] = []
 
+        self.URM_train = URM
+        print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
+                                                                                            len(URM.data)))
 
+    def leave_one_out(self, URM, URM_csv):
+        user_indexes = np.arange(URM.shape[0])
+        tmp = 0
+        print("Splitting using leave one out\n---------------------")
+        for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
+            # FOREACH USER
+            item_left = len(URM[user_index].data)
+            if item_left > 1:
+                # If has more than 1 interactions
+
+                # Array with the indexes of the non zero values
+                non_zero = URM[user_index].indices
+                # Shuffle array of indices
+                np.random.shuffle(non_zero)
+                # Select 1 element of the array
+                non_zero = non_zero[:1]
+                # Change values
+                URM[user_index, non_zero] = 0
+                URM.eliminate_zeros()
+                self.test_dictionary[user_index] = non_zero
+                tmp += len(self.test_dictionary[user_index])
+
+            else:
+                self.test_dictionary[user_index] = []
 
         self.URM_train = URM
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
@@ -64,7 +91,7 @@ class Evaluator(object):
 
     def evaluate(self, user_id, recommended_items):
         relevant_items = self.test_dictionary[user_id]
-        if(len(relevant_items) is not 0):
+        if (len(relevant_items) is not 0):
             map = self.MAP(recommended_items, relevant_items)
             return map
         else:

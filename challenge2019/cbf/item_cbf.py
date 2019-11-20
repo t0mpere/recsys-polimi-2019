@@ -32,22 +32,22 @@ class ItemContentBasedFiltering():
 
         self.SM_asset = self.create_similarity_matrix(self.ICM_asset)
         self.SM_price = self.create_similarity_matrix(self.ICM_price)
-        #self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class)
+        self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class)
 
     def get_expected_ratings(self, user_id):
         user_id = int(user_id)
         liked_items = self.URM[user_id]
         asset_weight = 0.5
-        price_weight = 0.5
+        price_weight = 0.1
         sub_class_weight = 0.4
 
         expected_ratings_assets = liked_items.dot(self.SM_asset).toarray().ravel()
         expected_ratings_price = liked_items.dot(self.SM_price).toarray().ravel()
-        #expected_ratings_sub_class = liked_items.dot(self.SM_sub_class)
+        expected_ratings_sub_class = liked_items.dot(self.SM_sub_class).toarray().ravel()
 
-        expected_ratings = (expected_ratings_assets * asset_weight)\
-                            + (expected_ratings_price * price_weight)
-                           #+ (expected_ratings_sub_class * sub_class_weight)
+        expected_ratings =  (expected_ratings_assets * asset_weight)   \
+                            + (expected_ratings_price * price_weight) \
+                            + (expected_ratings_sub_class * sub_class_weight)
 
         return expected_ratings
 
