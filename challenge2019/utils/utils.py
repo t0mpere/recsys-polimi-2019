@@ -41,7 +41,7 @@ class Utils(object):
         return ICM_asset
 
     def get_icm_price_from_csv(self):
-        scale = 10000
+        scale = 100
         data_list = list(np.ones(len(self.item_price_list)))
         self.item_price_list = self.item_price_list * scale
         self.item_price_list = self.item_price_list.astype(int)

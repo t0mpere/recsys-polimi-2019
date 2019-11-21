@@ -102,8 +102,25 @@ class Evaluator(object):
         recommender.fit(self.URM_train)
         count = 0
         for user_id in tqdm(Utils.get_target_user_list()):
-            recommended_items = recommender.recommend(user_id)
+            recommended_items = recommender.recommend(user_id, i/10 ,j/10 , k/10)
             MAP_final += self.evaluate(user_id, recommended_items)
             count += 1
         MAP_final /= len(Utils.get_target_user_list())
+        return MAP_final
+
+    def find_weight_cbf(self, recommender):
+        MAP_final = 0
+        recommender.fit(self.URM_train)
+        for i in range(7, 9, 1):
+            for j in range(1, 10 - i, 1):
+                k = 10 - i - j
+                print('asset ' + str(i) + '\nprice ' + str(j) + '\nsub_class ' + str(k))
+                count = 0
+                for user_id in tqdm(Utils.get_target_user_list()):
+                    recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10)
+                    MAP_final += self.evaluate(user_id, recommended_items)
+                    count += 1
+                MAP_final /= len(Utils.get_target_user_list())
+                print(MAP_final)
+                print('\n\n')
         return MAP_final
