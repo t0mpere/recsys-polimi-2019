@@ -23,10 +23,16 @@ class UserCollaborativeFiltering():
         self.SM_user = self.create_similarity_matrix()
         self.RECS = self.SM_user.dot(self.URM)
 
-    def get_expected_ratings(self, user_id):
+    def get_expected_ratings(self, user_id, normalized_ratings=False):
         user_id = int(user_id)
         expected_ratings = self.RECS[user_id].todense()
-        return np.squeeze(np.asarray(expected_ratings))
+        expected_ratings = np.squeeze(np.asarray(expected_ratings))
+
+        # Normalize ratings
+        if normalized_ratings and max(expected_ratings) > 0:
+            expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
+
+        return expected_ratings
 
     def recommend(self, user_id, at=10):
         user_id = int(user_id)

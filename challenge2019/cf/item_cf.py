@@ -17,21 +17,27 @@ class ItemCollaborativeFiltering():
         similarity_object = Compute_Similarity_Python(self.URM, topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self,URM):
+    def fit(self, URM):
         print("Starting calculating similarity")
 
         self.URM = URM
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
 
-    def get_expected_ratings(self, user_id):
-        user_id = int(user_id)
+    def get_expected_ratings(self, user_id, normalized_ratings=False):
         expected_ratings = self.RECS[user_id].todense()
-        return np.squeeze(np.asarray(expected_ratings))
+        expected_ratings = np.squeeze(np.asarray(expected_ratings))
+
+        # Normalize ratings
+        if normalized_ratings and max(expected_ratings) > 0:
+            expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
+
+        return expected_ratings
 
     def recommend(self, user_id, at=10):
         user_id = int(user_id)
         expected_ratings = self.get_expected_ratings(user_id)
+
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
@@ -40,5 +46,3 @@ class ItemCollaborativeFiltering():
         return recommended_items[0:at]
 
 
-#recommender = ItemCollaborativeFiltering()
-#Runner.run(recommender, True)

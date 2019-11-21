@@ -104,7 +104,7 @@ class Evaluator(object):
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
-            count += 1
+
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
 

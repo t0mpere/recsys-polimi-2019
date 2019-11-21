@@ -24,8 +24,13 @@ class Hybrid():
 
     def recommend(self, user_id, at=10):
         user_id = int(user_id)
+        normalized_ratings = True
         #todo add weight and
-        expected_ratings = 0.1*self.recommenderUser.get_expected_ratings(user_id) + 0.3*self.recommenderItem.get_expected_ratings(user_id) + 0.9*self.recommender_SLIM_BPR.get_expected_ratings(user_id)
+
+        expected_ratings = 0.1*self.recommenderUser.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)\
+                           + 0.4*self.recommenderItem.get_expected_ratings(user_id, normalized_ratings=normalized_ratings) \
+                           + 0.5*self.recommender_SLIM_BPR.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
+
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
@@ -34,4 +39,4 @@ class Hybrid():
         return recommended_items[0:at]
 
 recommender = Hybrid()
-Runner.run(recommender, True)
+Runner.run(recommender, False)
