@@ -67,13 +67,13 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
     def fit(self,
             URM,
-            epochs=300,
+            epochs=600,
             positive_threshold_BPR=None,
             train_with_sparse_weights=None,
             symmetric=True,
             verbose=False,
             random_seed=None,
-            batch_size=1000, lambda_i=0.2, lambda_j=0.2, learning_rate=1e-5, topK=100,
+            batch_size=100, lambda_i=0.1, lambda_j=0.1, learning_rate=1e-5, topK=150,
             sgd_mode='adagrad', gamma=0.995, beta_1=0.9, beta_2=0.999,
             **earlystopping_kwargs):
 
@@ -208,18 +208,25 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
             logFile.write("Test case: {}, Results {}\n".format(current_config, results_run))
             logFile.flush()
 
-    def get_expected_ratings(self, playlist_id):
-        expected_ratings = self.RECS[playlist_id].todense()
-        return np.squeeze(np.asarray(expected_ratings))
+    def get_expected_ratings(self, user_id, normalized_ratings=False):
+        expected_ratings = self.RECS[user_id].todense()
+        expected_ratings = np.squeeze(np.asarray(expected_ratings))
+        # Normalize ratings, need to check for all zero ratings
+        if normalized_ratings and max(expected_ratings) > 0:
+            expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
+
+        return expected_ratings
 
     def recommend(self, playlist_id, at=10):
 
         # compute the scores using the dot product
         scores = self.get_expected_ratings(playlist_id)
+
         ranking = scores.argsort()[::-1]
         unseen_items_mask = np.in1d(ranking, self.URM_train[playlist_id].indices, assume_unique=True, invert=True)
         ranking = ranking[unseen_items_mask]
-        return ranking[:at]
+        ranking = ranking[:at]
+        return ranking
 
     def runCompilationScript(self):
         return None
