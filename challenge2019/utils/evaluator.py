@@ -101,8 +101,8 @@ class Evaluator(object):
         MAP_final = 0
         recommender.fit(self.URM_train)
         count = 0
-        for user_id in tqdm(Utils.get_target_user_list()):
-            recommended_items = recommender.recommend(user_id, i/10 ,j/10 , k/10)
+        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+            recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
             count += 1
         MAP_final /= len(Utils.get_target_user_list())

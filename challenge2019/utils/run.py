@@ -11,14 +11,14 @@ class Runner(object):
 
     @staticmethod
     def run(recommender, is_test=True):
-        URM_csv = pd.read_csv("../dataset/data_train.csv")
+        # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         URM = utils.get_urm_from_csv()
 
         if is_test:
             print("Starting testing phase..")
             evaluator = Evaluator()
-            evaluator.random_split(URM, URM_csv)
+            evaluator.random_split(URM, None)
             print("MAP@10 : {}".format(evaluator.eval_recommender(recommender)))
 
         else:

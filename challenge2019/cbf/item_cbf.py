@@ -48,9 +48,9 @@ class ItemContentBasedFiltering():
 
         return expected_ratings
 
-    def recommend(self, user_id, i ,j, k, at=10):
+    def recommend(self, user_id, i = 0.3, j = 0.3, k = 0.4, at=10):
         user_id = int(user_id)
-        expected_ratings = self.get_expected_ratings(user_id, i ,j, k)
+        expected_ratings = self.get_expected_ratings(user_id, i,j, k)
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
