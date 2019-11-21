@@ -10,10 +10,13 @@ import numpy as np
 import scipy.sparse as sps
 import time, sys, copy
 
-from enum import Enum
-from Utils.seconds_to_biggest_unit import seconds_to_biggest_unit
+from tqdm import tqdm
+from challenge2019.utils.utils import Utils
 
-from Base.Evaluation.metrics import roc_auc, precision, precision_recall_min_denominator, recall, MAP, MRR, ndcg, arhr, rmse, \
+from enum import Enum
+from challenge2019.Utils_prof.seconds_to_biggest_unit import seconds_to_biggest_unit
+
+from challenge2019.Base.Evaluation.metrics import roc_auc, precision, precision_recall_min_denominator, recall, MAP, MRR, ndcg, arhr, rmse, \
     Novelty, Coverage_Item, Metrics_Object, Coverage_User, Gini_Diversity, Shannon_Entropy, Diversity_MeanInterList, Diversity_Herfindahl, AveragePopularity
 
 
@@ -111,7 +114,7 @@ def get_result_string(results_run, n_decimals=7):
 
 
 
-class Evaluator(object):
+class EvaluatorProf(object):
     """Abstract Evaluator"""
 
     EVALUATOR_NAME = "Evaluator_Base_Class"
@@ -121,7 +124,7 @@ class Evaluator(object):
                         ignore_items = None,
                         ignore_users = None):
 
-        super(Evaluator, self).__init__()
+        super(EvaluatorProf, self).__init__()
 
 
 
@@ -182,12 +185,23 @@ class Evaluator(object):
 
 
 
-    def evaluateRecommender(self, recommender_object):
+    def evaluateRecommender(self, recommender_object, validation_metric):
         """
         :param recommender_object: the trained recommender object, a BaseRecommender subclass
         :param URM_test_list: list of URMs to test the recommender against, or a single URM object
         :param cutoff_list: list of cutoffs to be use to report the scores, or a single cutoff
         """
+
+
+
+        if validation_metric == 'MAP':
+            MAP_final = 0
+            count = 0
+            for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+                recommended_items = recommender_object.recommend(user_id)
+                MAP_final += self.evaluate(user_id, recommended_items)
+                count += 1
+            MAP_final /= len(Utils.get_target_user_list())
 
         raise NotImplementedError("The method evaluateRecommender not implemented for this evaluator class")
 
@@ -211,7 +225,7 @@ class Evaluator(object):
 
 
 
-class EvaluatorHoldout(Evaluator):
+class EvaluatorHoldout(EvaluatorProf):
     """EvaluatorHoldout"""
 
     EVALUATOR_NAME = "EvaluatorHoldout"
@@ -416,7 +430,7 @@ class EvaluatorHoldout(Evaluator):
 
 
 
-class EvaluatorNegativeItemSample(Evaluator):
+class EvaluatorNegativeItemSample(EvaluatorProf):
     """EvaluatorNegativeItemSample"""
 
     EVALUATOR_NAME = "EvaluatorNegativeItemSample"

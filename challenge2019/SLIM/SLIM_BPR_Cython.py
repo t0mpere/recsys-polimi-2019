@@ -7,15 +7,18 @@ Created on 07/09/17
 """
 import numpy as np
 
-from Base.Recommender_utils import check_matrix
-from Base.Recommender_utils import similarityMatrixTopK
+from tqdm import tqdm
+
+from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
+from challenge2019.Base.Recommender_utils import check_matrix
+from challenge2019.Base.Recommender_utils import similarityMatrixTopK
 
 from challenge2019.CythonCompiler.run_compile_subprocess import run_compile_subprocess
 
-from Base.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
+from challenge2019.Base.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
 import os, sys
-from SLIM.SLIM_BPR_Cython_Epoch import SLIM_BPR_Cython_Epoch
-from utils.run import Runner
+from challenge2019.SLIM.SLIM_BPR_Cython_Epoch import SLIM_BPR_Cython_Epoch
+from challenge2019.utils.run import Runner
 
 
 def estimate_required_MB(n_items, symmetric):
@@ -54,7 +57,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         super().__init__()
         assert free_mem_threshold >= 0.0 and free_mem_threshold <= 1.0, "SLIM_BPR_Recommender: free_mem_threshold must be between 0.0 and 1.0, provided was '{}'".format(
             free_mem_threshold)
-
+        self.test_dictionary = {}
         self.free_mem_threshold = free_mem_threshold
 
         if recompile_cython:
@@ -145,9 +148,17 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         self.S_incremental = self.cythonEpoch.get_S()
         self.S_best = self.S_incremental.copy()
 
-        self._train_with_early_stopping(epochs,
-                                        algorithm_name=self.RECOMMENDER_NAME,
-                                        **earlystopping_kwargs)
+        self.random_split(URM, None)
+        self.evaluator = EvaluatorProf(URM_test_list = self.URM_train, cutoff_list = self.test_dictionary)
+
+        self._train_with_early_stopping(epochs_max = 100,
+                                        epochs_min = 0,
+                                        evaluator_object = self.evaluator,
+                                        stop_on_validation = True,
+                                        validation_every_n =3,
+                                        validation_metric = 'MAP',
+                                        lower_validations_allowed = 5
+                                        )
 
         self.get_S_incremental_and_set_W()
         self.RECS = self.URM_train.dot(self.W_sparse)
@@ -213,6 +224,38 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
     def runCompilationScript(self):
         return None
 
+        # Split random, 20% of each user
+
+    def random_split(self, URM, URM_csv = None):
+        user_indexes = np.arange(URM.shape[0])
+        tmp = 0
+        print("Splitting using random 20%\n---------------------")
+        for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
+            # FOREACH USER
+            item_left = len(URM[user_index].data)
+
+            if item_left > 4:
+                # If has more than 3 interactions
+
+                # Array with the indexes of the non zero values
+                non_zero = URM[user_index].indices
+                # Shuffle array of indices
+                np.random.shuffle(non_zero)
+                # Select 20% of the array
+                non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
+                # Change values
+                URM[user_index, non_zero] = 0
+                URM.eliminate_zeros()
+                self.test_dictionary[user_index] = non_zero
+                tmp += len(self.test_dictionary[user_index])
+
+            else:
+                self.test_dictionary[user_index] = []
+
+        self.URM_train = URM
+        print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
+                                                                                            len(URM.data)))
+
 
 recommender = SLIM_BPR_Cython(recompile_cython=False)
-Runner.run(recommender)
+Runner.run(recommender, False)

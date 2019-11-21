@@ -33,9 +33,7 @@ ELSE:
 
 
 
-
-from Base.Recommender_utils import similarityMatrixTopK, check_matrix
-import numpy as np
+from challenge2019.Base.Recommender_utils import similarityMatrixTopK, check_matrix
 import cython
 cimport numpy as np
 import time
