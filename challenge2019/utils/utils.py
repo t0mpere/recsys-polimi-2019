@@ -41,12 +41,11 @@ class Utils(object):
         return ICM_asset
 
     def get_icm_price_from_csv(self):
-        scale = 100
-        data_list = list(np.ones(len(self.item_price_list)))
-        self.item_price_list = self.item_price_list * scale
-        self.item_price_list = self.item_price_list.astype(int)
-        print(len(set(self.item_price_list)))
-        ICM_price = sps.coo_matrix((data_list, (self.item_list_icm_price, self.item_price_list)), dtype=np.float64)
+
+        data_list = np.zeros(len(self.item_price_list))
+        data_list = data_list.astype(int)
+
+        ICM_price = sps.coo_matrix((self.item_price_list, (self.item_list_icm_price, data_list)), dtype=np.float64)
         ICM_price = ICM_price.tocsr()
         return ICM_price
 

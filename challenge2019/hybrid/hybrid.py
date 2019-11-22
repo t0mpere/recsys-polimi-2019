@@ -3,6 +3,7 @@ from challenge2019.cf.item_cf import *
 from challenge2019.utils.utils import *
 from challenge2019.SLIM.SLIM_BPR_Cython import *
 
+
 class Hybrid():
 
     def __init__(self, knn=100, shrink=5, similarity="cosine"):
@@ -11,25 +12,27 @@ class Hybrid():
         self.similarity = similarity
         self.URM = None
         self.SM_item = None
-        self.recommenderUser = UserCollaborativeFiltering()
-        self.recommenderItem = ItemCollaborativeFiltering()
+        self.recommenderUser = UserCollaborativeFiltering(knn=350, shrink=20)
+        self.recommenderItem = ItemCollaborativeFiltering(knn=25, shrink=20)
         self.recommender_SLIM_BPR = SLIM_BPR_Cython()
 
-
-    def fit(self,URM):
+    def fit(self, URM):
         self.URM = URM
         self.recommenderUser.fit(URM)
         self.recommenderItem.fit(URM)
-        self.recommender_SLIM_BPR.fit(URM)
+        self.recommender_SLIM_BPR.fit(URM, epochs=150)
 
     def recommend(self, user_id, at=10):
         user_id = int(user_id)
         normalized_ratings = True
-        #todo add weight and
+        # todo add weight and
 
-        expected_ratings = 0.1*self.recommenderUser.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)\
-                           + 0.4*self.recommenderItem.get_expected_ratings(user_id, normalized_ratings=normalized_ratings) \
-                           + 0.5*self.recommender_SLIM_BPR.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
+        expected_ratings = 0.1 * self.recommenderUser.get_expected_ratings(user_id,
+                                                                           normalized_ratings=normalized_ratings) \
+                           + 0.4 * self.recommenderItem.get_expected_ratings(user_id,
+                                                                             normalized_ratings=normalized_ratings) \
+                           + 0.5 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                                                                                  normalized_ratings=normalized_ratings)
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -37,6 +40,7 @@ class Hybrid():
                                     assume_unique=True, invert=True)
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
+
 
 recommender = Hybrid()
 Runner.run(recommender, False)

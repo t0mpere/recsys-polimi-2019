@@ -29,7 +29,7 @@ class ItemCollaborativeFiltering():
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
         # Normalize ratings
-        if normalized_ratings and max(expected_ratings) > 0:
+        if normalized_ratings and np.amax(expected_ratings) > 0:
             expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
 
         return expected_ratings
@@ -45,4 +45,5 @@ class ItemCollaborativeFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-
+#recommender = ItemCollaborativeFiltering(knn = 30, shrink = 20)
+#Runner.run(recommender, True)

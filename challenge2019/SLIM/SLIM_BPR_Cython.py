@@ -148,16 +148,9 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         self.S_incremental = self.cythonEpoch.get_S()
         self.S_best = self.S_incremental.copy()
 
-        self.random_split(URM, None)
-        self.evaluator = EvaluatorProf(URM_test_list = self.URM_train, cutoff_list = self.test_dictionary)
 
-        self._train_with_early_stopping(epochs_max = 100,
+        self._train_with_early_stopping(epochs_max = epochs,
                                         epochs_min = 0,
-                                        evaluator_object = self.evaluator,
-                                        stop_on_validation = True,
-                                        validation_every_n =3,
-                                        validation_metric = 'MAP',
-                                        lower_validations_allowed = 5
                                         )
 
         self.get_S_incremental_and_set_W()
@@ -264,5 +257,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
                                                                                             len(URM.data)))
 
 
-recommender = SLIM_BPR_Cython(recompile_cython=False)
-Runner.run(recommender, False)
+#recommender = SLIM_BPR_Cython(recompile_cython=False)
+#Runner.run(recommender, True)
