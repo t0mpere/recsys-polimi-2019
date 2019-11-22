@@ -15,7 +15,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_Gini_Index(self):
 
-        from Base.Evaluation.metrics import Gini_Diversity
+        from challenge2019.Base.Evaluation.metrics import Gini_Diversity
 
         n_items = 1000
 
@@ -35,7 +35,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_Shannon_Entropy(self):
 
-        from Base.Evaluation.metrics import Shannon_Entropy
+        from challenge2019.Base.Evaluation.metrics import Shannon_Entropy
 
         n_items = 1000
 
@@ -62,7 +62,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_Diversity_list_all_equals(self):
 
-        from Base.Evaluation.metrics import Diversity_MeanInterList
+        from challenge2019.Base.Evaluation.metrics import Diversity_MeanInterList
         import scipy.sparse as sps
 
         n_items = 3
@@ -111,7 +111,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_Diversity_list(self):
 
-        from Base.Evaluation.metrics import Diversity_MeanInterList
+        from challenge2019.Base.Evaluation.metrics import Diversity_MeanInterList
         import scipy.sparse as sps
 
         n_items = 500
@@ -156,7 +156,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_AUC(self):
 
-        from Base.Evaluation.metrics import roc_auc
+        from challenge2019.Base.Evaluation.metrics import roc_auc
 
         pos_items = np.asarray([2, 4])
         ranked_list = np.asarray([1, 2, 3, 4, 5])
@@ -170,7 +170,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_Recall(self):
 
-        from Base.Evaluation.metrics import recall
+        from challenge2019.Base.Evaluation.metrics import recall
 
         pos_items = np.asarray([2, 4, 5, 10])
         ranked_list_1 = np.asarray([1, 2, 3, 4, 5])
@@ -195,7 +195,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_Precision(self):
 
-        from Base.Evaluation.metrics import precision
+        from challenge2019.Base.Evaluation.metrics import precision
 
         pos_items = np.asarray([2, 4, 5, 10])
         ranked_list_1 = np.asarray([1, 2, 3, 4, 5])
@@ -220,7 +220,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_RR(self):
 
-        from Base.Evaluation.metrics import rr
+        from challenge2019.Base.Evaluation.metrics import rr
 
         pos_items = np.asarray([2, 4, 5, 10])
         ranked_list_1 = np.asarray([1, 2, 3, 4, 5])
@@ -245,7 +245,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_MAP(self):
 
-        from Base.Evaluation.metrics import map
+        from challenge2019.Base.Evaluation.metrics import map
 
         pos_items = np.asarray([2, 4, 5, 10])
         ranked_list_1 = np.asarray([1, 2, 3, 4, 5])
@@ -284,7 +284,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_NDCG(self):
 
-        from Base.Evaluation.metrics import dcg, ndcg
+        from challenge2019.Base.Evaluation.metrics import dcg, ndcg
 
         pos_items = np.asarray([2, 4, 5, 10])
         pos_relevances = np.asarray([5, 4, 3, 2])

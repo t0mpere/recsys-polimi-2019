@@ -193,16 +193,6 @@ class EvaluatorProf(object):
         """
 
 
-
-        if validation_metric == 'MAP':
-            MAP_final = 0
-            count = 0
-            for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-                recommended_items = recommender_object.recommend(user_id)
-                MAP_final += self.evaluate(user_id, recommended_items)
-                count += 1
-            MAP_final /= len(Utils.get_target_user_list())
-
         raise NotImplementedError("The method evaluateRecommender not implemented for this evaluator class")
 
 
