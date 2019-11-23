@@ -13,7 +13,9 @@ class ItemContentBasedFiltering():
         self.ICM_asset = None
         self.ICM_price = None
         self.ICM_sub_class = None
-        self.SM_item = None
+        self.SM_asset = None
+        self.SM_price = None
+        self.SM_sub_class = None
 
     def create_similarity_matrix(self, ICM):
         similarity_object = Compute_Similarity_Python(ICM.transpose(), topK=self.knn, shrink=self.shrink,
@@ -33,18 +35,23 @@ class ItemContentBasedFiltering():
         self.SM_asset = self.create_similarity_matrix(self.ICM_asset)
         self.SM_price = self.create_similarity_matrix(self.ICM_price)
         self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class)
+        self.RECS_asset = self.URM.dot(self.SM_asset)
+        self.RECS_price = self.URM.dot(self.SM_price)
+        self.RECS_sub_class = self.URM.dot(self.SM_sub_class)
+
 
     def get_expected_ratings(self, user_id, i, j, k):
         user_id = int(user_id)
         liked_items = self.URM[user_id]
 
-        expected_ratings_assets = liked_items.dot(self.SM_asset).toarray().ravel()
-        expected_ratings_price = liked_items.dot(self.SM_price).toarray().ravel()
-        expected_ratings_sub_class = liked_items.dot(self.SM_sub_class).toarray().ravel()
+        expected_ratings_assets = self.RECS_asset[user_id].todense()
+        expected_ratings_price = self.RECS_price[user_id].todense()
+        expected_ratings_sub_class = self.RECS_sub_class[user_id].todense()
 
-        expected_ratings =  (expected_ratings_assets * i)   \
-                            + (expected_ratings_price * j) \
+        expected_ratings =  + (expected_ratings_price * j) \
+                            + (expected_ratings_assets * i)   \
                             + (expected_ratings_sub_class * k)
+        expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
         return expected_ratings
 
@@ -60,5 +67,5 @@ class ItemContentBasedFiltering():
 
 
 
-recommender = ItemContentBasedFiltering()
-Runner.run(recommender, True)
+#recommender = ItemContentBasedFiltering()
+#Runner.run(recommender, True)

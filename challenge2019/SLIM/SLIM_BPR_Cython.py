@@ -256,6 +256,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
 
-
-#recommender = SLIM_BPR_Cython(recompile_cython=False)
-#Runner.run(recommender, True)
+recommender = SLIM_BPR_Cython(recompile_cython=False)
+Runner.run(recommender, True)

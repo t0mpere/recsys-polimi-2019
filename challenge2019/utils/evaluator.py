@@ -127,8 +127,8 @@ class Evaluator(object):
     def find_weight_cbf(self, recommender):
         MAP_final = 0
         recommender.fit(self.URM_train)
-        for i in range(7, 9, 1):
-            for j in range(1, 10 - i, 1):
+        for i in range(1, 10, 2):
+            for j in range(1, 10 - i, 2):
                 k = 10 - i - j
                 MAP_final = 0
                 print('asset ' + str(i) + '\nprice ' + str(j) + '\nsub_class ' + str(k))
