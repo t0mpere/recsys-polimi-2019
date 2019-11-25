@@ -9,12 +9,14 @@ from scipy.sparse import csr_matrix, lil_matrix
 from tqdm import tqdm
 
 from .utils import Utils
+from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
 
-class Evaluator(object):
+class Evaluator():
 
     def __init__(self):
         self.URM_train = None
+        self.URM_test = None
         self.test_dictionary = {}
         self.train_test_split = 0.7
 
@@ -99,7 +101,7 @@ class Evaluator(object):
 
     def eval_recommender(self, recommender):
         MAP_final = 0
-        recommender.fit(self.URM_train)
+        recommender.fit(self.URM_train, self.test_dictionary)
         count = 0
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
@@ -158,3 +160,16 @@ class Evaluator(object):
                 print(MAP_final)
                 print('\n\n')
         return MAP_final
+
+class EvaluatorEarlyStopping(EvaluatorProf):
+
+    def __init__(self, URM_test_list=None, cutoff_list=None):
+        super().__init__(URM_test_list, cutoff_list)
+        self.evaluator = Evaluator()
+        self.evaluator.random_split(URM_test_list, None)
+
+    def evaluateRecommender(self, recommender_object, validation_metric):
+        MAP = self.evaluator.eval_recommender(recommender_object)
+        print('MAP:')
+        print(MAP)
+        return MAP

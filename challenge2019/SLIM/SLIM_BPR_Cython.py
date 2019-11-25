@@ -12,6 +12,7 @@ from tqdm import tqdm
 from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 from challenge2019.Base.Recommender_utils import check_matrix
 from challenge2019.Base.Recommender_utils import similarityMatrixTopK
+from challenge2019.utils.evaluator import *
 
 from challenge2019.CythonCompiler.run_compile_subprocess import run_compile_subprocess
 
@@ -67,6 +68,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
     def fit(self,
             URM,
+            URM_test=None,
             epochs=600,
             positive_threshold_BPR=None,
             train_with_sparse_weights=None,
@@ -132,7 +134,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
                                                  random_seed=random_seed,
                                                  gamma=gamma,
                                                  beta_1=beta_1,
-                                                 beta_2=beta_2,)
+                                                 beta_2=beta_2, )
 
         if (topK != False and topK < 1):
             raise ValueError(
@@ -148,9 +150,13 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         self.S_incremental = self.cythonEpoch.get_S()
         self.S_best = self.S_incremental.copy()
 
+        evaluator = EvaluatorEarlyStopping(URM_train_positive, [5])
 
-        self._train_with_early_stopping(epochs_max = epochs,
-                                        epochs_min = 0,
+        self._train_with_early_stopping(epochs_max=epochs,
+                                        epochs_min=0,
+                                        validation_every_n=5,
+                                        validation_metric='MAP',
+                                        evaluator_object=evaluator
                                         )
 
         self.get_S_incremental_and_set_W()
@@ -178,10 +184,6 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         else:
             self.W_sparse = similarityMatrixTopK(self.S_incremental, k=self.topK)
             self.W_sparse = check_matrix(self.W_sparse, format='csr')
-
-
-
-
 
     def writeCurrentConfig(self, currentEpoch, results_run, logFile):
 
@@ -226,7 +228,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
         # Split random, 20% of each user
 
-    def random_split(self, URM, URM_csv = None):
+    def random_split(self, URM, URM_csv=None):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
         print("Splitting using random 20%\n---------------------")
@@ -256,5 +258,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
 
-# recommender = SLIM_BPR_Cython(recompile_cython=False)
-# Runner.run(recommender, True)
+recommender = SLIM_BPR_Cython(recompile_cython=False)
+Runner.run(recommender, True)
