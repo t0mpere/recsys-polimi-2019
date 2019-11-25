@@ -145,8 +145,8 @@ class Evaluator(object):
 
     def find_hyper_parameters_cf(self, recommender):
         MAP_final = 0
-        for knn in range(600, 1001, 100):
-            for shrink in range(5, 6, 5):
+        for knn in range(100, 1001, 100):
+            for shrink in [5, 10, 15]:
                 print('knn ' + str(knn) + '\nshrink ' + str(shrink))
                 recommender.fit(self.URM_train, knn=knn, shrink=shrink)
                 count = 0
