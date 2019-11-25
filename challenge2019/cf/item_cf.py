@@ -6,10 +6,10 @@ from challenge2019.utils.utils import Utils
 
 
 class ItemCollaborativeFiltering():
-    def __init__(self, knn=100, shrink=5, similarity="cosine"):
-        self.knn = knn
-        self.shrink = shrink
-        self.similarity = similarity
+    def __init__(self):
+        self.knn = None
+        self.shrink = None
+        self.similarity = None
         self.URM = None
         self.SM_item = None
 
@@ -17,7 +17,10 @@ class ItemCollaborativeFiltering():
         similarity_object = Compute_Similarity_Python(self.URM, topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM):
+    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
+        self.knn = knn
+        self.shrink = shrink
+        self.similarity = similarity
         print("Starting calculating similarity")
 
         self.URM = URM
