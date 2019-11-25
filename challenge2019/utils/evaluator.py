@@ -143,12 +143,12 @@ class Evaluator(object):
                 print('\n\n')
         return MAP_final
 
-    def find_hyper_parameters_item_cf(self, recommender):
+    def find_hyper_parameters_cf(self, recommender):
         MAP_final = 0
-        for i in range(50, 210, 50):
-            for j in range(15, 35, 5):
-                print('knn ' + str(i) + '\nshrink ' + str(j))
-                recommender.fit(self.URM_train, knn=i, shrink=j)
+        for knn in range(600, 1001, 100):
+            for shrink in range(5, 6, 5):
+                print('knn ' + str(knn) + '\nshrink ' + str(shrink))
+                recommender.fit(self.URM_train, knn=knn, shrink=shrink)
                 count = 0
                 for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
                     recommended_items = recommender.recommend(user_id)

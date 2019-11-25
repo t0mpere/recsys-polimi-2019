@@ -47,5 +47,5 @@ class UserCollaborativeFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-#recommender = UserCollaborativeFiltering(knn = 350, shrink = 20)
-#Runner.run(recommender, True)
+#recommender = UserCollaborativeFiltering()
+#Runner.run(recommender, True, train_cf=True)

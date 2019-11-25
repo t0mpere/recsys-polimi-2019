@@ -10,7 +10,7 @@ from challenge2019.utils.utils import Utils
 class Runner(object):
 
     @staticmethod
-    def run(recommender, is_test=True):
+    def run(recommender, is_test=True,train_cf = False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         URM = utils.get_urm_from_csv()
@@ -19,7 +19,11 @@ class Runner(object):
             print("Starting testing phase..")
             evaluator = Evaluator()
             evaluator.random_split(URM, None)
-            print("MAP@10 : {}".format(evaluator.find_hyper_parameters_item_cf(recommender)))
+            if train_cf:
+                print("MAP@10 : {}".format(evaluator.find_hyper_parameters_cf(recommender)))
+            else:
+                print("MAP@10 : {}".format(evaluator.eval_recommender(recommender)))
+
 
         else:
 

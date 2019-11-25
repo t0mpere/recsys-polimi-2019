@@ -6,10 +6,10 @@ from challenge2019.utils.utils import Utils
 
 
 class ItemContentBasedFiltering():
-    def __init__(self, knn=100, shrink=5, similarity="cosine"):
-        self.knn = knn
-        self.shrink = shrink
-        self.similarity = similarity
+    def __init__(self):
+        self.knn = None
+        self.shrink = None
+        self.similarity = None
         self.URM = None
         self.ICM_asset = None
         self.ICM_price = None
@@ -23,8 +23,11 @@ class ItemContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM):
+    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
         utils = Utils()
+        self.knn = knn
+        self.shrink = shrink
+        self.similarity = similarity
         self.URM = URM
         self.ICM_asset = utils.get_icm_asset_from_csv()
         self.ICM_price = utils.get_icm_price_from_csv()
