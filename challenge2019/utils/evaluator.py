@@ -108,11 +108,12 @@ class Evaluator(object):
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
 
-    def find_epochs(self, recommender):
-        for i in range(20, 100, 5):
+    def find_epochs(self, recommender, k):
 
+        for i in range(20, 100, 5):
+            print(k)
             MAP_final = 0
-            recommender.fit(self.URM_train, epochs = i)
+            recommender.fit(self.URM_train, epochs = 250, lambda_i= 0.4, lambda_j = 0.4, topk = k)
             count = 0
             for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
                 recommended_items = recommender.recommend(user_id)

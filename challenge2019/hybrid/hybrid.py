@@ -20,7 +20,7 @@ class Hybrid():
         self.URM = URM
         self.recommenderUser.fit(URM)
         self.recommenderItem.fit(URM)
-        self.recommender_SLIM_BPR.fit(URM, epochs=150)
+        self.recommender_SLIM_BPR.fit(URM, epochs=200, lambda_i=0.2, lambda_j=0.2, topk=200)
 
     def recommend(self, user_id, at=10):
         user_id = int(user_id)
@@ -29,9 +29,9 @@ class Hybrid():
 
         expected_ratings = 0.1 * self.recommenderUser.get_expected_ratings(user_id,
                                                                            normalized_ratings=normalized_ratings) \
-                           + 0.4 * self.recommenderItem.get_expected_ratings(user_id,
+                           + 0.7 * self.recommenderItem.get_expected_ratings(user_id,
                                                                              normalized_ratings=normalized_ratings) \
-                           + 0.5 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                           + 0.2 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
                                                                                   normalized_ratings=normalized_ratings)
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
