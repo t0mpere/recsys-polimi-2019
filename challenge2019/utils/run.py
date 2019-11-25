@@ -19,7 +19,7 @@ class Runner(object):
             print("Starting testing phase..")
             evaluator = Evaluator()
             evaluator.random_split(URM, None)
-            print("MAP@10 : {}".format(evaluator.eval_recommender(recommender)))
+            print("MAP@10 : {}".format(evaluator.find_hyper_parameters_item_cf(recommender)))
 
         else:
 

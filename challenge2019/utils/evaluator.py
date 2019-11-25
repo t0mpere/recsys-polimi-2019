@@ -125,7 +125,7 @@ class Evaluator(object):
             print('\n\n')
         return MAP_final
 
-    def find_weight_cbf(self, recommender):
+    def find_weight_item_cbf(self, recommender):
         MAP_final = 0
         recommender.fit(self.URM_train)
         for i in range(1, 10, 2):
@@ -138,6 +138,22 @@ class Evaluator(object):
                     recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10)
                     MAP_final += self.evaluate(user_id, recommended_items)
                     count += 1
+                MAP_final /= len(Utils.get_target_user_list())
+                print(MAP_final)
+                print('\n\n')
+        return MAP_final
+
+    def find_hyper_parameters_item_cf(self, recommender):
+        MAP_final = 0
+        for i in range(50, 210, 50):
+            for j in range(15, 35, 5):
+                print('knn ' + str(i) + '\nshrink ' + str(j))
+                recommender.fit(self.URM_train, knn=i, shrink=j)
+                count = 0
+                for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+                    recommended_items = recommender.recommend(user_id)
+                    MAP_final += self.evaluate(user_id, recommended_items)
+
                 MAP_final /= len(Utils.get_target_user_list())
                 print(MAP_final)
                 print('\n\n')
