@@ -101,7 +101,6 @@ class Evaluator():
     def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
         recommender.fit(self.URM_train)
-        count = 0
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
@@ -113,7 +112,6 @@ class Evaluator():
     def evaluate_recommender(self,recommender):
         # used to evaluate an already trained model
         MAP_final = 0
-        count = 0
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
@@ -122,7 +120,6 @@ class Evaluator():
         return MAP_final
 
     def find_epochs(self, recommender, k):
-
         for i in range(20, 100, 5):
             print(k)
             MAP_final = 0
@@ -139,7 +136,6 @@ class Evaluator():
         return MAP_final
 
     def find_weight_item_cbf(self, recommender):
-        MAP_final = 0
         recommender.fit(self.URM_train)
         for i in range(1, 10, 2):
             for j in range(1, 10 - i, 2):

@@ -19,9 +19,9 @@ class Hybrid():
     def fit(self, URM):
         self.URM = URM
         self.recommenderUser.fit(URM, knn=600, shrink=5)
-        self.recommenderItem.fit(URM, knn=5, shrink=20)
-        self.recommender_SLIM_BPR.fit(URM, epochs=200, lambda_i=0.2, lambda_j=0.2, topk=200)
-        self.recommenderItemCBF.fit(URM, knn=180, shrink=12)
+        self.recommenderItem.fit(URM, knn=5, shrink=19)
+        self.recommender_SLIM_BPR.fit(URM, epochs=200, lambda_i=0.1, lambda_j=0.2, topk=200)
+        self.recommenderItemCBF.fit(URM, knn=180, shrink=10)
         self.recommenderTopPop.fit(URM)
 
     def recommend(self, user_id, at=10):
@@ -33,16 +33,15 @@ class Hybrid():
         liked_items = self.URM[user_id]
 
         if len(liked_items.data) < 1:
-            print("using top_pop")
             recommended_items = self.recommenderTopPop.recommend(user_id, at=100)
         else:
             expected_ratings = 0.1 * self.recommenderUser.get_expected_ratings(user_id,
                                                                                normalized_ratings=normalized_ratings) \
                                + 0.7 * self.recommenderItem.get_expected_ratings(user_id,
                                                                                  normalized_ratings=normalized_ratings) \
-                               + 0.1 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                               + 0.15 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
                                                                                       normalized_ratings=normalized_ratings) \
-                               + 0.1 * self.recommenderItemCBF.get_expected_ratings(user_id,
+                               + 0.05 * self.recommenderItemCBF.get_expected_ratings(user_id,
                                                                                     normalized_ratings=normalized_ratings)
 
             recommended_items = np.flip(np.argsort(expected_ratings), 0)

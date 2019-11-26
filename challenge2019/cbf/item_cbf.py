@@ -46,7 +46,6 @@ class ItemContentBasedFiltering():
 
     def get_expected_ratings(self, user_id, i=0.3, j=0.3, k=0.4, normalized_ratings=False):
         user_id = int(user_id)
-        liked_items = self.URM[user_id]
 
         expected_ratings_assets = self.RECS_asset[user_id].todense()
         expected_ratings_price = self.RECS_price[user_id].todense()
@@ -65,6 +64,7 @@ class ItemContentBasedFiltering():
 
         return expected_ratings
 
+    #change how weights are handled
     def recommend(self, user_id, i=0.3, j=0.3, k=0.4, at=10):
         user_id = int(user_id)
         expected_ratings = self.get_expected_ratings(user_id, i, j, k)

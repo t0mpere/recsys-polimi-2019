@@ -77,7 +77,7 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
 
         n_users, n_items = self.URM_train.shape
 
-        self.pyTorchModel = MF_MSE_PyTorch_model(n_users, n_items, self.n_factors).to(self.device)
+        self.pyTorchModel = MF_MSE_PyTorch_model(self.n_users, self.n_items, self.n_factors).to(self.device)
 
         # Choose loss
         self.lossFunction = torch.nn.MSELoss(size_average=False)

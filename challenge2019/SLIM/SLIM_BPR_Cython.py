@@ -69,13 +69,13 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
     def fit(self,
             URM,
             URM_test=None,
-            epochs=600,
+            epochs=200,
             positive_threshold_BPR=None,
             train_with_sparse_weights=None,
             symmetric=True,
             verbose=False,
             random_seed=None,
-            batch_size=100, lambda_i=0.2, lambda_j=0.2, learning_rate=1e-5, topK=200,
+            batch_size=100, lambda_i=0.1, lambda_j=0.1, learning_rate=1e-5, topK=200,
             sgd_mode='adagrad', gamma=0.995, beta_1=0.9, beta_2=0.999,
             **earlystopping_kwargs):
 
@@ -150,15 +150,15 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         self.S_incremental = self.cythonEpoch.get_S()
         self.S_best = self.S_incremental.copy()
 
-        evaluator = EvaluatorEarlyStopping(URM_train_positive, [5])
+        #evaluator = EvaluatorEarlyStopping(URM, [5])
 
         self._train_with_early_stopping(epochs_max=epochs,
-                                        epochs_min=0,
-                                        validation_every_n=50,
-                                        validation_metric='MAP',
-                                        evaluator_object=evaluator,
-                                        lower_validations_allowed=2
-                                        )
+                                        epochs_min=0)
+                                        #validation_every_n=20,
+                                        #validation_metric='MAP',
+                                        #evaluator_object=evaluator,
+                                        #lower_validations_allowed=2
+                                        #)
 
         self.get_S_incremental_and_set_W()
         self.cythonEpoch._dealloc()
@@ -232,5 +232,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
 
 
-recommender = SLIM_BPR_Cython(recompile_cython=False)
-Runner.run(recommender, False)
+#recommender = SLIM_BPR_Cython(recompile_cython=False)
+#Runner.run(recommender, False)
