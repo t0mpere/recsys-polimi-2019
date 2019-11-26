@@ -82,8 +82,7 @@ class Evaluator():
 
     def MAP(self, recommended_items, relevant_items):
         # print(recommended_items)
-        is_relevant = np.isin(recommended_items, relevant_items, assume_unique=True)
-
+        is_relevant = np.isin(recommended_items , relevant_items, assume_unique=True)
         # Cumulative sum: precision at 1, at 2, at 3 ...
         p_at_k = is_relevant * np.cumsum(is_relevant, dtype=np.float32) / (1 + np.arange(len(is_relevant)))
         # print(recommended_items, relevant_items)
@@ -99,9 +98,21 @@ class Evaluator():
         else:
             return 0
 
-    def eval_recommender(self, recommender):
+    def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
-        recommender.fit(self.URM_train, self.test_dictionary)
+        recommender.fit(self.URM_train)
+        count = 0
+        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+            recommended_items = recommender.recommend(user_id)
+            MAP_final += self.evaluate(user_id, recommended_items)
+
+        MAP_final /= len(Utils.get_target_user_list())
+        return MAP_final
+
+
+    def evaluate_recommender(self,recommender):
+        # used to evaluate an already trained model
+        MAP_final = 0
         count = 0
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
@@ -169,7 +180,7 @@ class EvaluatorEarlyStopping(EvaluatorProf):
         self.evaluator.random_split(URM_test_list, None)
 
     def evaluateRecommender(self, recommender_object, validation_metric):
-        MAP = self.evaluator.eval_recommender(recommender_object)
+        MAP = self.evaluator.evaluate_recommender(recommender_object)
         print('MAP:')
         print(MAP)
         return MAP

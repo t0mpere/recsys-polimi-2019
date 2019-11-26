@@ -25,7 +25,7 @@ class Runner(object):
             elif train_cbf:
                 print("MAP@10 : {}".format(evaluator.find_weight_item_cbf(recommender)))
             else:
-                print("MAP@10 : {}".format(evaluator.eval_recommender(recommender)))
+                print("MAP@10 : {}".format(evaluator.fit_and_evaluate_recommender(recommender)))
 
 
         else:

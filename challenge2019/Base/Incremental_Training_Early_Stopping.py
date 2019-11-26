@@ -190,13 +190,11 @@ class Incremental_Training_Early_Stopping(object):
                 self._prepare_model_for_validation()
 
                 # If the evaluator validation has multiple cutoffs, choose the first one
-                results_run, results_run_string = evaluator_object.evaluateRecommender(self, validation_metric)
-                results_run = results_run[list(results_run.keys())[0]]
+                current_metric_value = evaluator_object.evaluateRecommender(self, validation_metric)
 
-                print("{}: {}".format(algorithm_name, results_run_string))
+
 
                 # Update optimal model
-                current_metric_value = results_run[validation_metric]
 
                 if self.best_validation_metric is None or self.best_validation_metric < current_metric_value:
 

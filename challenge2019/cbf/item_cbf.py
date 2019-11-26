@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
 from challenge2019.utils.run import Runner
