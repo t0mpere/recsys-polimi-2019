@@ -75,7 +75,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
             symmetric=True,
             verbose=False,
             random_seed=None,
-            batch_size=100, lambda_i=0.1, lambda_j=0.1, learning_rate=1e-5, topK=150,
+            batch_size=100, lambda_i=0.2, lambda_j=0.2, learning_rate=1e-5, topK=200,
             sgd_mode='adagrad', gamma=0.995, beta_1=0.9, beta_2=0.999,
             **earlystopping_kwargs):
 
@@ -154,19 +154,21 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
         self._train_with_early_stopping(epochs_max=epochs,
                                         epochs_min=0,
-                                        validation_every_n=5,
+                                        validation_every_n=50,
                                         validation_metric='MAP',
-                                        evaluator_object=evaluator
+                                        evaluator_object=evaluator,
+                                        lower_validations_allowed=2
                                         )
 
         self.get_S_incremental_and_set_W()
-        self.RECS = self.URM_train.dot(self.W_sparse)
         self.cythonEpoch._dealloc()
 
         sys.stdout.flush()
 
     def _prepare_model_for_validation(self):
         self.get_S_incremental_and_set_W()
+        self.RECS = self.URM_train.dot(self.W_sparse)
+
 
     def _update_best_model(self):
         self.S_best = self.S_incremental.copy()
@@ -226,37 +228,9 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
     def runCompilationScript(self):
         return None
 
-        # Split random, 20% of each user
 
-    def random_split(self, URM, URM_csv=None):
-        user_indexes = np.arange(URM.shape[0])
-        tmp = 0
-        print("Splitting using random 20%\n---------------------")
-        for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
-            # FOREACH USER
-            item_left = len(URM[user_index].data)
 
-            if item_left > 4:
-                # If has more than 3 interactions
 
-                # Array with the indexes of the non zero values
-                non_zero = URM[user_index].indices
-                # Shuffle array of indices
-                np.random.shuffle(non_zero)
-                # Select 20% of the array
-                non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
-                # Change values
-                URM[user_index, non_zero] = 0
-                URM.eliminate_zeros()
-                self.test_dictionary[user_index] = non_zero
-                tmp += len(self.test_dictionary[user_index])
-
-            else:
-                self.test_dictionary[user_index] = []
-
-        self.URM_train = URM
-        print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
-                                                                                            len(URM.data)))
 
 recommender = SLIM_BPR_Cython(recompile_cython=False)
-Runner.run(recommender, True)
+Runner.run(recommender, False)

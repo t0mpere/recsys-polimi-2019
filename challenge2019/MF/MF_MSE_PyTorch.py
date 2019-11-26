@@ -41,7 +41,7 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
 
         return scores_array
 
-    def fit(self, URM_train, positive_threshold=4, epochs=30, batch_size=128, num_factors=10,
+    def fit(self, URM_train, positive_threshold=1, epochs=300, batch_size=128, num_factors=10,
             learning_rate=0.001, use_cuda=True,
             **earlystopping_kwargs):
 
@@ -94,14 +94,12 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
 
         ########################################################################################################
 
-        self._train_with_early_stopping(epochs,
-                                        algorithm_name=self.RECOMMENDER_NAME,
-                                        **earlystopping_kwargs)
+        self._train_with_early_stopping(epochs)
 
         self.ITEM_factors = self.W_best.copy()
         self.USER_factors = self.H_best.copy()
 
-        self._print("Computing NMF decomposition... Done!")
+        print("Computing NMF decomposition... Done!")
 
         sys.stdout.flush()
 
@@ -125,6 +123,10 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
 
         self.W_best = self.W_incremental.copy()
         self.H_best = self.H_incremental.copy()
+
+    def _prepare_model_for_validation(self):
+        self._update_incremental_model()
+
 
     def _run_epoch(self, num_epoch):
 
@@ -152,6 +154,16 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+
+    def recommend(self, user_id, at=10):
+        user_id = int(user_id)
+        expected_ratings = self.compute_score_MF(user_id)
+        recommended_items = np.flip(np.argsort(expected_ratings), 0)
+
+        unseen_items_mask = np.in1d(recommended_items, self.URM_train[user_id].indices,
+                                    assume_unique=True, invert=True)
+        recommended_items = recommended_items[unseen_items_mask]
+        return recommended_items[0:at]
 
 
 recommender = MF_MSE_PyTorch()
