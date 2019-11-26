@@ -145,13 +145,31 @@ class Evaluator():
                 print('\n\n')
         return MAP_final
 
+    def find_weights_hybrid(self, recommender):
+        recommender.fit(self.URM_train)
+        for i in range(1, 8, 2):
+            for j in range(1, 10 - i, 2):
+                for k in range(1, 10 - i - j, 2):
+                    l = 10 - i - j - k
+                    MAP_final = 0
+                    print('asset ' + str(i) + '\nprice ' + str(j) + '\nsub_class ' + str(k))
+                    count = 0
+                    for user_id in tqdm(Utils.get_target_user_list()):
+                        recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10, l/10)
+                        MAP_final += self.evaluate(user_id, recommended_items)
+                        count += 1
+                    MAP_final /= len(Utils.get_target_user_list())
+                    print(MAP_final)
+                    print('\n\n')
+        return MAP_final
+
+
     def find_hyper_parameters_cf(self, recommender):
-        MAP_final = 0
-        for knn in range(100, 1001, 100):
-            for shrink in [5, 10, 15]:
+        for knn in [3,4,5]:
+            for shrink in range(17, 23, 1):
                 print('knn ' + str(knn) + '\nshrink ' + str(shrink))
+                MAP_final = 0
                 recommender.fit(self.URM_train, knn=knn, shrink=shrink)
-                count = 0
                 for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
                     recommended_items = recommender.recommend(user_id)
                     MAP_final += self.evaluate(user_id, recommended_items)

@@ -23,7 +23,7 @@ class ItemContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
+    def fit(self, URM, knn=100, shrink=10, similarity="cosine"):
         utils = Utils()
         self.knn = knn
         self.shrink = shrink
