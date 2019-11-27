@@ -19,7 +19,7 @@ class Runner(object):
             print("Starting testing phase..")
             evaluator = Evaluator()
 
-            evaluator.random_split(URM, None)
+            evaluator.random_split_to_all_users(URM, None)
             if find_hyper_parameters_cf:
                 print("MAP@10 : {}".format(evaluator.find_hyper_parameters_cf(recommender)))
             elif find_weight_item_cbf:

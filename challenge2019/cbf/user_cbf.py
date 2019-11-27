@@ -23,7 +23,7 @@ class UserContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn_age=150, knn_region=150, shrink=20, similarity="cosine"):
+    def fit(self, URM, knn_age=1000, knn_region=1000, shrink=20, similarity="cosine"):
         utils = Utils()
         self.knn_age = knn_age
         self.knn_region = knn_region
@@ -74,5 +74,5 @@ class UserContentBasedFiltering():
         return recommended_items[0:at]
 
 
-#recommender = UserContentBasedFiltering()
-#Runner.run(recommender, True,evaluate_cold_users=True)
+# recommender = UserContentBasedFiltering()
+# Runner.run(recommender, True, evaluate_cold_users=True)

@@ -85,7 +85,7 @@ class Utils(object):
         URM = self.get_urm_from_csv()
         URM.eliminate_zeros()
         for i in range(0, URM.shape[0]):
-            if len(URM[i].data) <= 0:
+            if len(URM[i].data) == 1:
                 cold_users.append(i)
 
         return cold_users
