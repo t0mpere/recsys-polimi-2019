@@ -44,7 +44,7 @@ class UserContentBasedFiltering():
 
 
 
-    def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=False):
+    def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=True):
         user_id = int(user_id)
         region_exp_ratings = self.RECS_region[user_id].todense()
         age_exp_ratings = self.RECS_age[user_id].todense()
@@ -74,5 +74,5 @@ class UserContentBasedFiltering():
         return recommended_items[0:at]
 
 
-recommender = UserContentBasedFiltering()
-Runner.run(recommender, True, find_hyper_parameters_user_cbf=True)
+#recommender = UserContentBasedFiltering()
+#Runner.run(recommender, True,evaluate_cold_users=True)
