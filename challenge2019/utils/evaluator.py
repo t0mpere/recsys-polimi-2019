@@ -187,7 +187,7 @@ class Evaluator():
         return
 
     def find_hyper_parameters_user_cbf(self, recommender):
-        for knn in range(150,601, 50):
+        for knn in range(1000,10001, 500):
             for shrink in [20]:
                 print('knn ' + str(knn) + '\nshrink ' + str(shrink))
                 MAP_final = 0
