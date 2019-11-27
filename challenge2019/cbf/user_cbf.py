@@ -9,6 +9,8 @@ class UserContentBasedFiltering():
     def __init__(self):
         self.knn = None
         self.shrink = None
+        self.knn_age = None
+        self.knn_region = None
         self.similarity = None
         self.URM = None
         self.UCM_region = None
@@ -16,14 +18,15 @@ class UserContentBasedFiltering():
         self.SM_region = None
         self.SM_age = None
 
-    def create_similarity_matrix(self, UCM):
-        similarity_object = Compute_Similarity_Python(UCM.transpose(), topK=self.knn, shrink=self.shrink,
+    def create_similarity_matrix(self, UCM, knn=100):
+        similarity_object = Compute_Similarity_Python(UCM.transpose(), topK=knn, shrink=self.shrink,
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
+    def fit(self, URM, knn_age=150, knn_region=150, shrink=20, similarity="cosine"):
         utils = Utils()
-        self.knn = knn
+        self.knn_age = knn_age
+        self.knn_region = knn_region
         self.shrink = shrink
         self.similarity = similarity
         self.URM = URM
@@ -33,8 +36,8 @@ class UserContentBasedFiltering():
         # TODO: improve UCM (lezione 30/09)
         print("Starting calculating similarity")
 
-        self.SM_region = self.create_similarity_matrix(self.UCM_region)
-        self.SM_age = self.create_similarity_matrix(self.UCM_age)
+        self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
+        self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
         print("Size URM: {}, Size UCM_age: {}, Size UCM_reg: {}".format(self.URM.shape, self.SM_age.shape, self.SM_region.shape))
         self.RECS_region = self.SM_region.dot(self.URM)
         self.RECS_age = self.SM_age.dot(self.URM)
@@ -47,9 +50,11 @@ class UserContentBasedFiltering():
         age_exp_ratings = self.RECS_age[user_id].todense()
 
         # Normalize ratings
-        if normalized_ratings and np.amax(region_exp_ratings) > 0 and np.amax(age_exp_ratings) > 0:
-            region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
-            age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
+        if normalized_ratings:
+            if np.amax(region_exp_ratings) > 0:
+                region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
+            if np.amax(age_exp_ratings) > 0:
+                age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
 
         expected_ratings = (region_exp_ratings * i) \
                            + (age_exp_ratings * (1-i))
@@ -58,7 +63,7 @@ class UserContentBasedFiltering():
 
         return expected_ratings
 
-    def recommend(self, user_id, i=0.2, at=10):
+    def recommend(self, user_id, i=0.5, at=10):
         user_id = int(user_id)
         expected_ratings = self.get_expected_ratings(user_id, i)
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
@@ -69,5 +74,5 @@ class UserContentBasedFiltering():
         return recommended_items[0:at]
 
 
-#recommender = UserContentBasedFiltering()
-#Runner.run(recommender, True)
+recommender = UserContentBasedFiltering()
+Runner.run(recommender, True, find_hyper_parameters_user_cbf=True)

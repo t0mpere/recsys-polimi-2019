@@ -172,11 +172,26 @@ class Evaluator():
 
 
     def find_hyper_parameters_cf(self, recommender):
-        for knn in [3,4,5]:
-            for shrink in range(17, 23, 1):
+        for knn in range(50,301, 50):
+            for shrink in range(15, 26, 5):
                 print('knn ' + str(knn) + '\nshrink ' + str(shrink))
                 MAP_final = 0
                 recommender.fit(self.URM_train, knn=knn, shrink=shrink)
+                for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+                    recommended_items = recommender.recommend(user_id)
+                    MAP_final += self.evaluate(user_id, recommended_items)
+
+                MAP_final /= len(Utils.get_target_user_list())
+                print(MAP_final)
+                print('\n\n')
+        return
+
+    def find_hyper_parameters_user_cbf(self, recommender):
+        for knn in range(150,601, 50):
+            for shrink in [20]:
+                print('knn ' + str(knn) + '\nshrink ' + str(shrink))
+                MAP_final = 0
+                recommender.fit(self.URM_train, knn_age=knn, knn_region=knn, shrink=shrink)
                 for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
                     recommended_items = recommender.recommend(user_id)
                     MAP_final += self.evaluate(user_id, recommended_items)
