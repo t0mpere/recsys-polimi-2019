@@ -150,15 +150,15 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         self.S_incremental = self.cythonEpoch.get_S()
         self.S_best = self.S_incremental.copy()
 
-        #evaluator = EvaluatorEarlyStopping(URM, [5])
+        # evaluator = EvaluatorEarlyStopping(URM, [5])
 
         self._train_with_early_stopping(epochs_max=epochs,
                                         epochs_min=0)
-                                        #validation_every_n=20,
-                                        #validation_metric='MAP',
-                                        #evaluator_object=evaluator,
-                                        #lower_validations_allowed=2
-                                        #)
+        # validation_every_n=20,
+        # validation_metric='MAP',
+        # evaluator_object=evaluator,
+        # lower_validations_allowed=2
+        # )
 
         self.get_S_incremental_and_set_W()
         self.cythonEpoch._dealloc()
@@ -168,7 +168,6 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
     def _prepare_model_for_validation(self):
         self.get_S_incremental_and_set_W()
         self.RECS = self.URM_train.dot(self.W_sparse)
-
 
     def _update_best_model(self):
         self.S_best = self.S_incremental.copy()
@@ -229,8 +228,6 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         return None
 
 
-
-
-
-#recommender = SLIM_BPR_Cython(recompile_cython=False)
-#Runner.run(recommender, False)
+# recommender = SLIM_BPR_Cython(recompile_cython=False)
+# Runner.run(recommender, True)
+# MAP@10 : 0.025514333334597267
