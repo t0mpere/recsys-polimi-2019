@@ -6,10 +6,10 @@ from challenge2019.utils.utils import Utils
 
 
 class UserContentBasedFiltering():
-    def __init__(self, knn=100, shrink=5, similarity="cosine"):
-        self.knn = knn
-        self.shrink = shrink
-        self.similarity = similarity
+    def __init__(self):
+        self.knn = None
+        self.shrink = None
+        self.similarity = None
         self.URM = None
         self.UCM_region = None
         self.UCM_age = None
@@ -21,8 +21,11 @@ class UserContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM):
+    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
         utils = Utils()
+        self.knn = knn
+        self.shrink = shrink
+        self.similarity = similarity
         self.URM = URM
         self.UCM_region = utils.get_ucm_region_from_csv()
         self.UCM_age = utils.get_ucm_age_from_csv()
@@ -32,23 +35,32 @@ class UserContentBasedFiltering():
 
         self.SM_region = self.create_similarity_matrix(self.UCM_region)
         self.SM_age = self.create_similarity_matrix(self.UCM_age)
-
+        print("Size URM: {}, Size UCM_age: {}, Size UCM_reg: {}".format(self.URM.shape, self.SM_age.shape, self.SM_region.shape))
         self.RECS_region = self.SM_region.dot(self.URM)
         self.RECS_age = self.SM_age.dot(self.URM)
 
-    def get_expected_ratings(self, user_id, i, j):
-        user_id = int(user_id)
 
-        expected_ratings = (self.RECS_region[user_id].todense() * i) \
-                           + (self.RECS_age[user_id].todense() * j)
+
+    def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=False):
+        user_id = int(user_id)
+        region_exp_ratings = self.RECS_region[user_id].todense()
+        age_exp_ratings = self.RECS_age[user_id].todense()
+
+        # Normalize ratings
+        if normalized_ratings and np.amax(region_exp_ratings) > 0 and np.amax(age_exp_ratings) > 0:
+            region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
+            age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
+
+        expected_ratings = (region_exp_ratings * i) \
+                           + (age_exp_ratings * (1-i))
 
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
         return expected_ratings
 
-    def recommend(self, user_id, i=0.5, j=0.5, at=10):
+    def recommend(self, user_id, i=0.2, at=10):
         user_id = int(user_id)
-        expected_ratings = self.get_expected_ratings(user_id, i, j)
+        expected_ratings = self.get_expected_ratings(user_id, i)
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
@@ -57,5 +69,5 @@ class UserContentBasedFiltering():
         return recommended_items[0:at]
 
 
-#recommender = UserContentBasedFiltering()
-#Runner.run(recommender, False)
+recommender = UserContentBasedFiltering()
+Runner.run(recommender, True)

@@ -41,7 +41,7 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
 
         return scores_array
 
-    def fit(self, URM_train, positive_threshold=1, epochs=300, batch_size=128, num_factors=10,
+    def fit(self, URM_train, positive_threshold=1, epochs=50, batch_size=128, num_factors=50,
             learning_rate=0.001, use_cuda=True,
             **earlystopping_kwargs):
 
@@ -55,8 +55,8 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
         # Select only positive interactions
         URM_train_positive = self.URM_train.copy()
 
-        URM_train_positive.data = URM_train_positive.data >= self.positive_threshold
-        URM_train_positive.eliminate_zeros()
+        # URM_train_positive.data = URM_train_positive.data >= self.positive_threshold
+        # URM_train_positive.eliminate_zeros()
 
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -80,6 +80,8 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
         self.pyTorchModel = MF_MSE_PyTorch_model(self.n_users, self.n_items, self.n_factors).to(self.device)
 
         # Choose loss
+
+        # TODO: try cross-entropy loss
         self.lossFunction = torch.nn.MSELoss(size_average=False)
         # self.lossFunction = torch.nn.BCELoss(size_average=False)
         self.optimizer = torch.optim.Adagrad(self.pyTorchModel.parameters(), lr=self.learning_rate)
@@ -136,8 +138,8 @@ class MF_MSE_PyTorch(Incremental_Training_Early_Stopping):
                 print("num_batch: {}".format(num_batch))
 
             # On windows requires int64, on ubuntu int32
-            # input_data_tensor = Variable(torch.from_numpy(np.asarray(input_data, dtype=np.int64))).to(self.device)
-            input_data_tensor = Variable(input_data).to(self.device)
+            input_data_tensor = Variable(torch.from_numpy(np.asarray(input_data, dtype=np.int64))).to(self.device)
+            #input_data_tensor = Variable(input_data).to(self.device)
 
             label_tensor = Variable(label).to(self.device)
 

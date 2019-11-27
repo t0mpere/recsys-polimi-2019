@@ -33,6 +33,7 @@ class Hybrid():
         liked_items = self.URM[user_id]
 
         if len(liked_items.data) < 1:
+            # Provare a usare cbf al posto di top pop
             recommended_items = self.recommenderTopPop.recommend(user_id, at=100)
         else:
             expected_ratings = 0.1 * self.recommenderUser.get_expected_ratings(user_id,
