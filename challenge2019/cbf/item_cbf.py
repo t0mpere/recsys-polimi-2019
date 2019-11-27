@@ -18,15 +18,21 @@ class ItemContentBasedFiltering():
         self.SM_asset = None
         self.SM_price = None
         self.SM_sub_class = None
+        self.knn_asset = None
+        self.knn_price = None
+        self.knn_sub_class = None
 
-    def create_similarity_matrix(self, ICM):
-        similarity_object = Compute_Similarity_Python(ICM.transpose(), topK=self.knn, shrink=self.shrink,
+    def create_similarity_matrix(self, ICM, knn=100):
+
+        similarity_object = Compute_Similarity_Python(ICM.transpose(), topK=knn, shrink=self.shrink,
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=100, shrink=10, similarity="cosine"):
+    def fit(self, URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10, similarity="cosine"):
         utils = Utils()
-        self.knn = knn
+        self.knn_asset = knn_asset
+        self.knn_price = knn_price
+        self.knn_sub_class = knn_sub_class
         self.shrink = shrink
         self.similarity = similarity
         self.URM = URM
@@ -37,9 +43,9 @@ class ItemContentBasedFiltering():
         # TODO: improve ICM (lezione 30/09)  + ICM DI UNA COLONNA PER TROVARE DISTANZA TRA I VALORI
         print("Starting calculating similarity")
 
-        self.SM_asset = self.create_similarity_matrix(self.ICM_asset)
-        self.SM_price = self.create_similarity_matrix(self.ICM_price)
-        self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class)
+        self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
+        self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
+        self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class, knn=self.knn_sub_class)
         self.RECS_asset = self.URM.dot(self.SM_asset)
         self.RECS_price = self.URM.dot(self.SM_price)
         self.RECS_sub_class = self.URM.dot(self.SM_sub_class)
@@ -56,7 +62,7 @@ class ItemContentBasedFiltering():
                 expected_ratings_assets = expected_ratings_assets / np.linalg.norm(expected_ratings_assets)
             if np.amax(expected_ratings_price) > 0:
                 expected_ratings_price = expected_ratings_price / np.linalg.norm(expected_ratings_price)
-            if np.amax(expected_ratings_price) > 0:
+            if np.amax(expected_ratings_sub_class) > 0:
                 expected_ratings_sub_class = expected_ratings_sub_class / np.linalg.norm(expected_ratings_sub_class)
 
 

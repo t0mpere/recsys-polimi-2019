@@ -80,8 +80,22 @@ class Utils(object):
     def get_user_list(self):
         return set(self.user_list)
 
+    def get_cold_user_list(self):
+        cold_users = []
+        URM = self.get_urm_from_csv()
+        URM.eliminate_zeros()
+        for i in range(0, URM.shape[0]):
+            if len(URM[i].data) <= 0:
+                cold_users.append(i)
+
+        return cold_users
+
     @staticmethod
     def get_target_user_list():
         target_users_dataset = pd.read_csv("../dataset/data_target_users_test.csv")
         return list(target_users_dataset.user_id)
+
+
+
+
 

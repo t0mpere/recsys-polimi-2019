@@ -119,6 +119,17 @@ class Evaluator():
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
 
+    def eval_recommender_cold_users(self, recommender):
+        MAP_final = 0
+        utils = Utils()
+        recommender.fit(self.URM_train)
+        for user_id in tqdm(utils.get_cold_user_list(), desc='Computing Recommendations: '):
+            recommended_items = recommender.recommend(user_id)
+            MAP_final += self.evaluate(user_id, recommended_items)
+
+        MAP_final /= len(Utils.get_target_user_list())
+        return MAP_final
+
     def find_epochs(self, recommender, k):
         for i in range(20, 100, 5):
             print(k)
