@@ -69,5 +69,5 @@ class UserContentBasedFiltering():
         return recommended_items[0:at]
 
 
-recommender = UserContentBasedFiltering()
-Runner.run(recommender, True)
+#recommender = UserContentBasedFiltering()
+#Runner.run(recommender, True)
