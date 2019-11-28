@@ -1,4 +1,4 @@
-from SLIM.SlimElasticNet import SLIMElasticNetRecommender
+from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
 from challenge2019.cf.user_cf import *
 from challenge2019.cf.item_cf import *
 from challenge2019.cbf.item_cbf import *
@@ -37,7 +37,7 @@ class Hybrid():
         liked_items = self.URM[user_id]
 
         if len(liked_items.data) == 0:
-            #add top pop?
+            #add top pop? or even substitute
             recommended_items = self.recommenderUserCBF.get_expected_ratings(user_id,
                                                                              normalized_ratings=normalized_ratings)
         elif len(liked_items.data) < 4:
@@ -71,4 +71,4 @@ class Hybrid():
 
 if __name__ == '__main__':
     recommender = Hybrid()
-    Runner.run(recommender, True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True)

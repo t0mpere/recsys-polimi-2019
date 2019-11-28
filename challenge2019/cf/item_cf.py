@@ -18,7 +18,7 @@ class ItemCollaborativeFiltering():
                                                       similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=20, shrink=20, similarity="cosine"):
+    def fit(self, URM, knn=10, shrink=18, similarity="cosine"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
@@ -53,4 +53,4 @@ class ItemCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=True)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True)

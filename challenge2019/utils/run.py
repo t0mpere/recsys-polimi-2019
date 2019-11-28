@@ -9,7 +9,7 @@ class Runner(object):
 
     @staticmethod
     def run(recommender, is_test=True, find_hyper_parameters_cf=False, find_weight_item_cbf=False,
-            find_hyper_parameters_user_cbf=False, evaluate_cold_users=False, find_hyper_parameters_slim_elastic=False):
+            find_hyper_parameters_user_cbf=False, evaluate_different_type_of_users=False, find_hyper_parameters_slim_elastic=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         URM = utils.get_urm_from_csv()
@@ -37,8 +37,8 @@ class Runner(object):
                 print("MAP@10 : {}".format(evaluator.find_weight_item_cbf(recommender)))
             elif find_hyper_parameters_user_cbf:
                 print("MAP@10 : {}".format((evaluator.find_hyper_parameters_user_cbf(recommender))))
-            elif evaluate_cold_users:
-                print("MAP@10 : {}".format((evaluator.eval_recommender_cold_users(recommender))))
+            elif evaluate_different_type_of_users:
+                print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_type_of_user(recommender))))
             elif find_hyper_parameters_slim_elastic:
                 tuning_params = {
                     "topK": (50, 150),

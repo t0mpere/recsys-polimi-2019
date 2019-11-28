@@ -18,7 +18,7 @@ class UserCollaborativeFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
+    def fit(self, URM, knn=1000, shrink=2, similarity="cosine"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
@@ -52,4 +52,4 @@ class UserCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = UserCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=True)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True)

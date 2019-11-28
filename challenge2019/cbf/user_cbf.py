@@ -77,5 +77,5 @@ class UserContentBasedFiltering():
         return recommended_items[0:at]
 
 
-# recommender = UserContentBasedFiltering()
-# Runner.run(recommender, True, evaluate_cold_users=True)
+recommender = UserContentBasedFiltering()
+Runner.run(recommender, True, evaluate_different_type_of_users=True)

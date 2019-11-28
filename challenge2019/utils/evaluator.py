@@ -8,7 +8,6 @@ import random
 from scipy.sparse import csr_matrix, lil_matrix
 from tqdm import tqdm
 
-from utils import utils
 from .utils import Utils
 from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
@@ -26,7 +25,7 @@ class Evaluator():
     def random_split(self, URM, URM_csv):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
-        print("Splitting using random 20%\n---------------------")
+        print("Splitting using random 20% on long users\n---------------------")
         for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
             # FOREACH USER
             item_left = len(URM[user_index].data)
@@ -56,7 +55,7 @@ class Evaluator():
     def random_split_to_all_users(self, URM, URM_csv):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
-        print("Splitting using random 20%\n---------------------")
+        print("Splitting using random 20% on everything\n---------------------")
         for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
             # FOREACH USER
             item_left = len(URM[user_index].data)
@@ -102,7 +101,32 @@ class Evaluator():
         self.URM_train = URM
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
+    def random_split_to_short_users(self, URM, URM_csv):
+        user_indexes = np.arange(URM.shape[0])
+        tmp = 0
+        print("Splitting using random 20% on everything\n---------------------")
+        for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
+            # FOREACH USER
+            item_left = len(URM[user_index].data)
 
+            if 5 > item_left > 0:
+                x = np.random.randint(4, size=1)
+                if x == 0:
+                    non_zero = URM[user_index].indices
+                    np.random.shuffle(non_zero)
+                    non_zero = non_zero[0]
+                    URM[user_index, non_zero] = 0
+                    URM.eliminate_zeros()
+                    self.test_dictionary[user_index] = [non_zero]
+                    tmp += 1
+                else:
+                    self.test_dictionary[user_index] = []
+            else:
+                self.test_dictionary[user_index] = []
+
+        self.URM_train = URM
+        print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
+                                                                                            len(URM.data)))
 
     def leave_one_out(self, URM, URM_csv):
         user_indexes = np.arange(URM.shape[0])
@@ -164,24 +188,40 @@ class Evaluator():
         return MAP_final
 
 
-    def evaluate_recommender(self,recommender):
+    def fit_and_evaluate_recommender_on_different_type_of_user(self, recommender):
         # used to evaluate an already trained model
         MAP_final = 0
+        MAP_cold = 0
+        cold_users = 0
+        MAP_short = 0
+        short_users = 0
+        MAP_long = 0
+        long_users = 0
+        recommender.fit(self.URM_train)
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
-            MAP_final += self.evaluate(user_id, recommended_items)
+            item_left = len(self.URM_train[user_id].data)
+            app = self.evaluate(user_id, recommended_items)
+            if item_left == 0:
+                MAP_cold += app
+                cold_users += 1
+            elif item_left < 4:
+                MAP_short += app
+                short_users += 1
+            elif item_left >= 4:
+                MAP_long += app
+                long_users += 1
+            MAP_final += app
 
-        MAP_final /= len(Utils.get_target_user_list())
-        return MAP_final
 
-    def eval_recommender_cold_users(self, recommender):
-        MAP_final = 0
-        utils = Utils()
-        recommender.fit(self.URM_train)
-        for user_id in tqdm(utils.get_cold_user_list(), desc='Computing Recommendations: '):
-            recommended_items = recommender.recommend(user_id)
-            MAP_final += self.evaluate(user_id, recommended_items)
-
+        print(cold_users)
+        print(short_users)
+        print(long_users)
+        print(len(Utils.get_target_user_list()))
+        print("MAP@10 for cold users: {}".format(MAP_cold / cold_users))
+        print("MAP@10 for short users: {}".format(MAP_short / short_users))
+        print("MAP@10 for long users with actual target users: {}".format(MAP_long / long_users))
+        print("MAP@10 for long users with all users: {}".format(MAP_long / len(Utils.get_target_user_list())))
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
 
@@ -189,7 +229,7 @@ class Evaluator():
         for i in range(20, 100, 5):
             print(k)
             MAP_final = 0
-            recommender.fit(self.URM_train, epochs = 250, lambda_i= 0.4, lambda_j = 0.4, topk = k)
+            recommender.fit(self.URM_train, epochs=250, lambda_i=0.4, lambda_j=0.4, topk=k)
             count = 0
             for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
                 recommended_items = recommender.recommend(user_id)
