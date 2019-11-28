@@ -99,3 +99,4 @@ class Utils(object):
     def get_target_user_list():
         target_users_dataset = pd.read_csv("../dataset/data_target_users_test.csv")
         return list(target_users_dataset.user_id)
+

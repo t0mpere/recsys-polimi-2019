@@ -28,7 +28,7 @@ class ItemContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10, similarity="cosine"):
+    def fit(self, URM, knn_asset=980, knn_price=68, knn_sub_class=1000, shrink=2, similarity="cosine"):
         utils = Utils()
         self.knn_asset = knn_asset
         self.knn_price = knn_price
@@ -41,7 +41,7 @@ class ItemContentBasedFiltering():
         self.ICM_sub_class = utils.get_icm_sub_class_from_csv()
 
         # TODO: improve ICM (lezione 30/09)  + ICM DI UNA COLONNA PER TROVARE DISTANZA TRA I VALORI
-        print("Starting calculating similarity")
+        print("Starting calculating similarity ITEM_CBF")
 
         self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
         self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
@@ -90,5 +90,6 @@ class ItemContentBasedFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-#recommender = ItemContentBasedFiltering()
-#Runner.run(recommender, True)
+if __name__ == '__main__':
+    recommender = ItemContentBasedFiltering()
+    Runner.run(recommender, True, find_hyper_parameters_item_cbf=False, evaluate_different_type_of_users=True)

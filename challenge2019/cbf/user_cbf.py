@@ -34,7 +34,7 @@ class UserContentBasedFiltering():
         self.UCM_age = utils.get_ucm_age_from_csv()
 
         # TODO: improve UCM (lezione 30/09)
-        print("Starting calculating similarity")
+        print("Starting calculating similarity USER_CBF")
 
         self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
         self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
@@ -76,6 +76,6 @@ class UserContentBasedFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-
-recommender = UserContentBasedFiltering()
-Runner.run(recommender, True, evaluate_different_type_of_users=True)
+if __name__ == '__main__':
+    recommender = UserContentBasedFiltering()
+    Runner.run(recommender, True, find_hyper_parameters_user_cbf=True, evaluate_different_type_of_users=False)

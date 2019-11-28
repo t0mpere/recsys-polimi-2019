@@ -15,6 +15,7 @@ from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 class Evaluator():
 
     def __init__(self):
+
         self.URM_train = None
         self.URM_test = None
         self.test_dictionary = {}
@@ -175,6 +176,15 @@ class Evaluator():
         else:
             return 0
 
+    def evaluate_recommender(self, recommender):
+        MAP_final = 0
+        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+            recommended_items = recommender.recommend(user_id)
+            MAP_final += self.evaluate(user_id, recommended_items)
+
+        MAP_final /= len(Utils.get_target_user_list())
+        return MAP_final
+
     def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
         utils = Utils()
@@ -313,12 +323,33 @@ class Evaluator():
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
+    def optimize_hyperparameters_bo_item_cbf(self, knn_asset, knn_price, knn_sub_class, shrink):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, shrink=int(shrink), knn_asset=int(knn_asset), knn_price=int(knn_price), knn_sub_class=int(knn_sub_class))
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_user_cbf(self, knn_region, knn_age, shrink):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, shrink=int(shrink), knn_age=int(knn_age), knn_region=int(knn_region))
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
     def optimize_hyperparameters_bo_SLIM_el(self, topK, alpha, l1_ratio, tol):
         recommender = self.recommender
         recommender.fit(self.URM_train, topK=int(topK), alpha=alpha, l1_ratio=l1_ratio
                         , tol=tol)
         MAP = self.evaluate_recommender(recommender)
         return MAP
+
+    def optimize_hyperparameters_bo_SLIM_bpr(self, lj_reg, topK, learning_rate, li_reg):
+
+        recommender = self.recommender
+        recommender.fit(self.URM_train, topK=int(topK), learning_rate=learning_rate, li_reg=li_reg
+                        , lj_reg=lj_reg)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
 
     def optimize_bo(self, tuning_params,func):
         from bayes_opt import BayesianOptimization
@@ -327,16 +358,19 @@ class Evaluator():
             f=func,
             pbounds=tuning_params,
             verbose=5,
-            random_state=5,
+            random_state=randint(0,100),
         )
 
         optimizer.maximize(
             init_points=5,
             n_iter=8,
+            acq="ei", xi=1e-4
         )
 
     def set_recommender_to_tune(self, recommender):
         self.recommender = recommender
+
+
 
 class EvaluatorEarlyStopping(EvaluatorProf):
 

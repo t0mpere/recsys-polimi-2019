@@ -75,7 +75,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
             symmetric=True,
             verbose=False,
             random_seed=None,
-            batch_size=100, lambda_i=0.1, lambda_j=0.1, learning_rate=1e-5, topK=200,
+            batch_size=100, lambda_i=0.08125, lambda_j=0.09193, learning_rate=0.000703, topK=27,
             sgd_mode='adagrad', gamma=0.995, beta_1=0.9, beta_2=0.999,
             **earlystopping_kwargs):
 
@@ -228,6 +228,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
         return None
 
 
-# recommender = SLIM_BPR_Cython(recompile_cython=False)
-# Runner.run(recommender, True)
+if __name__ == '__main__':
+    recommender = SLIM_BPR_Cython(recompile_cython=False)
+    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=True)
 # MAP@10 : 0.025514333334597267
