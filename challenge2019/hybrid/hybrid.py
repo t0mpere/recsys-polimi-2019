@@ -1,3 +1,4 @@
+from SLIM.SlimElasticNet import SLIMElasticNetRecommender
 from challenge2019.cf.user_cf import *
 from challenge2019.cf.item_cf import *
 from challenge2019.cbf.item_cbf import *
@@ -68,6 +69,6 @@ class Hybrid():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-
-recommender = Hybrid()
-Runner.run(recommender, True)
+if __name__ == '__main__':
+    recommender = Hybrid()
+    Runner.run(recommender, True)

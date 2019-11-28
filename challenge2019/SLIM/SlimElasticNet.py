@@ -23,27 +23,26 @@ class SLIMElasticNetRecommender(object):
         X. Ning and G. Karypis, ICDM 2011.
         http://glaros.dtc.umn.edu/gkhome/fetch/papers/SLIM2011icdm.pdf
     """
-    def __init__(self, alpha=1e-4, l1_ratio=0.1, fit_intercept=False, copy_X=False, precompute=False, selection='random',
-                max_iter=200, tol=1e-4, topK=100, positive_only=True, workers=multiprocessing.cpu_count(), use_tail_boost=False):
+    def __init__(self, fit_intercept=False, copy_X=False, precompute=False, selection='random',
+                 positive_only=True, workers=multiprocessing.cpu_count()):
 
         self.analyzed_items = 0
-        self.alpha = alpha
-        self.l1_ratio = l1_ratio
+        self.alpha = None
+        self.l1_ratio = None
         self.fit_intercept = fit_intercept
         self.copy_X = copy_X
         self.precompute = precompute
         self.selection = selection
-        self.max_iter = max_iter
-        self.tol = tol
-        self.topK = topK
+        self.max_iter = None
+        self.tol = None
+        self.topK = None
         self.positive_only = positive_only
         self.workers = workers
-        self.use_tail_boost = use_tail_boost
 
     """ 
         Fit given to each pool thread, to fit the W_sparse 
     """
-    def _partial_fit(self, X, currentItem):
+    def _partial_fit(self, currentItem, X, iterations=1):
 
         model = ElasticNet(alpha=self.alpha,
                            l1_ratio=self.l1_ratio,
@@ -57,45 +56,51 @@ class SLIMElasticNetRecommender(object):
 
         # WARNING: make a copy of X to avoid race conditions on column j
         # TODO: We can probably come up with something better here.
-
         X_j = X.copy()
         # get the target column
         y = X_j[:, currentItem].toarray()
         # set the j-th column of X to zero
         X_j.data[X_j.indptr[currentItem]:X_j.indptr[currentItem + 1]] = 0.0
         # fit one ElasticNet model per column
-        model.fit(X_j, y)
+        values = []
+        rows = []
+        cols = []
+        if (currentItem % 3000) == 0:
+            print(currentItem/iterations * 100)
+        if np.max(y) > 0:
 
-        local_topK = min(len(model.sparse_coef_.data) - 1, self.topK)
+            model.fit(X_j, y)
 
-        relevant_items_partition = (-model.sparse_coef_.data).argpartition(local_topK)[0:local_topK]
-        relevant_items_partition_sorting = np.argsort(-model.sparse_coef_.data[relevant_items_partition])
-        ranking = relevant_items_partition[relevant_items_partition_sorting]
+            relevant_items_partition = (-model.coef_).argpartition(self.topK)[0:self.topK]
+            relevant_items_partition_sorting = np.argsort(-model.coef_[relevant_items_partition])
+            ranking = relevant_items_partition[relevant_items_partition_sorting]
 
-        non_zero_mask = model.coef_[ranking] > 0.0
-        ranking = ranking[non_zero_mask]
-        values = model.coef_[ranking]
-        rows = ranking
-        cols = [currentItem] * len(ranking)
+            notZerosMask = model.coef_[ranking] > 0.0
+            ranking = ranking[notZerosMask]
+
+            values = model.coef_[ranking]
+            rows = ranking
+            cols = [currentItem] * len(ranking)
 
         return values, rows, cols
 
-    def fit(self, URM):
+    def fit(self, URM, max_iter=200, tol=1e-5, topK=100, alpha=1e-3, l1_ratio=0.1):
 
-        self.URM_train = sps.csc_matrix(URM)
+        self.URM_train = URM
+        self.max_iter = max_iter
+        self.tol = tol
+        self.topK = topK
+        self.alpha = alpha
+        self.l1_ratio = l1_ratio
 
         n_items = self.URM_train.shape[1]
         print("Iterating for " + str(n_items) + "times")
-        self.URM_train.eliminate_zeros()
         warm_users = list(range(0, n_items))
         # something wrong here
-        for user in warm_users:
-            if len(self.URM_train[user].data) == 0:
-                warm_users.remove(user)
-        #create a copy of the URM since each _pfit will modify it
-        copy_urm = self.URM_train.copy()
 
-        _pfit = partial(self._partial_fit, copy_urm)
+        #create a copy of the URM since each _pfit will modify it
+
+        _pfit = partial(self._partial_fit, X=self.URM_train, iterations=n_items)
         with multiprocessing.Pool(self.workers) as pool:
             res = pool.map(_pfit, warm_users)
 
@@ -129,3 +134,6 @@ class SLIMElasticNetRecommender(object):
         return recommended_items[:at]
 
 
+if __name__ == '__main__':
+    recommender = SLIMElasticNetRecommender()
+    Runner.run(recommender, True,find_hyper_parameters_slim_elastic=True)

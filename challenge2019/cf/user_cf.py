@@ -4,6 +4,7 @@ from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Simi
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
+
 class UserCollaborativeFiltering():
     def __init__(self):
         self.knn = None
@@ -13,7 +14,8 @@ class UserCollaborativeFiltering():
         self.SM_item = None
 
     def create_similarity_matrix(self):
-        similarity_object = Compute_Similarity_Python(self.URM.transpose(), topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
+        similarity_object = Compute_Similarity_Python(self.URM.transpose(), topK=self.knn, shrink=self.shrink,
+                                                      normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
     def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
@@ -47,5 +49,7 @@ class UserCollaborativeFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-#recommender = UserCollaborativeFiltering()
-#Runner.run(recommender, True, train_cf=True)
+
+if __name__ == '__main__':
+    recommender = UserCollaborativeFiltering()
+    Runner.run(recommender, True, find_hyper_parameters_cf=True)

@@ -3,6 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 import scipy.sparse as sps
+from sklearn import feature_extraction
 
 
 class Utils(object):
@@ -46,6 +47,10 @@ class Utils(object):
         ICM_asset = sps.coo_matrix((data_list, (self.item_list_icm_asset, self.item_asset_list)), dtype=np.float64)
         ICM_asset = ICM_asset.tocsr()
         return ICM_asset
+
+    def get_URM_tfidf(self, URM):
+        URM_tfidf = feature_extraction.text.TfidfTransformer().fit_transform(URM)
+        return URM_tfidf.tocsr()
 
     def get_icm_price_from_csv(self):
 

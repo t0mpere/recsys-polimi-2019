@@ -14,16 +14,18 @@ class ItemCollaborativeFiltering():
         self.SM_item = None
 
     def create_similarity_matrix(self):
-        similarity_object = Compute_Similarity_Python(self.URM, topK=self.knn, shrink=self.shrink, normalize=True, similarity=self.similarity)
+        similarity_object = Compute_Similarity_Python(self.URM, topK=self.knn, shrink=self.shrink, normalize=True,
+                                                      similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
+    def fit(self, URM, knn=20, shrink=20, similarity="cosine"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
         print("Starting calculating similarity")
 
         self.URM = URM
+        print("Shape URM: {}".format(URM.shape))
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
 
@@ -48,5 +50,7 @@ class ItemCollaborativeFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-recommender = ItemCollaborativeFiltering()
-Runner.run(recommender, True)
+
+if __name__ == '__main__':
+    recommender = ItemCollaborativeFiltering()
+    Runner.run(recommender, True, find_hyper_parameters_cf=True)

@@ -8,6 +8,7 @@ import random
 from scipy.sparse import csr_matrix, lil_matrix
 from tqdm import tqdm
 
+from utils import utils
 from .utils import Utils
 from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
@@ -19,6 +20,7 @@ class Evaluator():
         self.URM_test = None
         self.test_dictionary = {}
         self.train_test_split = 0.7
+        self.recommender = None
 
     # Split random, 20% of each user
     def random_split(self, URM, URM_csv):
@@ -151,6 +153,8 @@ class Evaluator():
 
     def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
+        utils = Utils()
+        #URM_enh = utils.get_URM_tfidf(self.URM_train)
         recommender.fit(self.URM_train)
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
@@ -262,6 +266,37 @@ class Evaluator():
                 print(MAP_final)
                 print('\n\n')
         return MAP_final
+
+    def optimize_hyperparameters_bo_cf(self, knn, shrink):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_SLIM_el(self, topK, alpha, l1_ratio, tol):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, topK=int(topK), alpha=alpha, l1_ratio=l1_ratio
+                        , tol=tol)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_bo(self, tuning_params,func):
+        from bayes_opt import BayesianOptimization
+
+        optimizer = BayesianOptimization(
+            f=func,
+            pbounds=tuning_params,
+            verbose=5,
+            random_state=5,
+        )
+
+        optimizer.maximize(
+            init_points=5,
+            n_iter=8,
+        )
+
+    def set_recommender_to_tune(self, recommender):
+        self.recommender = recommender
 
 class EvaluatorEarlyStopping(EvaluatorProf):
 
