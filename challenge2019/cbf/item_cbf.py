@@ -57,13 +57,13 @@ class ItemContentBasedFiltering():
         expected_ratings_price = self.RECS_price[user_id].todense()
         expected_ratings_sub_class = self.RECS_sub_class[user_id].todense()
 
-        if normalized_ratings:
-            if np.amax(expected_ratings_assets) > 0:
-                expected_ratings_assets = expected_ratings_assets / np.linalg.norm(expected_ratings_assets)
-            if np.amax(expected_ratings_price) > 0:
-                expected_ratings_price = expected_ratings_price / np.linalg.norm(expected_ratings_price)
-            if np.amax(expected_ratings_sub_class) > 0:
-                expected_ratings_sub_class = expected_ratings_sub_class / np.linalg.norm(expected_ratings_sub_class)
+
+        if np.amax(expected_ratings_assets) > 0:
+            expected_ratings_assets = expected_ratings_assets / np.linalg.norm(expected_ratings_assets)
+        if np.amax(expected_ratings_price) > 0:
+            expected_ratings_price = expected_ratings_price / np.linalg.norm(expected_ratings_price)
+        if np.amax(expected_ratings_sub_class) > 0:
+            expected_ratings_sub_class = expected_ratings_sub_class / np.linalg.norm(expected_ratings_sub_class)
 
 
         expected_ratings = + (expected_ratings_price * j) \

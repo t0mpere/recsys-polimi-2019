@@ -49,17 +49,20 @@ class UserContentBasedFiltering():
         region_exp_ratings = self.RECS_region[user_id].todense()
         age_exp_ratings = self.RECS_age[user_id].todense()
 
-        # Normalize ratings
-        if normalized_ratings:
-            if np.amax(region_exp_ratings) > 0:
-                region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
-            if np.amax(age_exp_ratings) > 0:
-                age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
+
+        if np.amax(region_exp_ratings) > 0:
+            region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
+        if np.amax(age_exp_ratings) > 0:
+            age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
 
         expected_ratings = (region_exp_ratings * i) \
                            + (age_exp_ratings * (1-i))
 
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
+
+        # Normalize ratings
+        if normalized_ratings and np.amax(expected_ratings) > 0:
+            expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
 
         return expected_ratings
 
