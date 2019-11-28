@@ -2,7 +2,7 @@ from challenge2019.cf.user_cf import *
 from challenge2019.cf.item_cf import *
 from challenge2019.cbf.item_cbf import *
 from challenge2019.SLIM.SLIM_BPR_Cython import *
-from challenge2019.topPop.topPop import *
+#from challenge2019.topPop.topPop import *
 from challenge2019.cbf.user_cbf import *
 
 
@@ -36,12 +36,20 @@ class Hybrid():
         liked_items = self.URM[user_id]
 
         if len(liked_items.data) == 0:
-            # Provare a usare cbf al posto di top pop
-            # Using user_cbf
-            recommended_items = self.recommenderUserCBF.recommend(user_id)
-
-            # Using TopPop
-            # recommended_items = self.recommenderTopPop.recommend(user_id)
+            #add top pop?
+            recommended_items = self.recommenderUserCBF.get_expected_ratings(user_id,
+                                                                             normalized_ratings=normalized_ratings)
+        elif len(liked_items.data) < 4:
+            recommended_items = 0.4 * self.recommenderUserCBF.get_expected_ratings(user_id,
+                                                                        normalized_ratings=normalized_ratings) \
+                                + 0.3 * self.recommenderUser.get_expected_ratings(user_id,
+                                                                                normalized_ratings=normalized_ratings) \
+                                + 0.05 * self.recommenderItem.get_expected_ratings(user_id,
+                                                                                  normalized_ratings=normalized_ratings) \
+                                + 0.2 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                                                                                        normalized_ratings=normalized_ratings) \
+                                + 0.05 * self.recommenderItemCBF.get_expected_ratings(user_id,
+                                                                                      normalized_ratings=normalized_ratings)
 
         else:
             expected_ratings = 0.1 * self.recommenderUser.get_expected_ratings(user_id,

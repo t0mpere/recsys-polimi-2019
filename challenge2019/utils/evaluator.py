@@ -74,7 +74,7 @@ class Evaluator():
                 self.test_dictionary[user_index] = non_zero
                 tmp += len(self.test_dictionary[user_index])
 
-            elif item_left != 0:
+            elif item_left > 1:
                 non_zero = URM[user_index].indices
                 np.random.shuffle(non_zero)
                 non_zero = non_zero[0]
@@ -82,8 +82,20 @@ class Evaluator():
                 URM.eliminate_zeros()
                 self.test_dictionary[user_index] = [non_zero]
                 tmp += 1
+            elif item_left == 1:
+                x = np.random.randint(2, size=1)
+                if x == 1:
+                    non_zero = URM[user_index].indices
+                    np.random.shuffle(non_zero)
+                    non_zero = non_zero[0]
+                    URM[user_index, non_zero] = 0
+                    URM.eliminate_zeros()
+                    self.test_dictionary[user_index] = [non_zero]
+                    tmp += 1
+                else:
+                    self.test_dictionary[user_index] = []
             else:
-                self.test_dictionary[user_index] =[]
+                self.test_dictionary[user_index] = []
 
         self.URM_train = URM
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
@@ -263,3 +275,5 @@ class EvaluatorEarlyStopping(EvaluatorProf):
         print('MAP:')
         print(MAP)
         return MAP
+
+#todo modify evaluator so that it calculates the three different MAP for the three different part of the hybrid

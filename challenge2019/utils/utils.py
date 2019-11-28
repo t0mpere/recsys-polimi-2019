@@ -85,7 +85,7 @@ class Utils(object):
         URM = self.get_urm_from_csv()
         URM.eliminate_zeros()
         for i in range(0, URM.shape[0]):
-            if len(URM[i].data) == 1:
+            if len(URM[i].data) < 4:
                 cold_users.append(i)
 
         return cold_users
@@ -94,8 +94,3 @@ class Utils(object):
     def get_target_user_list():
         target_users_dataset = pd.read_csv("../dataset/data_target_users_test.csv")
         return list(target_users_dataset.user_id)
-
-
-
-
-
