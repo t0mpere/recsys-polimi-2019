@@ -25,7 +25,7 @@ class Runner(object):
             if find_hyper_parameters_cf:
                 tuning_params = {
                     "knn": (100, 1000),
-                    "shrink": (10, 100)
+                    "shrink": (10, 1000)
                 }
                 evaluator.set_recommender_to_tune(recommender)
                 evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_cf)

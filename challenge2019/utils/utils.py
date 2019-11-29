@@ -4,11 +4,12 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sps
 from sklearn import feature_extraction
+from tqdm import tqdm
 
 
 class Utils(object):
 
-    #TODO change URM to generic matrix
+    # TODO change URM to generic matrix
     def __init__(self):
         self.URM_csv = pd.read_csv("../dataset/data_train.csv")
         self.ICM_asset_csv = pd.read_csv("../dataset/data_ICM_asset.csv")
@@ -63,7 +64,8 @@ class Utils(object):
 
     def get_icm_sub_class_from_csv(self):
         data_list = list(np.ones(len(self.item_sub_class_list)))
-        ICM_sub_class = sps.coo_matrix((data_list, (self.item_list_icm_sub_class, self.item_sub_class_list)), dtype=np.float64)
+        ICM_sub_class = sps.coo_matrix((data_list, (self.item_list_icm_sub_class, self.item_sub_class_list)),
+                                       dtype=np.float64)
         ICM_sub_class = ICM_sub_class.tocsr()
         return ICM_sub_class
 
@@ -79,7 +81,7 @@ class Utils(object):
         data_list = list(np.ones(len(self.user_region_list)))
 
         UCM_region = sps.coo_matrix((data_list, (self.user_list_ucm_region, self.user_region_list)), dtype=np.float64)
-        UCM_region= UCM_region.tocsr()
+        UCM_region = UCM_region.tocsr()
         return UCM_region
 
     def get_user_list(self):
@@ -95,8 +97,58 @@ class Utils(object):
 
         return cold_users
 
+    def weight_interactions(self, URM_train):
+        # more weight to items that appear more in users with few interactions
+        non_zero = URM_train.nonzero()
+        rows = np.array(non_zero[0])
+        col = list(non_zero[1])
+        short_users = np.array(self.get_cold_user_list())
+        indices = np.array([], dtype=np.int32)
+        for u in short_users:
+            tmp = np.array(np.where(rows == u)[0])
+            if len(tmp) > 0:
+                indices = np.concatenate((indices, tmp), axis=None)
+
+        for i in indices:
+            column = URM_train.getcol(col[i])
+
+            URM_train.data[i] += len(column.data)/400
+
+        return URM_train
+
     @staticmethod
     def get_target_user_list():
         target_users_dataset = pd.read_csv("../dataset/data_target_users_test.csv")
         return list(target_users_dataset.user_id)
 
+    def get_frequencies(self):
+        # not working
+        URM = self.get_urm_from_csv()
+        res_user = np.zeros(678)
+        URM.eliminate_zeros()
+        for i in range(0, URM.shape[0]):
+            res_user[len(URM[i].data)] += 1
+
+        res_item = None
+
+        non_zero_user = []
+        non_zero_item = []
+        for i in range(0, len(res_user)):
+            if res_user[i] > 0:
+                non_zero_user.append(i)
+                print("Users with {} items: {}".format(i, res_user[i]))
+
+        for i in range(0, len(res_item)):
+            if res_item[i] > 0:
+                non_zero_item.append(i)
+                print("Item with {} users: {}".format(i, res_item[i]))
+
+        import matplotlib.pyplot as plt
+        plt.plot(res_user[non_zero_user])
+        plt.plot(res_item[non_zero_item])
+        plt.show()
+
+
+if __name__ == '__main__':
+    utils = Utils()
+    utils.weight_interactions(utils.get_urm_from_csv())

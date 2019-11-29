@@ -5,6 +5,7 @@ from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Simi
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
+
 class TopPop():
     def __init__(self):
         self.URM = None
@@ -16,15 +17,15 @@ class TopPop():
             self.occurrencies[i] = len(self.URM[:, i].data)
 
     def get_expected_ratings(self, user_id):
-        data = np.arange(0.0, 1.0, 0.1)
+        data = np.arange(0.1, 1.1, 0.1)
         data = np.flip(data, 0)
 
-        recommended_items = self.recommend(user_id)
-        #expected_ratings = np.array(data)[recommended_items.astype(int)]
-        expected_ratings = sps.coo_matrix(data, (recommended_items, np.zeros(10)), shape=(self.URM.shape[1]))
-        expected_ratings = np.squeeze(np.asarray(expected_ratings))
-        print(expected_ratings)
+        recommended_items = list(self.recommend(user_id))
+        expected_ratings = np.zeros(self.URM.shape[1])
+        for item in recommended_items:
+            expected_ratings[item] = data[recommended_items.index(item)]
         return expected_ratings
+
 
     def recommend(self, user_id, at=10):
         expected_ratings = self.occurrencies
@@ -35,5 +36,8 @@ class TopPop():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
-recommender = TopPop()
-Runner.run(recommender, True)
+
+if __name__ == '__main__':
+    recommender = TopPop()
+    Runner.run(recommender, True, evaluate_different_type_of_users=True)
+    recommender.get_expected_ratings(1)

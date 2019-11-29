@@ -18,13 +18,15 @@ class ItemCollaborativeFiltering():
                                                       similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=15, shrink=19, similarity="tversky"):
+    def fit(self, URM, knn=15, shrink=19, similarity="tanimoto"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
         print("Starting calculating similarity ITEM_CF")
 
-        self.URM = URM
+        utils = Utils()
+        self.URM = utils.weight_interactions(URM)
+
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
 

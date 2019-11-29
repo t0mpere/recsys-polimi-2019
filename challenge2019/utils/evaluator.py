@@ -233,6 +233,7 @@ class Evaluator():
         print("MAP@10 for long users with actual target users: {}".format(MAP_long / long_users))
         print("MAP@10 for long users with all users: {}".format(MAP_long / len(Utils.get_target_user_list())))
         MAP_final /= len(Utils.get_target_user_list())
+        print("MAP@10 delta (new - old): {}".format(MAP_final-(MAP_long / len(Utils.get_target_user_list()))))
         return MAP_final
 
     def find_epochs(self, recommender, k):
