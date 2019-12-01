@@ -51,7 +51,7 @@ class Evaluator(object):
                                                                                             len(URM.data)))
 
     # TODO matteo scrivi come funziona
-    def random_split_to_all_users(self, URM):
+    def random_split_to_all_users(self, URM, seed):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
         print("MATTEO I COPIA INCOLLA\n---------------------")
@@ -65,6 +65,7 @@ class Evaluator(object):
                 # Array with the indexes of the non zero values
                 non_zero = URM[user_index].indices
                 # Shuffle array of indices
+                np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 # Select 20% of the array
                 non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
@@ -76,6 +77,7 @@ class Evaluator(object):
 
             elif item_left > 1:
                 non_zero = URM[user_index].indices
+                np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 non_zero = non_zero[0]
                 URM[user_index, non_zero] = 0
@@ -86,6 +88,7 @@ class Evaluator(object):
                 x = np.random.randint(2, size=1)
                 if x == 1:
                     non_zero = URM[user_index].indices
+                    np.random.seed(seed)
                     np.random.shuffle(non_zero)
                     non_zero = non_zero[0]
                     URM[user_index, non_zero] = 0
