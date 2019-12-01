@@ -69,7 +69,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
     def fit(self,
             URM,
             URM_test=None,
-            epochs=200,
+            epochs=50,
             positive_threshold_BPR=None,
             train_with_sparse_weights=None,
             symmetric=True,
@@ -230,5 +230,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
 if __name__ == '__main__':
     recommender = SLIM_BPR_Cython(recompile_cython=False)
-    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False, evaluate_on_seeds=True, find_epochs=True)
 # MAP@10 : 0.025514333334597267

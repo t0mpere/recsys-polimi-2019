@@ -189,10 +189,10 @@ class Evaluator(object):
             if item_left == 0:
                 MAP_cold += app
                 cold_users += 1
-            elif item_left < 4:
+            elif item_left < 20:
                 MAP_short += app
                 short_users += 1
-            elif item_left >= 4:
+            elif item_left >= 20:
                 MAP_long += app
                 long_users += 1
             MAP_final += app
@@ -209,18 +209,18 @@ class Evaluator(object):
         print("MAP@10 delta (new - old): {}".format(MAP_final - (MAP_long / len(Utils.get_target_user_list()))))
         return MAP_final
 
-    def find_epochs(self, recommender, k):
-        for i in range(20, 100, 5):
-            print(k)
+    def find_epochs(self, recommender):
+        for i in [5, 10, 20, 30, 50, 70, 100]:
+            print(i)
             MAP_final = 0
-            recommender.fit(self.URM_train, epochs=250, lambda_i=0.4, lambda_j=0.4, topk=k)
+            recommender.fit(self.URM_train, epochs=i)
             count = 0
             for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
                 recommended_items = recommender.recommend(user_id)
                 MAP_final += self.evaluate(user_id, recommended_items)
 
             MAP_final /= len(Utils.get_target_user_list())
-            print('epoches' + str(i))
+            print('epochs' + str(i))
             print(MAP_final)
             print('\n\n')
         return MAP_final

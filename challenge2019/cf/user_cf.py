@@ -52,4 +52,4 @@ class UserCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = UserCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=True, evaluate_different_type_of_users=False)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, evaluate_on_seeds=True)
