@@ -87,12 +87,12 @@ class Utils(object):
     def get_user_list(self):
         return set(self.user_list)
 
-    def get_cold_user_list(self):
+    def get_cold_user_list(self, threshold=4):
         cold_users = []
         URM = self.get_urm_from_csv()
         URM.eliminate_zeros()
         for i in range(0, URM.shape[0]):
-            if len(URM[i].data) < 4:
+            if len(URM[i].data) < threshold:
                 cold_users.append(i)
 
         return cold_users
@@ -102,17 +102,17 @@ class Utils(object):
         non_zero = URM_train.nonzero()
         rows = np.array(non_zero[0])
         col = list(non_zero[1])
-        short_users = np.array(self.get_cold_user_list())
+        short_users = np.array(self.get_cold_user_list(threshold=4))
         indices = np.array([], dtype=np.int32)
         for u in short_users:
             tmp = np.array(np.where(rows == u)[0])
             if len(tmp) > 0:
                 indices = np.concatenate((indices, tmp), axis=None)
 
-        for i in indices:
+        for i in tqdm(indices, desc="weighting urm: "):
             column = URM_train.getcol(col[i])
 
-            URM_train.data[i] += len(column.data)/400
+            URM_train.data[i] += len(column.data)/688
 
         return URM_train
 

@@ -1,18 +1,15 @@
 from random import randint
 
 import numpy as np
-import pandas as pd
-import scipy
-import random
-
-from scipy.sparse import csr_matrix, lil_matrix
 from tqdm import tqdm
 
 from .utils import Utils
 from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
 
-class Evaluator():
+class Evaluator(object):
+
+
 
     def __init__(self):
 
@@ -23,7 +20,7 @@ class Evaluator():
         self.recommender = None
 
     # Split random, 20% of each user
-    def random_split(self, URM, URM_csv):
+    def random_split(self, URM):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
         print("Splitting using random 20% on long users\n---------------------")
@@ -52,11 +49,12 @@ class Evaluator():
         self.URM_train = URM
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
-    # Split random, 20% of each user
-    def random_split_to_all_users(self, URM, URM_csv):
+
+    # TODO matteo scrivi come funziona
+    def random_split_to_all_users(self, URM):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
-        print("Splitting using random 20% on everything\n---------------------")
+        print("MATTEO I COPIA INCOLLA\n---------------------")
         for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
             # FOREACH USER
             item_left = len(URM[user_index].data)
@@ -87,32 +85,6 @@ class Evaluator():
             elif item_left == 1:
                 x = np.random.randint(2, size=1)
                 if x == 1:
-                    non_zero = URM[user_index].indices
-                    np.random.shuffle(non_zero)
-                    non_zero = non_zero[0]
-                    URM[user_index, non_zero] = 0
-                    URM.eliminate_zeros()
-                    self.test_dictionary[user_index] = [non_zero]
-                    tmp += 1
-                else:
-                    self.test_dictionary[user_index] = []
-            else:
-                self.test_dictionary[user_index] = []
-
-        self.URM_train = URM
-        print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
-                                                                                            len(URM.data)))
-    def random_split_to_short_users(self, URM, URM_csv):
-        user_indexes = np.arange(URM.shape[0])
-        tmp = 0
-        print("Splitting using random 20% on everything\n---------------------")
-        for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
-            # FOREACH USER
-            item_left = len(URM[user_index].data)
-
-            if 5 > item_left > 0:
-                x = np.random.randint(4, size=1)
-                if x == 0:
                     non_zero = URM[user_index].indices
                     np.random.shuffle(non_zero)
                     non_zero = non_zero[0]
@@ -160,7 +132,7 @@ class Evaluator():
 
     def MAP(self, recommended_items, relevant_items):
         # print(recommended_items)
-        is_relevant = np.isin(recommended_items , relevant_items, assume_unique=True)
+        is_relevant = np.isin(recommended_items, relevant_items, assume_unique=True)
         # Cumulative sum: precision at 1, at 2, at 3 ...
         p_at_k = is_relevant * np.cumsum(is_relevant, dtype=np.float32) / (1 + np.arange(len(is_relevant)))
         # print(recommended_items, relevant_items)
@@ -188,7 +160,7 @@ class Evaluator():
     def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
         utils = Utils()
-        #URM_enh = utils.get_URM_tfidf(self.URM_train)
+        # URM_enh = utils.get_URM_tfidf(self.URM_train)
         recommender.fit(self.URM_train)
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
@@ -196,7 +168,6 @@ class Evaluator():
 
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
-
 
     def fit_and_evaluate_recommender_on_different_type_of_user(self, recommender):
         # used to evaluate an already trained model
@@ -223,7 +194,6 @@ class Evaluator():
                 long_users += 1
             MAP_final += app
 
-
         print(cold_users)
         print(short_users)
         print(long_users)
@@ -233,7 +203,7 @@ class Evaluator():
         print("MAP@10 for long users with actual target users: {}".format(MAP_long / long_users))
         print("MAP@10 for long users with all users: {}".format(MAP_long / len(Utils.get_target_user_list())))
         MAP_final /= len(Utils.get_target_user_list())
-        print("MAP@10 delta (new - old): {}".format(MAP_final-(MAP_long / len(Utils.get_target_user_list()))))
+        print("MAP@10 delta (new - old): {}".format(MAP_final - (MAP_long / len(Utils.get_target_user_list()))))
         return MAP_final
 
     def find_epochs(self, recommender, k):
@@ -279,7 +249,7 @@ class Evaluator():
                     print('asset ' + str(i) + '\nprice ' + str(j) + '\nsub_class ' + str(k))
                     count = 0
                     for user_id in tqdm(Utils.get_target_user_list()):
-                        recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10, l/10)
+                        recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10, l / 10)
                         MAP_final += self.evaluate(user_id, recommended_items)
                         count += 1
                     MAP_final /= len(Utils.get_target_user_list())
@@ -287,9 +257,8 @@ class Evaluator():
                     print('\n\n')
         return MAP_final
 
-
     def find_hyper_parameters_cf(self, recommender):
-        for knn in range(50,301, 50):
+        for knn in range(50, 301, 50):
             for shrink in range(15, 26, 5):
                 print('knn ' + str(knn) + '\nshrink ' + str(shrink))
                 MAP_final = 0
@@ -304,7 +273,7 @@ class Evaluator():
         return
 
     def find_hyper_parameters_user_cbf(self, recommender):
-        for knn in range(1000,10001, 500):
+        for knn in range(1000, 10001, 500):
             for shrink in [20]:
                 print('knn ' + str(knn) + '\nshrink ' + str(shrink))
                 MAP_final = 0
@@ -326,7 +295,8 @@ class Evaluator():
 
     def optimize_hyperparameters_bo_item_cbf(self, knn_asset, knn_price, knn_sub_class, shrink):
         recommender = self.recommender
-        recommender.fit(self.URM_train, shrink=int(shrink), knn_asset=int(knn_asset), knn_price=int(knn_price), knn_sub_class=int(knn_sub_class))
+        recommender.fit(self.URM_train, shrink=int(shrink), knn_asset=int(knn_asset), knn_price=int(knn_price),
+                        knn_sub_class=int(knn_sub_class))
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
@@ -351,15 +321,25 @@ class Evaluator():
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
+    def optimize_weights_hybrid(self, SLIM, item_cf, user_cf):
+        recommender = self.recommender
+        weights = {
+            "SLIM": SLIM,
+            "item_cf": item_cf,
+            "user_cf": user_cf
+        }
+        recommender.fit(self.URM_train, fit_once=True, weights=weights)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
 
-    def optimize_bo(self, tuning_params,func):
+    def optimize_bo(self, tuning_params, func):
         from bayes_opt import BayesianOptimization
 
         optimizer = BayesianOptimization(
             f=func,
             pbounds=tuning_params,
             verbose=5,
-            random_state=randint(0,100),
+            random_state=randint(0, 100),
         )
 
         optimizer.maximize(
@@ -370,7 +350,6 @@ class Evaluator():
 
     def set_recommender_to_tune(self, recommender):
         self.recommender = recommender
-
 
 
 class EvaluatorEarlyStopping(EvaluatorProf):
@@ -386,4 +365,4 @@ class EvaluatorEarlyStopping(EvaluatorProf):
         print(MAP)
         return MAP
 
-#todo modify evaluator so that it calculates the three different MAP for the three different part of the hybrid
+# todo modify evaluator so that it calculates the three different MAP for the three different part of the hybrid

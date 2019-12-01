@@ -25,7 +25,7 @@ class ItemCollaborativeFiltering():
         print("Starting calculating similarity ITEM_CF")
 
         utils = Utils()
-        self.URM = utils.weight_interactions(URM)
+        self.URM = URM
 
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)

@@ -10,7 +10,7 @@ class Runner(object):
     @staticmethod
     def run(recommender, is_test=True, find_hyper_parameters_cf=False, find_hyper_parameters_item_cbf=False,
             find_hyper_parameters_user_cbf=False, evaluate_cold_users=False, find_hyper_parameters_slim_elastic=False,
-            find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False):
+            find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False, find_weights_hybrid=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         URM = utils.get_urm_from_csv()
@@ -20,7 +20,7 @@ class Runner(object):
             print("Starting testing phase..")
             evaluator = Evaluator()
 
-            evaluator.random_split_to_all_users(URM, None)
+            evaluator.random_split_to_all_users(URM)
 
             if find_hyper_parameters_cf:
                 tuning_params = {
@@ -41,6 +41,18 @@ class Runner(object):
                 evaluator.set_recommender_to_tune(recommender)
                 evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_item_cbf)
                 #print("MAP@10 : {}".format(evaluator.find_weight_item_cbf(recommender)))
+
+            elif find_weights_hybrid:
+
+                weights = {
+                    "SLIM": (0.1, 1),
+                    "item_cf": (0.1, 1),
+                    "user_cf": (0.1, 1)
+                }
+                evaluator.set_recommender_to_tune(recommender)
+                evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
+                # print("MAP@10 : {}".format(evaluator.find_weight_item_cbf(recommender)))
+
             elif find_hyper_parameters_user_cbf:
                 tuning_params = {
                     "shrink": (0, 30),
@@ -50,8 +62,10 @@ class Runner(object):
                 evaluator.set_recommender_to_tune(recommender)
                 evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_user_cbf)
                 #print("MAP@10 : {}".format((evaluator.find_hyper_parameters_user_cbf(recommender))))
+
             elif evaluate_cold_users:
                 print("MAP@10 : {}".format((evaluator.eval_recommender_cold_users(recommender))))
+
             elif find_hyper_parameters_slim_bpr:
 
                 tuning_params = {
