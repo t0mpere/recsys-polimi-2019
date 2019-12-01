@@ -15,12 +15,10 @@ class Runner(object):
             evaluate_on_seeds=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
-        URM = utils.get_urm_from_csv()
         # TODO: see if this line changes something
 
         if is_test:
             print("Starting testing phase..")
-            evaluator = Evaluator()
 
             if evaluate_on_seeds:
                 seeds = [69, 420, 666, 777, 619]
@@ -28,7 +26,9 @@ class Runner(object):
                 seeds = [np.random.randint(0, 1000)]
 
             for seed in seeds:
-
+                evaluator = None
+                URM = utils.get_urm_from_csv()
+                evaluator = Evaluator()
                 evaluator.random_split_to_all_users(URM, seed)
 
                 if find_hyper_parameters_cf:
@@ -71,9 +71,6 @@ class Runner(object):
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_user_cbf)
                     #print("MAP@10 : {}".format((evaluator.find_hyper_parameters_user_cbf(recommender))))
-
-                elif evaluate_cold_users:
-                    print("MAP@10 : {}".format((evaluator.eval_recommender_cold_users(recommender))))
 
                 elif find_hyper_parameters_slim_bpr:
 
