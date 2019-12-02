@@ -38,7 +38,7 @@ class UserContentBasedFiltering():
 
         self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
         self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
-        print("Size URM: {}, Size UCM_age: {}, Size UCM_reg: {}".format(self.URM.shape, self.SM_age.shape, self.SM_region.shape))
+
         self.RECS_region = self.SM_region.dot(self.URM)
         self.RECS_age = self.SM_age.dot(self.URM)
 

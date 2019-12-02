@@ -7,33 +7,28 @@ from challenge2019.topPop.topPop import *
 from challenge2019.cbf.user_cbf import *
 from challenge2019.utils.utils import Utils
 
-class HybridItemCfCbf(object):
+class HybridUserCfCbf(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
 
-
-    weights_long = {
-        "SLIM": 0.0924,
-        "item_cf": 0.562
-    }
-
     def fit(self, URM):
         self.URM = URM
         utils = Utils()
         self.alpha = 0.8
-        self.ICM_asset = utils.get_icm_asset_from_csv()
-        self.ICM_price = utils.get_icm_price_from_csv()
-        self.ICM_sub_class = utils.get_icm_sub_class_from_csv()
-        self.combined_ICM = sps.hstack([self.ICM_asset, self.ICM_sub_class, self.ICM_price])
+        self.UCM_region = utils.get_ucm_region_from_csv()
+        self.UCM_age = utils.get_ucm_age_from_csv()
+        self.SM_age = self.create_similarity_matrix(self.UCM_age.transpose(), 1000, 20, similarity="dice")
+        self.SM_region = self.create_similarity_matrix(self.UCM_region.transpose(), 1000, 20, similarity="dice")
 
-        self.SM_cbf = self.create_similarity_matrix(self.combined_ICM.transpose(), 900, 2)
-        self.SM_cf = self.create_similarity_matrix(URM, 12, 23, similarity="tanimoto")
+
+        self.SM_cbf = self.SM_age + self.SM_region
+        self.SM_cf = self.create_similarity_matrix(self.URM.transpose(), 784, 10, similarity="tversky")
 
         self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_cbf
 
-        self.RECS = self.URM.dot(self.SM)
+        self.RECS = self.SM.dot(self.URM)
 
 
     def create_similarity_matrix(self, URM, knn, shrink, similarity="cosine"):
@@ -62,5 +57,5 @@ class HybridItemCfCbf(object):
         return expected_ratings
 
 if __name__ == '__main__':
-    recommender = HybridItemCfCbf()
+    recommender = HybridUserCfCbf()
     Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True)
