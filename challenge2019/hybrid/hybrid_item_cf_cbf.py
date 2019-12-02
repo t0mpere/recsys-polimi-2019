@@ -12,7 +12,7 @@ class HybridItemCfCbf(object):
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
-        
+
     def fit(self, URM):
         self.URM = URM
         utils = Utils()

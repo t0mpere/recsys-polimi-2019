@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse as sps
 
 from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
 from challenge2019.utils.run import Runner
@@ -33,30 +34,32 @@ class UserContentBasedFiltering():
         self.UCM_region = utils.get_ucm_region_from_csv()
         self.UCM_age = utils.get_ucm_age_from_csv()
 
+        self.combined_UCM = sps.hstack([self.UCM_age, self.UCM_region])
         # TODO: improve UCM (lezione 30/09)
         print("Starting calculating similarity USER_CBF")
 
-        self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
-        self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
+        # self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
+        # self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
+        self.SM = self.create_similarity_matrix(self.combined_UCM, 1000)
 
-        self.RECS_region = self.SM_region.dot(self.URM)
-        self.RECS_age = self.SM_age.dot(self.URM)
-
+        # self.RECS_region = self.SM_region.dot(self.URM)
+        # self.RECS_age = self.SM_age.dot(self.URM)
+        self.RECS = self.SM.dot(self.URM)
 
 
     def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=True):
         user_id = int(user_id)
-        region_exp_ratings = self.RECS_region[user_id].todense()
-        age_exp_ratings = self.RECS_age[user_id].todense()
+        # region_exp_ratings = self.RECS_region[user_id].todense()
+        # age_exp_ratings = self.RECS_age[user_id].todense()
+        expected_ratings = self.RECS[user_id].todense()
 
+        # if np.amax(region_exp_ratings) > 0:
+        #     region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
+        # if np.amax(age_exp_ratings) > 0:
+        #     age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
 
-        if np.amax(region_exp_ratings) > 0:
-            region_exp_ratings = region_exp_ratings / np.linalg.norm(region_exp_ratings)
-        if np.amax(age_exp_ratings) > 0:
-            age_exp_ratings = age_exp_ratings / np.linalg.norm(age_exp_ratings)
-
-        expected_ratings = (region_exp_ratings * i) \
-                           + (age_exp_ratings * (1-i))
+        # expected_ratings = (region_exp_ratings * i) \
+        #                    + (age_exp_ratings * (1-i))
 
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
@@ -78,4 +81,4 @@ class UserContentBasedFiltering():
 
 if __name__ == '__main__':
     recommender = UserContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_type_of_users=True)
+    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_region_of_users=True, batch_evaluation=True)

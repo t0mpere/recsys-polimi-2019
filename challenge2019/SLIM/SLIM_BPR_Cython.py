@@ -230,5 +230,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
 if __name__ == '__main__':
     recommender = SLIM_BPR_Cython(recompile_cython=False)
-    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False, evaluate_on_seeds=True, find_epochs=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=False, evaluate_different_age_of_users=True, batch_evaluation=True)
 # MAP@10 : 0.025514333334597267

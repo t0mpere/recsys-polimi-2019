@@ -172,7 +172,63 @@ class Evaluator(object):
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
 
-    def fit_and_evaluate_recommender_on_different_type_of_user(self, recommender):
+    def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
+        MAP_age = [0,0,0,0,0,0,0,0,0,0,0]
+        user_age = [0,0,0,0,0,0,0,0,0,0,0]
+        MAP_final = 0
+        utils = Utils()
+        age_matrix = utils.get_ucm_age_from_csv()
+        recommender.fit(self.URM_train)
+
+        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+            recommended_items = recommender.recommend(user_id)
+            app = self.evaluate(user_id, recommended_items)
+            if len(age_matrix[user_id].data) > 0:
+                age = age_matrix[user_id]
+                age = int(age.data)
+                MAP_age[age] += app
+                user_age[age] += 1
+            MAP_final += app
+
+        for i in range(1, 11, 1):
+            print("age: {}".format(str(i)))
+            print("MAP@10 for these users: {}".format(str(MAP_age[i] / user_age[i])))
+
+        MAP_final /= len(Utils.get_target_user_list())
+        return MAP_final
+
+    # TODO: non va mica - only works with one regio
+    def fit_and_evaluate_recommender_on_different_region_of_user(self, recommender):
+        MAP_region = [0,0,0,0,0,0,0,0,0,0,0]
+        user_region = [0,0,0,0,0,0,0,0,0,0,0]
+        MAP_final = 0
+        utils = Utils()
+        region_matrix = utils.get_ucm_region_from_csv()
+        recommender.fit(self.URM_train)
+
+        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+            recommended_items = recommender.recommend(user_id)
+            app = self.evaluate(user_id, recommended_items)
+            if len(region_matrix[user_id].data) > 0:
+                regions = region_matrix[user_id]
+                regions = regions.todense()[0].nonzero()[1]
+                for region in regions:
+                    region = int(region)
+                    MAP_region[region] += app
+                    user_region[region] += 1
+            MAP_final += app
+
+        for i in range(0, 10, 1):
+            print("region: {}".format(str(i)))
+            print(user_region[i])
+            if user_region[i] > 0:
+                print("MAP@10 for these users: {}".format(str(MAP_region[i] / user_region[i])))
+            else:
+                print("0")
+        MAP_final /= len(Utils.get_target_user_list())
+        return MAP_final
+
+    def fit_and_evaluate_recommender_on_different_length_of_user(self, recommender):
         # used to evaluate an already trained model
         MAP_final = 0
         MAP_cold = 0

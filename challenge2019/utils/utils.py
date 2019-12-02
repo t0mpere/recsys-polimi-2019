@@ -84,6 +84,15 @@ class Utils(object):
         UCM_region = UCM_region.tocsr()
         return UCM_region
 
+    def get_ucm_region_from_csv_in_different_format(self):
+        data_list = np.zeros(len(self.user_region_list))
+        data_list = data_list.astype(int)
+
+        UCM_age = sps.coo_matrix((self.user_region_list, (self.user_list_ucm_region, data_list)), dtype=np.float64)
+        UCM_age = UCM_age.tocsr()
+        return UCM_age
+
+
     def get_user_list(self):
         return set(self.user_list)
 
