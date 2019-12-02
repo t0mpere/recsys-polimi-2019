@@ -7,7 +7,7 @@ from challenge2019.topPop.topPop import *
 from challenge2019.cbf.user_cbf import *
 
 
-class Hybrid():
+class Hybrid(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
@@ -21,19 +21,23 @@ class Hybrid():
         self.divide_recommendations = divide_recommendations
         self.fitted = False
 
-    weights = {
-        "SLIM": 0.1,
-        "item_cf": 0.9,
-        "user_cf": 0.1
+    weights_long = {
+        "SLIM": 0.0924,
+        "item_cf": 0.562,
+        "user_cf": 0.5714
     }
 
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
-            weights = weights
+            weights = {
+                "SLIM": 0.001545,
+                "item_cf": 0.9751,
+                "user_cf": 0.9975
+            }
 
         self.weights = weights
 
-        if not(fit_once and self.fitted):
+        if not (fit_once and self.fitted):
             self.URM = URM
             if self.divide_recommendations:
                 True
@@ -55,26 +59,26 @@ class Hybrid():
         liked_items = self.URM[user_id]
 
         if len(liked_items.data) == 0:
-            #add top pop? or even substitute
+            # add top pop? or even substitute
             expected_ratings = 0.9 * self.recommenderTopPop.get_expected_ratings(user_id) + \
                                0.1 * self.recommenderUserCBF.get_expected_ratings(user_id,
-                                                                            normalized_ratings=normalized_ratings)
+                                                                                  normalized_ratings=normalized_ratings)
 
-        elif len(liked_items.data) < 4 and self.divide_recommendations:
-             expected_ratings = 0.2 * self.recommenderUser.get_expected_ratings(user_id,
-                                                                                 normalized_ratings=normalized_ratings) \
-                                 + 0.7 * self.recommenderItem.get_expected_ratings(user_id,
-                                                                                   normalized_ratings=normalized_ratings) \
-                                 + 0.1 * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
-                                                                                         normalized_ratings=normalized_ratings)
+        elif len(liked_items.data) < 10 and self.divide_recommendations:
+            expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
+                                                                                                   normalized_ratings=normalized_ratings) \
+                               + self.weights["item_cf"] * self.recommenderItem.get_expected_ratings(user_id,
+                                                                                                     normalized_ratings=normalized_ratings) \
+                               + self.weights["SLIM"] * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                                                                                                       normalized_ratings=normalized_ratings)
 
         else:
-            expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
-                                                                               normalized_ratings=normalized_ratings) \
-                               + self.weights["item_cf"] * self.recommenderItem.get_expected_ratings(user_id,
-                                                                                 normalized_ratings=normalized_ratings) \
-                               + self.weights["SLIM"] * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
-                                                                                      normalized_ratings=normalized_ratings) \
+            expected_ratings = self.weights_long["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
+                                                                                                        normalized_ratings=normalized_ratings) \
+                               + self.weights_long["item_cf"] * self.recommenderItem.get_expected_ratings(user_id,
+                                                                                                          normalized_ratings=normalized_ratings) \
+                               + self.weights_long["SLIM"] * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                                                                                                            normalized_ratings=normalized_ratings) \
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -86,4 +90,5 @@ class Hybrid():
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False)
+    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+               batch_evaluation=False)

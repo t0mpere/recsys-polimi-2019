@@ -54,4 +54,4 @@ class ItemCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, evaluate_on_seeds=False)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, batch_evaluation=False)
