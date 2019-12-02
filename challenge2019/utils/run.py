@@ -12,7 +12,7 @@ class Runner(object):
     def run(recommender, is_test=True, find_hyper_parameters_cf=False, find_hyper_parameters_item_cbf=False,
             find_hyper_parameters_user_cbf=False, find_epochs=False, find_hyper_parameters_slim_elastic=False,
             find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False, find_weights_hybrid=False,
-            evaluate_on_seeds=False):
+            batch_evaluation=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -20,12 +20,13 @@ class Runner(object):
         if is_test:
             print("Starting testing phase..")
 
-            if evaluate_on_seeds:
+            if batch_evaluation:
                 seeds = [69, 420, 666, 777, 619]
             else:
                 seeds = [np.random.randint(0, 1000)]
 
             for seed in seeds:
+                print("Seed: {}".format(seed))
                 evaluator = None
                 URM = utils.get_urm_from_csv()
                 evaluator = Evaluator()
@@ -54,9 +55,9 @@ class Runner(object):
                 elif find_weights_hybrid:
 
                     weights = {
-                        "SLIM": (0.1, 1),
-                        "item_cf": (0.1, 1),
-                        "user_cf": (0.1, 1)
+                        "SLIM": (0, 1),
+                        "item_cf": (0, 1),
+                        "user_cf": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
