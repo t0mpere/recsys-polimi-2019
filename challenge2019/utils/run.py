@@ -56,7 +56,7 @@ class Runner(object):
                 elif find_weights_hybrid:
 
                     weights = {
-                        "SLIM": (0, 1),
+                        "SLIM_E": (0, 1),
                         "item_cf": (0, 1),
                         "user_cf": (0, 1)
                     }

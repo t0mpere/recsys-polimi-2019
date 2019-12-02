@@ -380,10 +380,10 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, SLIM, item_cf, user_cf):
+    def optimize_weights_hybrid(self, SLIM_E, item_cf, user_cf):
         recommender = self.recommender
         weights = {
-            "SLIM": SLIM,
+            "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf
         }

@@ -84,7 +84,7 @@ class SLIMElasticNetRecommender(object):
 
         return values, rows, cols
 
-    def fit(self, URM, max_iter=200, tol=1e-5, topK=100, alpha=1e-3, l1_ratio=0.1):
+    def fit(self, URM, max_iter=200, tol=7.905e-07, topK=100, alpha=0.00101, l1_ratio=0.09723):
 
         self.URM_train = URM
         self.max_iter = max_iter
@@ -113,12 +113,16 @@ class SLIMElasticNetRecommender(object):
 
         self.W_sparse = sps.csc_matrix((values, (rows, cols)), shape=(n_items, n_items), dtype=np.float32)
 
-    def get_expected_ratings(self, user_id):
+    def get_expected_ratings(self, user_id, normalized_ratings=False):
         user_id = int(user_id)
         user_profile = self.URM_train[user_id]
         expected_ratings = user_profile.dot(self.W_sparse).toarray().ravel()
 
         # # EDIT
+        # Normalize ratings
+        if normalized_ratings and np.amax(expected_ratings) > 0:
+            expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
+
         return expected_ratings
 
     def recommend(self, user_id, at=10):
@@ -136,4 +140,4 @@ class SLIMElasticNetRecommender(object):
 
 if __name__ == '__main__':
     recommender = SLIMElasticNetRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_age_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False,evaluate_different_type_of_users=True)
