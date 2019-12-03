@@ -12,19 +12,22 @@ class HybridUserCfCbf(object):
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
+        self.fitted = False
 
-    def fit(self, URM):
-        self.URM = URM
-        utils = Utils()
-        self.alpha = 0.8
-        self.UCM_region = utils.get_ucm_region_from_csv()
-        self.UCM_age = utils.get_ucm_age_from_csv()
-        self.SM_age = self.create_similarity_matrix(self.UCM_age.transpose(), 1000, 20, similarity="dice")
-        self.SM_region = self.create_similarity_matrix(self.UCM_region.transpose(), 1000, 20, similarity="dice")
+    def fit(self, URM, fit_once=False, alpha=0.8):
+        self.alpha = alpha
+        if not (fit_once and self.fitted):
+            self.URM = URM
+            utils = Utils()
+            self.UCM_region = utils.get_ucm_region_from_csv()
+            self.UCM_age = utils.get_ucm_age_from_csv()
+            self.SM_age = self.create_similarity_matrix(self.UCM_age.transpose(), 1000, 20, similarity="dice")
+            self.SM_region = self.create_similarity_matrix(self.UCM_region.transpose(), 1000, 20, similarity="dice")
 
 
-        self.SM_cbf = self.SM_age + self.SM_region
-        self.SM_cf = self.create_similarity_matrix(self.URM.transpose(), 784, 10, similarity="tversky")
+            self.SM_cbf = self.SM_age + self.SM_region
+            self.SM_cf = self.create_similarity_matrix(self.URM.transpose(), 784, 10, similarity="tversky")
+            self.fitted = True
 
         self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_cbf
 
@@ -58,4 +61,4 @@ class HybridUserCfCbf(object):
 
 if __name__ == '__main__':
     recommender = HybridUserCfCbf()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_weights_hybrid_item=True, evaluate_different_type_of_users=False, batch_evaluation=True)

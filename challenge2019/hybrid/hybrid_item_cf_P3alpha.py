@@ -13,15 +13,19 @@ class HybridItemCfP3alpha(object):
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
+        self.fitted = False
 
-    def fit(self, URM , alpha=0.8):
-        self.URM = URM
-        utils = Utils()
+    def fit(self, URM, fit_once=False, alpha=0.8):
         self.alpha = alpha
-        P3_alpha = P3alphaRecommender()
-        P3_alpha.fit(URM, topK=10, alpha=0.5)
-        self.SM_cf = self.create_similarity_matrix(URM, 12, 23, similarity="tanimoto")
-        self.SM_P3alpha = P3_alpha.get_W()
+        if not (fit_once and self.fitted):
+            P3_alpha = P3alphaRecommender()
+            P3_alpha.fit(URM, topK=10, alpha=0.5)
+            self.SM_cf = self.create_similarity_matrix(URM, 12, 23, similarity="tanimoto")
+            self.SM_P3alpha = P3_alpha.get_W()
+            self.URM = URM
+            utils = Utils()
+            self.fitted = True
+
         self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_P3alpha
 
         self.RECS = self.URM.dot(self.SM)

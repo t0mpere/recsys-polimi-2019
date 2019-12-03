@@ -13,7 +13,8 @@ class Runner(object):
             find_hyper_parameters_user_cbf=False, find_epochs=False, find_hyper_parameters_slim_elastic=False,
             find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
-            find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, batch_evaluation=False):
+            find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
+            batch_evaluation=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something

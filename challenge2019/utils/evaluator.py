@@ -405,7 +405,7 @@ class Evaluator(object):
 
     def optimize_weights_hybrid_item(self, alpha):
         recommender = self.recommender
-        recommender.fit(self.URM_train, alpha=alpha)
+        recommender.fit(self.URM_train, alpha=alpha, fit_once=True)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
