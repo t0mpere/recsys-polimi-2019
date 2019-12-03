@@ -6,10 +6,10 @@ Created on 16/09/2017
 @author: Maurizio Ferrari Dacrema
 """
 
-from Base.BaseRecommender import BaseRecommender
+from challenge2019.Base.BaseRecommender import BaseRecommender
 from KNN.ItemKNNCustomSimilarityRecommender import ItemKNNCustomSimilarityRecommender
-from Base.Recommender_utils import check_matrix
-from Base.DataIO import DataIO
+from challenge2019.Base.Recommender_utils import check_matrix
+from challenge2019.Base.DataIO import DataIO
 import numpy as np
 import scipy.sparse as sps
 

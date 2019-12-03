@@ -11,7 +11,6 @@ from challenge2019.utils.run import Runner
 from sklearn.preprocessing import normalize
 from challenge2019.Base.Recommender_utils import check_matrix, similarityMatrixTopK
 
-from challenge2019.Base.BaseSimilarityMatrixRecommender import BaseItemSimilarityMatrixRecommender
 import time, sys
 
 
