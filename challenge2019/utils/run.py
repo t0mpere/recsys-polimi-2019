@@ -50,11 +50,18 @@ class Runner(object):
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_item_cbf)
+
+                elif find_weights_hybrid_item:
+                    tuning_params = {
+                        "alpha": (0, 1),
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(tuning_params, evaluator.optimize_weights_hybrid_item)
+
                 elif find_hyper_parameters_P3alpha:
                     tuning_params = {
-                        #todo: prova con alpha > 1
-                        "topk": (1, 20),
-                        "alpha": (1, 1)
+                        "topk": (1, 50),
+                        "alpha": (0.01, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_P3alpha)

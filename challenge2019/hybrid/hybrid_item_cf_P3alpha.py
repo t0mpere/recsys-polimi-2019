@@ -1,3 +1,4 @@
+from challenge2019.GraphBased.P3alpha import P3alphaRecommender
 from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
 from challenge2019.cf.user_cf import *
 from challenge2019.cf.item_cf import *
@@ -7,25 +8,21 @@ from challenge2019.topPop.topPop import *
 from challenge2019.cbf.user_cbf import *
 from challenge2019.utils.utils import Utils
 
-class HybridItemCfCbf(object):
+class HybridItemCfP3alpha(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
 
-    def fit(self, URM):
+    def fit(self, URM , alpha=0.8):
         self.URM = URM
         utils = Utils()
-        self.alpha = 0.8
-        self.ICM_asset = utils.get_icm_asset_from_csv()
-        self.ICM_price = utils.get_icm_price_from_csv()
-        self.ICM_sub_class = utils.get_icm_sub_class_from_csv()
-        self.combined_ICM = sps.hstack([self.ICM_asset, self.ICM_sub_class, self.ICM_price])
-
-        self.SM_cbf = self.create_similarity_matrix(self.combined_ICM.transpose(), 900, 2)
+        self.alpha = alpha
+        P3_alpha = P3alphaRecommender()
+        P3_alpha.fit(URM, topK=10, alpha=0.5)
         self.SM_cf = self.create_similarity_matrix(URM, 12, 23, similarity="tanimoto")
-
-        self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_cbf
+        self.SM_P3alpha = P3_alpha.get_W()
+        self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_P3alpha
 
         self.RECS = self.URM.dot(self.SM)
 
@@ -56,5 +53,5 @@ class HybridItemCfCbf(object):
         return expected_ratings
 
 if __name__ == '__main__':
-    recommender = HybridItemCfCbf()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True)
+    recommender = HybridItemCfP3alpha()
+    Runner.run(recommender, True, evaluate_different_type_of_users=False, find_weights_hybrid_item=True, batch_evaluation=True)
