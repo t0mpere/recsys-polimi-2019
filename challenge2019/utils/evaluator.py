@@ -365,6 +365,12 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
+    def optimize_hyperparameters_bo_P3alpha(self, topk, alpha):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, topK=int(topk), alpha=int(alpha))
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
     def optimize_hyperparameters_bo_SLIM_el(self, topK, alpha, l1_ratio, tol):
         recommender = self.recommender
         recommender.fit(self.URM_train, topK=int(topK), alpha=alpha, l1_ratio=l1_ratio

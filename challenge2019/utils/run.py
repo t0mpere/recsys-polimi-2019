@@ -13,7 +13,7 @@ class Runner(object):
             find_hyper_parameters_user_cbf=False, find_epochs=False, find_hyper_parameters_slim_elastic=False,
             find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
-            batch_evaluation=False):
+            find_hyper_parameters_P3alpha=False, batch_evaluation=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -40,7 +40,6 @@ class Runner(object):
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_cf)
-                    #print("MAP@10 : {}".format(evaluator.find_hyper_parameters_cf(recommender)))
 
                 elif find_hyper_parameters_item_cbf:
                     tuning_params = {
@@ -51,8 +50,14 @@ class Runner(object):
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_item_cbf)
-                    #print("MAP@10 : {}".format(evaluator.find_weight_item_cbf(recommender)))
-
+                elif find_hyper_parameters_P3alpha:
+                    tuning_params = {
+                        #todo: prova con alpha > 1
+                        "topk": (1, 20),
+                        "alpha": (0, 1)
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_P3alpha)
                 elif find_weights_hybrid:
 
                     weights = {
