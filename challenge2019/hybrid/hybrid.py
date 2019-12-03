@@ -6,6 +6,7 @@ from challenge2019.SLIM.SLIM_BPR_Cython import *
 from challenge2019.topPop.topPop import *
 from challenge2019.cbf.user_cbf import *
 from challenge2019.SLIM.SlimElasticNet import *
+from challenge2019.hybrid.hybrid_item_cf_P3alpha import HybridItemCfP3alpha
 
 
 class Hybrid(object):
@@ -14,7 +15,8 @@ class Hybrid(object):
         self.URM = None
         self.SM_item = None
         self.recommenderUser = UserCollaborativeFiltering()
-        self.recommenderItem = ItemCollaborativeFiltering()
+        # self.recommenderItem = ItemCollaborativeFiltering()
+        self.recommenderHybridItem = HybridItemCfP3alpha()
         self.recommender_SLIM_BPR = SLIM_BPR_Cython()
         self.recommenderItemCBF = ItemContentBasedFiltering()
         self.recommenderUserCBF = UserContentBasedFiltering()
@@ -39,7 +41,8 @@ class Hybrid(object):
                 True
 
             self.recommenderUser.fit(URM, knn=784, shrink=10)
-            self.recommenderItem.fit(URM, knn=12, shrink=23)
+            # self.recommenderItem.fit(URM, knn=12, shrink=23)
+            self.recommenderHybridItem.fit(URM)
             self.recommender_SLIM_E.fit(URM)
             # self.recommender_SLIM_BPR.fit(URM)
             # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
@@ -62,7 +65,7 @@ class Hybrid(object):
         else:
             expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
                                                                                                         normalized_ratings=normalized_ratings) \
-                               + self.weights["item_cf"] * self.recommenderItem.get_expected_ratings(user_id,
+                               + self.weights["item_cf"] * self.recommenderHybridItem.get_expected_ratings(user_id,
                                                                                                           normalized_ratings=normalized_ratings) \
                                + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
                                                                                                        normalized_ratings=normalized_ratings)
