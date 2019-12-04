@@ -19,14 +19,17 @@ class AlternatingLeastSquare:
 
     """
 
-    def __init__(self, n_factors=300, regularization=0.15, iterations=30):
+    def __init__(self):
+        self.n_factors = None
+        self.regularization = None
+        self.iterations = None
+
+    def fit(self, URM, n_factors=300, regularization=0.15, iterations=30):
+        self.URM = URM
+
         self.n_factors = n_factors
         self.regularization = regularization
         self.iterations = iterations
-
-    def fit(self, URM):
-        self.URM = URM
-
 
         sparse_item_user = self.URM.T
 

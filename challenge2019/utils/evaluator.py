@@ -9,8 +9,6 @@ from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
 class Evaluator(object):
 
-
-
     def __init__(self):
 
         self.URM_train = None
@@ -178,8 +176,8 @@ class Evaluator(object):
         return MAP_final
 
     def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
-        MAP_age = [0,0,0,0,0,0,0,0,0,0,0]
-        user_age = [0,0,0,0,0,0,0,0,0,0,0]
+        MAP_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        user_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
         utils = Utils()
         age_matrix = utils.get_ucm_age_from_csv()
@@ -204,8 +202,8 @@ class Evaluator(object):
 
     # TODO: non va mica - only works with one regio
     def fit_and_evaluate_recommender_on_different_region_of_user(self, recommender):
-        MAP_region = [0,0,0,0,0,0,0,0,0,0,0]
-        user_region = [0,0,0,0,0,0,0,0,0,0,0]
+        MAP_region = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        user_region = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
         utils = Utils()
         region_matrix = utils.get_ucm_region_from_csv()
@@ -351,6 +349,12 @@ class Evaluator(object):
                 print('\n\n')
         return MAP_final
 
+    #
+    #
+    # Bayesian optimization methods
+    #
+    #
+
     def optimize_hyperparameters_bo_cf(self, knn, shrink):
         recommender = self.recommender
         recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
@@ -376,9 +380,15 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_hyperparameters_bo_RP3beta(self, topk, alpha,beta):
+    def optimize_hyperparameters_bo_RP3beta(self, topk, alpha, beta):
         recommender = self.recommender
         recommender.fit(self.URM_train, topK=int(topk), alpha=alpha, beta=beta)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_pure_svd(self, num_factors):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, num_factors=int(num_factors))
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
@@ -403,14 +413,14 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E): #MF, SLIM_E ,user_cbf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, MF):  # MF, SLIM_E ,user_cbf):
         recommender = self.recommender
         weights = {
-            "SLIM_E": SLIM_E,
+            # "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
-            #"MF": MF,
-            #"user_cbf": user_cbf
+            "MF": MF,
+            # "user_cbf": user_cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
@@ -421,6 +431,13 @@ class Evaluator(object):
         recommender.fit(self.URM_train, alpha=alpha, fit_once=True)
         MAP = self.evaluate_recommender(recommender)
         return MAP
+
+    #
+    #
+    # Runner for the bayesian optimization algorithm
+    #
+    #
+    #
 
     def optimize_bo(self, tuning_params, func):
         from bayes_opt import BayesianOptimization
@@ -441,6 +458,12 @@ class Evaluator(object):
     def set_recommender_to_tune(self, recommender):
         self.recommender = recommender
 
+
+#
+#
+# Early stopping class (NOT USED)
+#
+#
 
 class EvaluatorEarlyStopping(EvaluatorProf):
 

@@ -13,6 +13,7 @@ from Base.Recommender_utils import check_matrix, similarityMatrixTopK
 import time, sys
 
 from utils.run import Runner
+from utils.utils import Utils
 
 
 class RP3betaRecommender():
@@ -31,7 +32,10 @@ class RP3betaRecommender():
 
     def fit(self, URM_train, alpha=.02069, beta=0.03782, min_rating=0, topK=77, implicit=True, normalize_similarity=True):
 
+
+        utils = Utils()
         self.URM_train = URM_train
+        #self.URM_train = utils.weight_interactions(URM_train)
         self.alpha = alpha
         self.beta = beta
         self.min_rating = min_rating
@@ -172,4 +176,4 @@ class RP3betaRecommender():
 
 if __name__ == '__main__':
     recommender = RP3betaRecommender()
-    Runner.run(recommender, True,find_hyper_parameters_RP3beta=True, batch_evaluation=True)
+    Runner.run(recommender, True,find_hyper_parameters_RP3beta=False, batch_evaluation=True)

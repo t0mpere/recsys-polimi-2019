@@ -48,10 +48,10 @@ class Hybrid(object):
             self.recommenderUser.fit(URM, knn=784, shrink=10)
             #self.recommenderItem.fit(URM, knn=12, shrink=23)
             self.recommenderHybridItem.fit(URM)
-            #self.recommender_SLIM_E.fit(URM)
+            self.recommender_SLIM_E.fit(URM)
             #self.recommender_pureSVD.fit(URM)
 
-            self.recommender_SLIM_BPR.fit(URM)
+            # self.recommender_SLIM_BPR.fit(URM)
             # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
             #self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
@@ -74,7 +74,7 @@ class Hybrid(object):
                                                                                                         normalized_ratings=normalized_ratings) \
                                + self.weights["item_cf"] * self.recommenderHybridItem.get_expected_ratings(user_id,
                                                                                                           normalized_ratings=normalized_ratings) \
-                               + self.weights["SLIM_E"] * self.recommender_SLIM_BPR.get_expected_ratings(user_id,
+                               + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
                                                                                                        normalized_ratings=normalized_ratings)
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -86,5 +86,5 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
                batch_evaluation=True)
