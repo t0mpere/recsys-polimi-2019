@@ -1,27 +1,21 @@
-from challenge2019.GraphBased.P3alpha import P3alphaRecommender
-from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
-from challenge2019.cf.user_cf import *
-from challenge2019.cf.item_cf import *
-from challenge2019.cbf.item_cbf import *
-from challenge2019.SLIM.SLIM_BPR_Cython import *
-from challenge2019.topPop.topPop import *
+from challenge2019.GraphBased.RP3beta import RP3betaRecommender
 from challenge2019.cbf.user_cbf import *
 from challenge2019.utils.utils import Utils
 
-class HybridItemCfP3alpha(object):
+class HybridItemCfRP3Beta(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
         self.fitted = False
 
-    def fit(self, URM, fit_once=False, alpha=0.8):
+    def fit(self, URM, fit_once=False, alpha=.2117):
         self.alpha = alpha
         if not (fit_once and self.fitted):
-            P3_alpha = P3alphaRecommender()
-            P3_alpha.fit(URM, topK=10, alpha=0.5)
+            RP3_beta = RP3betaRecommender()
+            RP3_beta.fit(URM)
             self.SM_cf = self.create_similarity_matrix(URM, 12, 23, similarity="tanimoto")
-            self.SM_P3alpha = P3_alpha.get_W()
+            self.SM_P3alpha = RP3_beta.get_W()
             self.URM = URM
             utils = Utils()
             self.fitted = True
@@ -57,5 +51,5 @@ class HybridItemCfP3alpha(object):
         return expected_ratings
 
 if __name__ == '__main__':
-    recommender = HybridItemCfP3alpha()
+    recommender = HybridItemCfRP3Beta()
     Runner.run(recommender, True, evaluate_different_type_of_users=False, find_weights_hybrid_item=False, batch_evaluation=True)

@@ -30,76 +30,53 @@ class PureSVDRecommender():
         self._cold_item_mask = np.ediff1d(self.URM_train.tocsc().indptr) == 0
         return self._cold_item_mask
 
-    def fit(self, URM_train, num_factors=100, random_seed = None):
+    def fit(self, URM_train, num_factors=600, random_seed=None):
         self.URM_train = URM_train
         print("Computing SVD decomposition...")
 
         U, Sigma, VT = randomized_svd(self.URM_train,
                                       n_components=num_factors,
-                                      #n_iter=5,
-                                      random_state = random_seed)
+                                      # n_iter=5,
+                                      random_state=random_seed)
 
-        s_Vt = sps.diags(Sigma)*VT
+        s_Vt = sps.diags(Sigma) * VT
 
         self.USER_factors = U
         self.ITEM_factors = s_Vt.T
 
+        self.item_scores = np.dot(self.USER_factors, self.ITEM_factors.T)
+
         print("Computing SVD decomposition... Done!")
 
-    def _compute_item_score_postprocess_for_cold_users(self, user_id_array, item_scores):
+    def _compute_item_score_postprocess_for_cold_items(self, item_scores):
         """
-        Remove cold users from the computed item scores, setting them to -inf
-        Or estimate user factors with specified method
-        :param user_id_array:
+        Remove cold items from the computed item scores, setting them to -inf
         :param item_scores:
         :return:
         """
 
-        # todo: importa item_cbf (che fa schifo) in un'altra funzione e fanne il fit.
-
-        cold_users_batch_mask = self._get_cold_user_mask()[user_id_array]
-
-        # Set as -inf all cold user scores
-        if cold_users_batch_mask.any():
-
-
-            # Add KNN scores for users cold for MF but warm in KNN model
-            cold_users_in_MF_warm_in_KNN_mask = np.logical_and(cold_users_batch_mask, self._warm_user_KNN_mask[user_id_array])
-
-            item_scores[cold_users_in_MF_warm_in_KNN_mask, :] = self._ItemKNNRecommender._compute_item_score(user_id_array[cold_users_in_MF_warm_in_KNN_mask], items_to_compute=items_to_compute)
-
-            # Set cold users as those neither in MF nor in KNN
-            cold_users_batch_mask = np.logical_and(cold_users_batch_mask, np.logical_not(cold_users_in_MF_warm_in_KNN_mask))
-
-        # Set as -inf all remaining cold user scores
-        item_scores[cold_users_batch_mask, :] = - np.ones_like(item_scores[cold_users_batch_mask, :]) * np.inf
+        # Set as -inf all cold items scores
+        if self._get_cold_item_mask().any():
+            item_scores[:, self._get_cold_item_mask()] = - np.ones_like(
+                item_scores[:, self._get_cold_item_mask()]) * np.inf
 
         return item_scores
 
-
-    def get_expected_values(self, user_id_array, items_to_compute = None):
+    def get_expected_values(self, user_id, items_to_compute=None, normalized_ratings=False):
         """
         USER_factors is n_users x n_factors
         ITEM_factors is n_items x n_factors
 
         The prediction for cold users will always be -inf for ALL items
 
-        :param user_id_array:
+        :param user_id:
         :param items_to_compute:
         :return:
         """
-
-        assert self.USER_factors.shape[1] == self.ITEM_factors.shape[1], \
-            "{}: User and Item factors have inconsistent shape".format(self.RECOMMENDER_NAME)
-
-        assert self.USER_factors.shape[0] > user_id_array,\
-                "{}: Cold users not allowed. Users in trained model are {}, requested prediction for users up to {}".format(
-                self.RECOMMENDER_NAME, self.USER_factors.shape[0], user_id_array)
-
-        item_scores = np.dot(self.USER_factors[user_id_array], self.ITEM_factors.T)
-
-        # item_scores = self._compute_item_score_postprocess_for_cold_users(user_id_array, item_scores)
-        # item_scores = self._compute_item_score_postprocess_for_cold_items(item_scores)
+        item_scores = self.item_scores[user_id]
+        # Normalize ratings
+        if normalized_ratings and np.amax(item_scores) > 0:
+            expected_ratings = item_scores / np.linalg.norm(item_scores)
 
         return item_scores
 
@@ -113,6 +90,8 @@ class PureSVDRecommender():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
+
 if __name__ == '__main__':
     recommender = PureSVDRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_pureSVD=True, evaluate_different_region_of_users=False, batch_evaluation=False)
+    Runner.run(recommender, True, find_hyper_parameters_pureSVD=False, evaluate_different_region_of_users=True,
+               batch_evaluation=False)

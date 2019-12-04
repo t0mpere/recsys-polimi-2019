@@ -14,7 +14,7 @@ class Runner(object):
             find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
-            batch_evaluation=False):
+            batch_evaluation=False, find_hyper_parameters_RP3beta=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -25,14 +25,14 @@ class Runner(object):
             if batch_evaluation:
                 seeds = [69, 420, 666, 777, 619]
             else:
-                seeds = [np.random.randint(0, 1000)]
+                seeds = [None]
 
             for seed in seeds:
                 print("Seed: {}".format(seed))
                 evaluator = None
                 URM = utils.get_urm_from_csv()
                 evaluator = Evaluator()
-                evaluator.random_split_to_all_users(URM, seed)
+                evaluator.random_split(URM, seed)
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
@@ -61,17 +61,28 @@ class Runner(object):
 
                 elif find_hyper_parameters_P3alpha:
                     tuning_params = {
-                        "topk": (1, 50),
+                        "topk": (1, 200),
                         "alpha": (0.01, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_P3alpha)
+                    
+                elif find_hyper_parameters_RP3beta:
+                    tuning_params = {
+                        "topk": (1, 200),
+                        "alpha": (0.01, 1),
+                        "beta": (0.01, 1)
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_RP3beta)
                 elif find_weights_hybrid:
 
                     weights = {
                         "SLIM_E": (0, 1),
                         "item_cf": (0, 1),
-                        "user_cf": (0, 1)
+                        "user_cf": (0, 0.1),
+                        #"MF": (0, 1),
+                        #"user_cbf": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)

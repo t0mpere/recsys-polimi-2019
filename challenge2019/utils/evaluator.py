@@ -20,7 +20,7 @@ class Evaluator(object):
         self.recommender = None
 
     # Split random, 20% of each user
-    def random_split(self, URM):
+    def random_split(self, URM, seed):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
         print("Splitting using random 20% on long users\n---------------------")
@@ -34,6 +34,8 @@ class Evaluator(object):
                 # Array with the indexes of the non zero values
                 non_zero = URM[user_index].indices
                 # Shuffle array of indices
+                if seed is not None:
+                    np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 # Select 20% of the array
                 non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
@@ -65,7 +67,8 @@ class Evaluator(object):
                 # Array with the indexes of the non zero values
                 non_zero = URM[user_index].indices
                 # Shuffle array of indices
-                np.random.seed(seed)
+                if seed is not None:
+                    np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 # Select 20% of the array
                 non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
@@ -77,7 +80,8 @@ class Evaluator(object):
 
             elif item_left > 1:
                 non_zero = URM[user_index].indices
-                np.random.seed(seed)
+                if seed is not None:
+                    np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 non_zero = non_zero[0]
                 URM[user_index, non_zero] = 0
@@ -88,7 +92,8 @@ class Evaluator(object):
                 x = np.random.randint(2, size=1)
                 if x == 1:
                     non_zero = URM[user_index].indices
-                    np.random.seed(seed)
+                    if seed is not None:
+                        np.random.seed(seed)
                     np.random.shuffle(non_zero)
                     non_zero = non_zero[0]
                     URM[user_index, non_zero] = 0
@@ -367,7 +372,13 @@ class Evaluator(object):
 
     def optimize_hyperparameters_bo_P3alpha(self, topk, alpha):
         recommender = self.recommender
-        recommender.fit(self.URM_train, topK=int(topk), alpha=int(alpha))
+        recommender.fit(self.URM_train, topK=int(topk), alpha=alpha)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_RP3beta(self, topk, alpha,beta):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, topK=int(topk), alpha=alpha, beta=beta)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
@@ -392,12 +403,14 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, SLIM_E, item_cf, user_cf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E): #MF, SLIM_E ,user_cbf):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
-            "user_cf": user_cf
+            "user_cf": user_cf,
+            #"MF": MF,
+            #"user_cbf": user_cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
@@ -421,7 +434,7 @@ class Evaluator(object):
 
         optimizer.maximize(
             init_points=5,
-            n_iter=8,
+            n_iter=13,
             acq="ei", xi=1e-4
         )
 
