@@ -115,4 +115,4 @@ class PureSVDRecommender():
 
 if __name__ == '__main__':
     recommender = PureSVDRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_pureSVD=True, evaluate_different_region_of_users=False, batch_evaluation=False)
+    Runner.run(recommender, False, find_hyper_parameters_pureSVD=True, evaluate_different_region_of_users=False, batch_evaluation=False)

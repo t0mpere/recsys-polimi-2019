@@ -14,7 +14,7 @@ class Runner(object):
             find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
-            batch_evaluation=False):
+            batch_evaluation=False, loo_split=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -32,7 +32,11 @@ class Runner(object):
                 evaluator = None
                 URM = utils.get_urm_from_csv()
                 evaluator = Evaluator()
-                evaluator.random_split_to_all_users(URM, seed)
+
+                if loo_split:
+                    evaluator.leave_one_out(URM, seed)
+                else:
+                    evaluator.random_split_to_all_users(URM, seed)
 
                 if find_hyper_parameters_cf:
                     tuning_params = {

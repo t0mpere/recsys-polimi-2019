@@ -62,6 +62,13 @@ class Hybrid(object):
             # add top pop? or even substitute
             expected_ratings = self.recommenderTopPop.get_expected_ratings(user_id)
 
+        elif len(liked_items.data) < 30:
+            expected_ratings = 0.11 * self.recommenderUser.get_expected_ratings(user_id,
+                                                                                                   normalized_ratings=normalized_ratings) \
+                               + 0.15 * self.recommenderHybridItem.get_expected_ratings(user_id,
+                                                                                                           normalized_ratings=normalized_ratings) \
+                               + 0.17 * self.recommender_SLIM_E.get_expected_ratings(user_id,
+                                                                                                       normalized_ratings=normalized_ratings)
         else:
             expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
                                                                                                         normalized_ratings=normalized_ratings) \
@@ -79,5 +86,5 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=True,
                batch_evaluation=False)
