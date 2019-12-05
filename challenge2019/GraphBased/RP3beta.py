@@ -7,46 +7,44 @@
 import numpy as np
 import scipy.sparse as sps
 
-from challenge2019.utils.run import Runner
 from sklearn.preprocessing import normalize
-from challenge2019.Base.Recommender_utils import check_matrix, similarityMatrixTopK
+from Base.Recommender_utils import check_matrix, similarityMatrixTopK
 
 import time, sys
 
+from utils.run import Runner
+from utils.utils import Utils
 
-class P3alphaRecommender():
-    """ P3alpha recommender """
 
-    RECOMMENDER_NAME = "P3alphaRecommender"
+class RP3betaRecommender():
+    """ RP3beta recommender """
+
+    RECOMMENDER_NAME = "RP3betaRecommender"
 
     def __init__(self):
         self.URM_train = None
-        self.topK = None
-        self.alpha = None
-        self.min_rating = None
-        self.implicit = None
-        self.normalize_similarity = None
-        self.RECS = None
-        self.fitted = False
 
     def __str__(self):
-        return "P3alpha(alpha={}, min_rating={}, topk={}, implicit={}, normalize_similarity={})".format(self.alpha,
-                                                                                                        self.min_rating,
-                                                                                                        self.topK,
-                                                                                                        self.implicit,
-                                                                                                        self.normalize_similarity)
+        return "RP3beta(alpha={}, beta={}, min_rating={}, topk={}, implicit={}, normalize_similarity={})".format(
+            self.alpha,
+            self.beta, self.min_rating, self.topK,
+            self.implicit, self.normalize_similarity)
 
-    def fit(self, URM_train, topK=10, alpha=0.5, min_rating=0, implicit=True, normalize_similarity=False):
+    def fit(self, URM_train, alpha=.02069, beta=0.03782, min_rating=0, topK=77, implicit=True, normalize_similarity=True):
+
+
+        utils = Utils()
         self.URM_train = URM_train
-        self.topK = topK
+        #self.URM_train = utils.weight_interactions(URM_train)
         self.alpha = alpha
+        self.beta = beta
         self.min_rating = min_rating
+        self.topK = topK
         self.implicit = implicit
         self.normalize_similarity = normalize_similarity
 
-        #
         # if X.dtype != np.float32:
-        #     print("P3ALPHA fit: For memory usage reasons, we suggest to use np.float32 as dtype for the dataset")
+        #     print("RP3beta fit: For memory usage reasons, we suggest to use np.float32 as dtype for the dataset")
 
         if self.min_rating > 0:
             self.URM_train.data[self.URM_train.data < self.min_rating] = 0
@@ -60,9 +58,20 @@ class P3alphaRecommender():
         # Piu is the column-normalized, "boolean" urm transposed
         X_bool = self.URM_train.transpose(copy=True)
         X_bool.data = np.ones(X_bool.data.size, np.float32)
+
+        # Taking the degree of each item to penalize top popular
+        # Some rows might be zero, make sure their degree remains zero
+        X_bool_sum = np.array(X_bool.sum(axis=1)).ravel()
+
+        degree = np.zeros(self.URM_train.shape[1])
+
+        nonZeroMask = X_bool_sum != 0.0
+
+        degree[nonZeroMask] = np.power(X_bool_sum[nonZeroMask], -self.beta)
+
         # ATTENTION: axis is still 1 because i transposed before the normalization
         Piu = normalize(X_bool, norm='l1', axis=1)
-        del X_bool
+        del (X_bool)
 
         # Alfa power
         if self.alpha != 1.:
@@ -95,7 +104,7 @@ class P3alphaRecommender():
             similarity_block = similarity_block.toarray()
 
             for row_in_block in range(block_dim):
-                row_data = similarity_block[row_in_block, :]
+                row_data = np.multiply(similarity_block[row_in_block, :], degree)
                 row_data[current_block_start_row + row_in_block] = 0
 
                 best = row_data.argsort()[::-1][:self.topK]
@@ -119,7 +128,7 @@ class P3alphaRecommender():
                     numCells += 1
 
             if time.time() - start_time_printBatch > 60:
-                self._print("Processed {} ( {:.2f}% ) in {:.2f} minutes. Rows per second: {:.0f}".format(
+                print("Processed {} ( {:.2f}% ) in {:.2f} minutes. Rows per second: {:.0f}".format(
                     current_block_start_row,
                     100.0 * float(current_block_start_row) / Pui.shape[1],
                     (time.time() - start_time) / 60,
@@ -165,8 +174,6 @@ class P3alphaRecommender():
         ranking = ranking[:at]
         return ranking
 
-
 if __name__ == '__main__':
-    recommender = P3alphaRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_P3alpha=False, evaluate_different_region_of_users=False,
-               batch_evaluation=False)
+    recommender = RP3betaRecommender()
+    Runner.run(recommender, True,find_hyper_parameters_RP3beta=False, batch_evaluation=True)

@@ -9,8 +9,6 @@ from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
 class Evaluator(object):
 
-
-
     def __init__(self):
 
         self.URM_train = None
@@ -20,7 +18,7 @@ class Evaluator(object):
         self.recommender = None
 
     # Split random, 20% of each user
-    def random_split(self, URM):
+    def random_split(self, URM, seed):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
         print("Splitting using random 20% on long users\n---------------------")
@@ -34,6 +32,8 @@ class Evaluator(object):
                 # Array with the indexes of the non zero values
                 non_zero = URM[user_index].indices
                 # Shuffle array of indices
+                if seed is not None:
+                    np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 # Select 20% of the array
                 non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
@@ -65,7 +65,8 @@ class Evaluator(object):
                 # Array with the indexes of the non zero values
                 non_zero = URM[user_index].indices
                 # Shuffle array of indices
-                np.random.seed(seed)
+                if seed is not None:
+                    np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 # Select 20% of the array
                 non_zero = non_zero[:min(int(len(non_zero) * .2), 9)]
@@ -77,7 +78,8 @@ class Evaluator(object):
 
             elif item_left > 1:
                 non_zero = URM[user_index].indices
-                np.random.seed(seed)
+                if seed is not None:
+                    np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 non_zero = non_zero[0]
                 URM[user_index, non_zero] = 0
@@ -88,7 +90,8 @@ class Evaluator(object):
                 x = np.random.randint(2, size=1)
                 if x == 1:
                     non_zero = URM[user_index].indices
-                    np.random.seed(seed)
+                    if seed is not None:
+                        np.random.seed(seed)
                     np.random.shuffle(non_zero)
                     non_zero = non_zero[0]
                     URM[user_index, non_zero] = 0
@@ -174,8 +177,8 @@ class Evaluator(object):
         return MAP_final
 
     def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
-        MAP_age = [0,0,0,0,0,0,0,0,0,0,0]
-        user_age = [0,0,0,0,0,0,0,0,0,0,0]
+        MAP_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        user_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
         utils = Utils()
         age_matrix = utils.get_ucm_age_from_csv()
@@ -200,8 +203,8 @@ class Evaluator(object):
 
     # TODO: non va mica - only works with one regio
     def fit_and_evaluate_recommender_on_different_region_of_user(self, recommender):
-        MAP_region = [0,0,0,0,0,0,0,0,0,0,0]
-        user_region = [0,0,0,0,0,0,0,0,0,0,0]
+        MAP_region = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        user_region = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
         utils = Utils()
         region_matrix = utils.get_ucm_region_from_csv()
@@ -302,6 +305,12 @@ class Evaluator(object):
             print('\n\n')
         return MAP_final
 
+    #
+    #
+    # Bayesian optimization methods
+    #
+    #
+
     def optimize_hyperparameters_bo_cf(self, knn, shrink):
         recommender = self.recommender
         recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
@@ -323,13 +332,25 @@ class Evaluator(object):
 
     def optimize_hyperparameters_bo_P3alpha(self, topk, alpha):
         recommender = self.recommender
-        recommender.fit(self.URM_train, topK=int(topk), alpha=int(alpha))
+        recommender.fit(self.URM_train, topK=int(topk), alpha=alpha)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_RP3beta(self, topk, alpha, beta):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, topK=int(topk), alpha=alpha, beta=beta)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
     def optimize_hyperparameters_bo_pure_svd(self, num_factors):
         recommender = self.recommender
         recommender.fit(self.URM_train, num_factors=int(num_factors))
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_ALS(self, n_factors, regularization, iterations):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, n_factors=int(n_factors), regularization=regularization, iterations=int(iterations))
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
@@ -348,12 +369,13 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, SLIM_E, item_cf, user_cf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E):  # MF, SLIM_E ,user_cbf):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
-            "user_cf": user_cf
+            "user_cf": user_cf,
+            #"MF": MF,
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
@@ -364,6 +386,13 @@ class Evaluator(object):
         recommender.fit(self.URM_train, alpha=alpha, fit_once=True)
         MAP = self.evaluate_recommender(recommender)
         return MAP
+
+    #
+    #
+    # Runner for the bayesian optimization algorithm
+    #
+    #
+    #
 
     def optimize_bo(self, tuning_params, func):
         from bayes_opt import BayesianOptimization
@@ -377,13 +406,19 @@ class Evaluator(object):
 
         optimizer.maximize(
             init_points=5,
-            n_iter=8,
+            n_iter=13,
             acq="ei", xi=1e-4
         )
 
     def set_recommender_to_tune(self, recommender):
         self.recommender = recommender
 
+
+#
+#
+# Early stopping class (NOT USED)
+#
+#
 
 class EvaluatorEarlyStopping(EvaluatorProf):
 
