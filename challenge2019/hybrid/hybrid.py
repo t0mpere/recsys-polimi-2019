@@ -1,4 +1,4 @@
-from MF.pureSVD import PureSVDRecommender
+from challenge2019.MF.pureSVD import PureSVDRecommender
 from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
 from challenge2019.cf.user_cf import *
 from challenge2019.cf.item_cf import *
@@ -103,7 +103,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
-               batch_evaluation=True)
+    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=True,
+               batch_evaluation=False, loo_split=True)
 
     # best score-old(rand split 20%) on seed 69: MAP@10 : 0.03016543118910578

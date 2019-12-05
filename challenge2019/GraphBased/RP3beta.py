@@ -8,12 +8,12 @@ import numpy as np
 import scipy.sparse as sps
 
 from sklearn.preprocessing import normalize
-from Base.Recommender_utils import check_matrix, similarityMatrixTopK
+from challenge2019.Base.Recommender_utils import check_matrix, similarityMatrixTopK
 
 import time, sys
 
-from utils.run import Runner
-from utils.utils import Utils
+from challenge2019.utils.run import Runner
+from challenge2019.utils.utils import Utils
 
 
 class RP3betaRecommender():
