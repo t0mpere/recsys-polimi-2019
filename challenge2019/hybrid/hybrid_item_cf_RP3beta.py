@@ -44,6 +44,7 @@ class HybridItemCfRP3Beta(object):
         expected_ratings = self.RECS[user_id].todense()
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
+
         # Normalize ratings
         if normalized_ratings and np.amax(expected_ratings) > 0:
             expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)

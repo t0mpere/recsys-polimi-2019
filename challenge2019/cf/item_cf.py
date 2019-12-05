@@ -33,7 +33,6 @@ class ItemCollaborativeFiltering():
     def get_expected_ratings(self, user_id, normalized_ratings=False):
         expected_ratings = self.RECS[user_id].todense()
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
-
         # Normalize ratings
         if normalized_ratings and np.amax(expected_ratings) > 0:
             expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
@@ -54,4 +53,4 @@ class ItemCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_region_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, batch_evaluation=True)

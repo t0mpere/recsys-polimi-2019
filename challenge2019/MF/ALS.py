@@ -1,7 +1,5 @@
 import numpy as np
 import implicit
-import pandas as pd
-from tqdm import tqdm
 
 from utils.run import Runner
 
@@ -69,5 +67,5 @@ class AlternatingLeastSquare:
 
 if __name__ == '__main__':
      recommender = AlternatingLeastSquare()
-     Runner.run(recommender, True)
+     Runner.run(recommender, True,find_hyper_parameters_ALS=True,batch_evaluation=True)
 

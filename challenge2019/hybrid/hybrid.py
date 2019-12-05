@@ -28,15 +28,25 @@ class Hybrid(object):
         self.divide_recommendations = divide_recommendations
         self.fitted = False
 
+        self.weights_long = {
+            "SLIM_E": 0.9,
+            "item_cf": 0.99,
+            "user_cf": 0.01,
+            "user_cbf": 0.001,
+            "MF": 0.9794
+        }
+
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
+
             weights = {
-                "SLIM_E": 0.9,
-                "item_cf": 0.99,
-                "user_cf": 0.01,
+                "SLIM_E": 1.032,
+                "item_cf": 1.277,
+                "user_cf": 0.008621,
                 "user_cbf": 0.001,
                 "MF": 0.9794
             }
+
 
         self.weights = weights
 
@@ -53,13 +63,13 @@ class Hybrid(object):
 
             # self.recommender_SLIM_BPR.fit(URM)
             # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
-            #self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            # self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 
     def recommend(self, user_id, at=10):
 
-        normalized_ratings = True
+        normalized_ratings = False
         # todo add weight and
 
         self.URM.eliminate_zeros()
@@ -88,3 +98,5 @@ if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
     Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
                batch_evaluation=True)
+
+    # best score-old(rand split 20%) on seed 69: MAP@10 : 0.03016543118910578

@@ -62,21 +62,16 @@ class PureSVDRecommender():
 
         return item_scores
 
-    def get_expected_values(self, user_id, items_to_compute=None, normalized_ratings=False):
-        """
-        USER_factors is n_users x n_factors
-        ITEM_factors is n_items x n_factors
+    def get_expected_values(self, user_id, normalized_ratings=False):
 
-        The prediction for cold users will always be -inf for ALL items
-
-        :param user_id:
-        :param items_to_compute:
-        :return:
-        """
         item_scores = self.item_scores[user_id]
+        item_scores = np.squeeze(np.asarray(item_scores))
+
+        print(max(item_scores), user_id, len(self.URM_train[user_id].data))
+
         # Normalize ratings
         if normalized_ratings and np.amax(item_scores) > 0:
-            expected_ratings = item_scores / np.linalg.norm(item_scores)
+            item_scores = item_scores / np.linalg.norm(item_scores)
 
         return item_scores
 

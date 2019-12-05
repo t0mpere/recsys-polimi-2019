@@ -392,9 +392,9 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_hyperparameters_bo_pure_svd(self, num_factors):
+    def optimize_hyperparameters_bo_ALS(self, n_factors, regularization, iterations):
         recommender = self.recommender
-        recommender.fit(self.URM_train, num_factors=int(num_factors))
+        recommender.fit(self.URM_train, n_factors=int(n_factors), regularization=regularization, iterations=int(iterations))
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
@@ -413,14 +413,13 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, MF):  # MF, SLIM_E ,user_cbf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E):  # MF, SLIM_E ,user_cbf):
         recommender = self.recommender
         weights = {
-            # "SLIM_E": SLIM_E,
+            "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
-            "MF": MF,
-            # "user_cbf": user_cbf
+            #"MF": MF,
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
