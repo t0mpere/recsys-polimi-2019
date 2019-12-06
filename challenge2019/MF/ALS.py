@@ -22,7 +22,7 @@ class AlternatingLeastSquare:
         self.regularization = None
         self.iterations = None
 
-    def fit(self, URM, n_factors=300, regularization=0.15, iterations=30):
+    def fit(self, URM, n_factors=400, regularization=0.04, iterations=100):
         self.URM = URM
 
         self.n_factors = n_factors
@@ -32,7 +32,7 @@ class AlternatingLeastSquare:
         sparse_item_user = self.URM.T
 
         # Initialize the als model and fit it using the sparse item-user matrix
-        model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization, iterations=self.iterations)
+        model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization, iterations=self.iterations,use_gpu=False)
 
 
         alpha_val = 24
@@ -48,18 +48,18 @@ class AlternatingLeastSquare:
         self.item_factors = model.item_factors
 
 
-    def get_expected_ratings(self, playlist_id):
-        scores = np.dot(self.user_factors[playlist_id], self.item_factors.T)
+    def get_expected_ratings(self, user_id):
+        scores = np.dot(self.user_factors[user_id], self.item_factors.T)
 
         return np.squeeze(scores)
 
-    def recommend(self, playlist_id, at=10):
-        playlist_id = int(playlist_id)
-        expected_ratings = self.get_expected_ratings(playlist_id)
+    def recommend(self, user_id, at=10):
+        user_id = int(user_id)
+        expected_ratings = self.get_expected_ratings(user_id)
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
-        unseen_items_mask = np.in1d(recommended_items, self.URM[playlist_id].indices,
+        unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
                                     assume_unique=True, invert=True)
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
@@ -67,5 +67,5 @@ class AlternatingLeastSquare:
 
 if __name__ == '__main__':
      recommender = AlternatingLeastSquare()
-     Runner.run(recommender, True, find_hyper_parameters_ALS=True, batch_evaluation=True)
+     Runner.run(recommender, True, find_hyper_parameters_ALS=False, batch_evaluation=True)
 

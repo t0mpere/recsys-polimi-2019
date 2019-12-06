@@ -1,3 +1,4 @@
+from challenge2019.MF.ALS import AlternatingLeastSquare
 from challenge2019.MF.pureSVD import PureSVDRecommender
 from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
 from challenge2019.cf.user_cf import *
@@ -25,6 +26,7 @@ class Hybrid(object):
         self.recommenderTopPop = TopPop()
         self.recommender_pureSVD = PureSVDRecommender()
         self.recommender_SLIM_E = SLIMElasticNetRecommender()
+        self.recommender_ALS = AlternatingLeastSquare()
         self.divide_recommendations = divide_recommendations
         self.fitted = False
 
@@ -38,15 +40,13 @@ class Hybrid(object):
 
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
-
             weights = {
-                "SLIM_E": 1.032,
-                "item_cf": 1.093,
-                "user_cf": 0.008621,
+                "SLIM_E": 1.264,
+                "item_cf": 1.056,
+                "user_cf": 0.01865,
                 "user_cbf": 0.001,
-                "MF": 0.9794
+                "MF": 0.06
             }
-
 
         self.weights = weights
 
@@ -56,9 +56,10 @@ class Hybrid(object):
                 True
 
             self.recommenderUser.fit(URM, knn=784, shrink=10)
-            #self.recommenderItem.fit(URM, knn=12, shrink=23)
+            # self.recommenderItem.fit(URM, knn=12, shrink=23)
             self.recommenderHybridItem.fit(URM)
             self.recommender_SLIM_E.fit(URM)
+            self.recommender_ALS.fit(URM)
             #self.recommender_pureSVD.fit(URM)
 
             # self.recommender_SLIM_BPR.fit(URM)
@@ -79,20 +80,14 @@ class Hybrid(object):
             # add top pop? or even substitute
             expected_ratings = self.recommenderTopPop.get_expected_ratings(user_id)
 
-        elif len(liked_items.data) < 30 and self.divide_recommendations:
-            expected_ratings = 0.11 * self.recommenderUser.get_expected_ratings(user_id,
-                                                                                                   normalized_ratings=normalized_ratings) \
-                               + 0.15 * self.recommenderHybridItem.get_expected_ratings(user_id,
-                                                                                                           normalized_ratings=normalized_ratings) \
-                               + 0.17 * self.recommender_SLIM_E.get_expected_ratings(user_id,
-                                                                                                       normalized_ratings=normalized_ratings)
         else:
             expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
-                                                                                                        normalized_ratings=normalized_ratings) \
+                                                                                                   normalized_ratings=normalized_ratings) \
                                + self.weights["item_cf"] * self.recommenderHybridItem.get_expected_ratings(user_id,
-                                                                                                          normalized_ratings=normalized_ratings) \
+                                                                                                           normalized_ratings=normalized_ratings) \
                                + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
-                                                                                                       normalized_ratings=normalized_ratings)
+                                                                                                       normalized_ratings=normalized_ratings) \
+                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id)
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
@@ -103,7 +98,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
-               batch_evaluation=False, loo_split=False)
+    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+               batch_evaluation=False)
 
     # best score-old(rand split 20%) with normalized ratings on seed 69: MAP@10 : 0.03016543118910578

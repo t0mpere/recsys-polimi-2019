@@ -48,6 +48,7 @@ class ItemCollaborativeFiltering():
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
                                     assume_unique=True, invert=True)
         recommended_items = recommended_items[unseen_items_mask]
+        if len(recommended_items) == 0: print("aia")
         return recommended_items[0:at]
 
 

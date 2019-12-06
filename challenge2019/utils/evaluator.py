@@ -1,3 +1,5 @@
+import multiprocessing
+from functools import partial
 from random import randint
 
 import numpy as np
@@ -157,9 +159,13 @@ class Evaluator(object):
 
     def evaluate_recommender(self, recommender):
         MAP_final = 0
+        _prec = partial(self.recommender.recommend)
+        with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
+            res = pool.map(_prec, Utils.get_target_user_list())
+        i = 0
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-            recommended_items = recommender.recommend(user_id)
-            MAP_final += self.evaluate(user_id, recommended_items)
+            MAP_final += self.evaluate(user_id, res[i])
+            i += 1
 
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
@@ -169,9 +175,15 @@ class Evaluator(object):
         utils = Utils()
         # URM_enh = utils.get_URM_tfidf(self.URM_train)
         recommender.fit(self.URM_train)
+        _prec = partial(recommender.recommend)
+
+        print("Start recommending...")
+        with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
+            res = pool.map(_prec, Utils.get_target_user_list())
+        i = 0
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-            recommended_items = recommender.recommend(user_id)
-            MAP_final += self.evaluate(user_id, recommended_items)
+            MAP_final += self.evaluate(user_id, res[i])
+            i += 1
 
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
@@ -369,13 +381,13 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E):  # MF, SLIM_E ,user_cbf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF):  # MF, SLIM_E ,user_cbf):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
-            #"MF": MF,
+            "MF": MF,
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
