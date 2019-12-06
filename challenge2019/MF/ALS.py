@@ -1,7 +1,7 @@
 import numpy as np
 import implicit
 
-from utils.run import Runner
+from challenge2019.utils.run import Runner
 
 
 class AlternatingLeastSquare:
@@ -67,5 +67,5 @@ class AlternatingLeastSquare:
 
 if __name__ == '__main__':
      recommender = AlternatingLeastSquare()
-     Runner.run(recommender, True,find_hyper_parameters_ALS=True,batch_evaluation=True)
+     Runner.run(recommender, True, find_hyper_parameters_ALS=True, batch_evaluation=True)
 

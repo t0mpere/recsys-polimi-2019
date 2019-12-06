@@ -37,7 +37,7 @@ class Runner(object):
                 if loo_split:
                     evaluator.leave_one_out(URM, seed)
                 else:
-                    evaluator.random_split_to_all_users(URM, seed)
+                    evaluator.random_split(URM, seed)
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
@@ -111,9 +111,9 @@ class Runner(object):
 
                 elif find_hyper_parameters_ALS:
                     tuning_params = {
-                        "n_factors": (100, 500),
+                        "n_factors": (400, 800),
                         "regularization": (0.01, 0.1),
-                        "iterations" : (5,50)
+                        "iterations" : (45, 100)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_ALS)

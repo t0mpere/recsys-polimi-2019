@@ -41,7 +41,7 @@ class Hybrid(object):
 
             weights = {
                 "SLIM_E": 1.032,
-                "item_cf": 1.277,
+                "item_cf": 1.093,
                 "user_cf": 0.008621,
                 "user_cbf": 0.001,
                 "MF": 0.9794
@@ -79,7 +79,7 @@ class Hybrid(object):
             # add top pop? or even substitute
             expected_ratings = self.recommenderTopPop.get_expected_ratings(user_id)
 
-        elif len(liked_items.data) < 30:
+        elif len(liked_items.data) < 30 and self.divide_recommendations:
             expected_ratings = 0.11 * self.recommenderUser.get_expected_ratings(user_id,
                                                                                                    normalized_ratings=normalized_ratings) \
                                + 0.15 * self.recommenderHybridItem.get_expected_ratings(user_id,
@@ -103,7 +103,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=True,
-               batch_evaluation=False, loo_split=True)
+    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+               batch_evaluation=False, loo_split=False)
 
-    # best score-old(rand split 20%) on seed 69: MAP@10 : 0.03016543118910578
+    # best score-old(rand split 20%) with normalized ratings on seed 69: MAP@10 : 0.03016543118910578

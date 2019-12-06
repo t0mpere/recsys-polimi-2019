@@ -279,7 +279,7 @@ class Evaluator(object):
             MAP_final += app
 
         for i in range(0, 10, 1):
-            print("region: {}".format(str(i*4)))
+            print("bagaglio until: {}".format(str(i*4)))
             print(user_lenght[i])
             if user_lenght[i] > 0:
                 print("MAP@10 for these users: {}".format(str(MAP_lenght[i] / user_lenght[i])))
