@@ -140,4 +140,4 @@ class SLIMElasticNetRecommender(object):
 
 if __name__ == '__main__':
     recommender = SLIMElasticNetRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False,evaluate_different_type_of_users=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_type_of_users=True, batch_evaluation=True, loo_split=True)

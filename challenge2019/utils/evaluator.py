@@ -109,7 +109,7 @@ class Evaluator(object):
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
 
-    def leave_one_out(self, URM, URM_csv):
+    def leave_one_out(self, URM, seed):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
         print("Splitting using leave one out\n---------------------")
@@ -122,6 +122,7 @@ class Evaluator(object):
                 # Array with the indexes of the non zero values
                 non_zero = URM[user_index].indices
                 # Shuffle array of indices
+                np.random.seed(seed)
                 np.random.shuffle(non_zero)
                 # Select 1 element of the array
                 non_zero = non_zero[:1]
@@ -245,39 +246,59 @@ class Evaluator(object):
 
     def fit_and_evaluate_recommender_on_different_length_of_user(self, recommender):
         # used to evaluate an already trained model
+        MAP_lenght = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        user_lenght = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
-        MAP_cold = 0
-        cold_users = 0
-        MAP_short = 0
-        short_users = 0
-        MAP_long = 0
-        long_users = 0
         recommender.fit(self.URM_train)
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             item_left = len(self.URM_train[user_id].data)
             app = self.evaluate(user_id, recommended_items)
             if item_left == 0:
-                MAP_cold += app
-                cold_users += 1
+                MAP_lenght[0] += app
+                user_lenght[0] += 1
+            elif item_left < 4:
+                MAP_lenght[1] += app
+                user_lenght[1] += 1
+            elif item_left < 8:
+                MAP_lenght[2] += app
+                user_lenght[2] += 1
+            elif item_left < 12:
+                MAP_lenght[3] += app
+                user_lenght[3] += 1
+            elif item_left < 16:
+                MAP_lenght[4] += app
+                user_lenght[4] += 1
             elif item_left < 20:
-                MAP_short += app
-                short_users += 1
-            elif item_left >= 20:
-                MAP_long += app
-                long_users += 1
+                MAP_lenght[5] += app
+                user_lenght[5] += 1
+            elif item_left < 24:
+                MAP_lenght[6] += app
+                user_lenght[6] += 1
+            elif item_left < 28:
+                MAP_lenght[7] += app
+                user_lenght[7] += 1
+            elif item_left < 32:
+                MAP_lenght[8] += app
+                user_lenght[8] += 1
+            elif item_left < 36:
+                MAP_lenght[9] += app
+                user_lenght[9] += 1
+            else:
+                MAP_lenght[10] += app
+                user_lenght[10] += 1
+
             MAP_final += app
 
-        print(cold_users)
-        print(short_users)
-        print(long_users)
-        print(len(Utils.get_target_user_list()))
-        print("MAP@10 for cold users: {}".format(MAP_cold / cold_users))
-        print("MAP@10 for short users: {}".format(MAP_short / short_users))
-        print("MAP@10 for long users with actual target users: {}".format(MAP_long / long_users))
-        print("MAP@10 for long users with all users: {}".format(MAP_long / len(Utils.get_target_user_list())))
+        for i in range(0, 10, 1):
+            print("region: {}".format(str(i*4)))
+            print(user_lenght[i])
+            if user_lenght[i] > 0:
+                print("MAP@10 for these users: {}".format(str(MAP_lenght[i] / user_lenght[i])))
+            else:
+                print("0")
+
         MAP_final /= len(Utils.get_target_user_list())
-        print("MAP@10 delta (new - old): {}".format(MAP_final - (MAP_long / len(Utils.get_target_user_list()))))
         return MAP_final
 
     def find_epochs(self, recommender):
@@ -294,71 +315,6 @@ class Evaluator(object):
             print('epochs' + str(i))
             print(MAP_final)
             print('\n\n')
-        return MAP_final
-
-    def find_weight_item_cbf(self, recommender):
-        recommender.fit(self.URM_train)
-        for i in range(1, 10, 2):
-            for j in range(1, 10 - i, 2):
-                k = 10 - i - j
-                MAP_final = 0
-                print('asset ' + str(i) + '\nprice ' + str(j) + '\nsub_class ' + str(k))
-                count = 0
-                for user_id in tqdm(Utils.get_target_user_list()):
-                    recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10)
-                    MAP_final += self.evaluate(user_id, recommended_items)
-                    count += 1
-                MAP_final /= len(Utils.get_target_user_list())
-                print(MAP_final)
-                print('\n\n')
-        return MAP_final
-
-    def find_weights_hybrid(self, recommender):
-        recommender.fit(self.URM_train)
-        for i in range(1, 8, 2):
-            for j in range(1, 10 - i, 2):
-                for k in range(1, 10 - i - j, 2):
-                    l = 10 - i - j - k
-                    MAP_final = 0
-                    print('asset ' + str(i) + '\nprice ' + str(j) + '\nsub_class ' + str(k))
-                    count = 0
-                    for user_id in tqdm(Utils.get_target_user_list()):
-                        recommended_items = recommender.recommend(user_id, i / 10, j / 10, k / 10, l / 10)
-                        MAP_final += self.evaluate(user_id, recommended_items)
-                        count += 1
-                    MAP_final /= len(Utils.get_target_user_list())
-                    print(MAP_final)
-                    print('\n\n')
-        return MAP_final
-
-    def find_hyper_parameters_cf(self, recommender):
-        for knn in range(50, 301, 50):
-            for shrink in range(15, 26, 5):
-                print('knn ' + str(knn) + '\nshrink ' + str(shrink))
-                MAP_final = 0
-                recommender.fit(self.URM_train, knn=knn, shrink=shrink)
-                for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-                    recommended_items = recommender.recommend(user_id)
-                    MAP_final += self.evaluate(user_id, recommended_items)
-
-                MAP_final /= len(Utils.get_target_user_list())
-                print(MAP_final)
-                print('\n\n')
-        return
-
-    def find_hyper_parameters_user_cbf(self, recommender):
-        for knn in range(1000, 10001, 500):
-            for shrink in [20]:
-                print('knn ' + str(knn) + '\nshrink ' + str(shrink))
-                MAP_final = 0
-                recommender.fit(self.URM_train, knn_age=knn, knn_region=knn, shrink=shrink)
-                for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-                    recommended_items = recommender.recommend(user_id)
-                    MAP_final += self.evaluate(user_id, recommended_items)
-
-                MAP_final /= len(Utils.get_target_user_list())
-                print(MAP_final)
-                print('\n\n')
         return MAP_final
 
     #

@@ -1,5 +1,5 @@
-from MF.ALS import AlternatingLeastSquare
-from MF.pureSVD import PureSVDRecommender
+from challenge2019.MF.ALS import AlternatingLeastSquare
+from challenge2019.MF.pureSVD import PureSVDRecommender
 from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
 from challenge2019.cf.user_cf import *
 from challenge2019.cf.item_cf import *
