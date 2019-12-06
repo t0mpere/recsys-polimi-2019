@@ -67,8 +67,6 @@ class PureSVDRecommender():
         item_scores = self.item_scores[user_id]
         item_scores = np.squeeze(np.asarray(item_scores))
 
-        print(max(item_scores), user_id, len(self.URM_train[user_id].data))
-
         # Normalize ratings
         if normalized_ratings and np.amax(item_scores) > 0:
             item_scores = item_scores / np.linalg.norm(item_scores)
