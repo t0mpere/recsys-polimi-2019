@@ -4,6 +4,7 @@ from random import randint
 
 import numpy as np
 from tqdm import tqdm
+import scipy.sparse as sps
 
 from .utils import Utils
 from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
@@ -18,6 +19,32 @@ class Evaluator(object):
         self.test_dictionary = {}
         self.train_test_split = 0.7
         self.recommender = None
+
+    def train_test_holdout(self, URM_all, train_perc=0.8):
+
+        numInteractions = URM_all.nnz
+        URM_all = URM_all.tocoo()
+        shape = URM_all.shape
+
+        train_mask = np.random.choice([True, False], numInteractions, p=[train_perc, 1 - train_perc])
+
+        URM_train = sps.coo_matrix((URM_all.data[train_mask], (URM_all.row[train_mask], URM_all.col[train_mask])),
+                                   shape=shape)
+        URM_train = URM_train.tocsr()
+
+        test_mask = np.logical_not(train_mask)
+
+        URM_test = sps.coo_matrix((URM_all.data[test_mask], (URM_all.row[test_mask], URM_all.col[test_mask])),
+                                  shape=shape)
+        URM_test = URM_test.tocsr()
+
+        user_indexes = np.arange(URM_all.shape[0])
+        for user_index in user_indexes:
+            non_zero = URM_test[user_index].nonzero()
+            self.test_dictionary[user_index] = non_zero
+
+        self.URM_train = URM_train
+
 
     # Split random, 20% of each user
     def random_split(self, URM, seed):
@@ -385,14 +412,15 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, user_cbf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, user_cbf,item_cbf):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
             "MF": MF,
-            "user_cbf": user_cbf
+            "user_cbf": user_cbf,
+            "item_cbf":item_cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
@@ -423,7 +451,7 @@ class Evaluator(object):
 
         optimizer.maximize(
             init_points=5,
-            n_iter=13,
+            n_iter=100,
             acq="ei", xi=1e-4
         )
 

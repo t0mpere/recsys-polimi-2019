@@ -45,7 +45,8 @@ class Hybrid(object):
                 "item_cf": 1.998,
                 "user_cf": 0.01865,
                 "user_cbf": 0.001,
-                "MF": 0.05818
+                "MF": 0.05818,
+                "item_cbf":0.0
             }
 
         self.weights = weights
@@ -60,10 +61,10 @@ class Hybrid(object):
             self.recommenderHybridItem.fit(URM)
             self.recommender_SLIM_E.fit(URM)
             self.recommender_ALS.fit(URM)
-            #self.recommender_pureSVD.fit(URM)
+            # self.recommender_pureSVD.fit(URM)
 
             # self.recommender_SLIM_BPR.fit(URM)
-            # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
+            self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
             self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
@@ -88,8 +89,8 @@ class Hybrid(object):
                                                                                                        normalized_ratings=normalized_ratings) \
                                + self.weights["user_cbf"] * self.recommenderUserCBF.get_expected_ratings(user_id,
                                                                                                          normalized_ratings=normalized_ratings) \
-                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id)
-
+                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id) \
+                               + self.weights["item_cbf"] * self.recommenderItemCBF.get_expected_ratings(user_id)
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -101,7 +102,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=False,
-               batch_evaluation=True)
+    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+               batch_evaluation=False)
 
     # best score on seed 69: MAP@10 : 0.03042666580147029

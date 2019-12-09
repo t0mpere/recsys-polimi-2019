@@ -87,7 +87,8 @@ class Runner(object):
                         "item_cf": (0.8, 2),
                         "user_cf": (0, 0.02),
                         "MF": (0, 1),
-                        "user_cbf": (0, 1)
+                        "user_cbf": (0, 1),
+                        "item_cbf": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
