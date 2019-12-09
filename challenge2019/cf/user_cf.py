@@ -25,6 +25,10 @@ class UserCollaborativeFiltering():
         print("Starting calculating similarity USER_CF")
 
         self.URM = URM
+        utils = Utils()
+        self.URM = utils.get_URM_BM_25(self.URM)    #good
+        # self.URM = utils.get_URM_tfidf(self.URM) <--- worst
+
         self.SM_user = self.create_similarity_matrix()
         self.RECS = self.SM_user.dot(self.URM)
 
@@ -52,4 +56,6 @@ class UserCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = UserCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, batch_evaluation=True, loo_split=True)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=False, batch_evaluation=True)
+
+    # 0.02308 with seed 69

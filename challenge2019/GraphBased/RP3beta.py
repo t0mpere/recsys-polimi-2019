@@ -35,7 +35,12 @@ class RP3betaRecommender():
 
         utils = Utils()
         self.URM_train = URM_train
+
+        # self.URM_train = utils.get_URM_BM_25(self.URM_train) <--- worst
+        # self.URM_train = utils.get_URM_tfidf(self.URM_train) <--- worst
+
         #self.URM_train = utils.weight_interactions(URM_train)
+
         self.alpha = alpha
         self.beta = beta
         self.min_rating = min_rating
@@ -176,4 +181,6 @@ class RP3betaRecommender():
 
 if __name__ == '__main__':
     recommender = RP3betaRecommender()
-    Runner.run(recommender, True,find_hyper_parameters_RP3beta=False, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_RP3beta=False, batch_evaluation=True)
+
+#0.02890 with seed 69

@@ -24,8 +24,10 @@ class ItemCollaborativeFiltering():
         self.similarity = similarity
         print("Starting calculating similarity ITEM_CF")
 
-        utils = Utils()
         self.URM = URM
+        utils = Utils()
+        # self.URM = utils.get_URM_BM_25(self.URM) <--- worst
+        # self.URM = utils.get_URM_tfidf(self.URM) <--- worst
 
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
@@ -55,3 +57,5 @@ class ItemCollaborativeFiltering():
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
     Runner.run(recommender, True, find_hyper_parameters_cf=False, batch_evaluation=True)
+
+#0.02888 with seed 69

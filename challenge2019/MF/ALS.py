@@ -2,7 +2,7 @@ import numpy as np
 import implicit
 
 from challenge2019.utils.run import Runner
-
+from challenge2019.utils.utils import Utils
 
 class AlternatingLeastSquare:
     """
@@ -24,6 +24,10 @@ class AlternatingLeastSquare:
 
     def fit(self, URM, n_factors=400, regularization=0.04, iterations=100):
         self.URM = URM
+
+        utils = Utils()
+        # self.URM = utils.get_URM_BM_25(self.URM)
+        self.URM = utils.get_URM_tfidf(self.URM)  #good
 
         self.n_factors = n_factors
         self.regularization = regularization
@@ -69,3 +73,4 @@ if __name__ == '__main__':
      recommender = AlternatingLeastSquare()
      Runner.run(recommender, True, find_hyper_parameters_ALS=False, batch_evaluation=True)
 
+#0.02331 with seed 69

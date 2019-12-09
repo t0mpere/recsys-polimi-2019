@@ -87,7 +87,7 @@ class Runner(object):
                         "item_cf": (0.8, 2),
                         "user_cf": (0, 0.02),
                         "MF": (0, 1),
-                        # "user_cbf": (0, 1)
+                        "user_cbf": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
@@ -111,15 +111,14 @@ class Runner(object):
 
                 elif find_hyper_parameters_ALS:
                     tuning_params = {
-                        "n_factors": (400, 800),
+                        "n_factors": (400, 700),
                         "regularization": (0.01, 0.1),
-                        "iterations" : (45, 100)
+                        "iterations": (80, 150)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_ALS)
 
                 elif find_hyper_parameters_slim_bpr:
-
                     tuning_params = {
                         "topK": (100, 1),
                         "learning_rate": (1e-3, 1e-7),
@@ -134,8 +133,7 @@ class Runner(object):
                 elif evaluate_different_age_of_users:
                     print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_age_of_user(recommender))))
                 elif evaluate_different_region_of_users:
-                    print("MAP@10 : {}".format(
-                        (evaluator.fit_and_evaluate_recommender_on_different_region_of_user(recommender))))
+                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_region_of_user(recommender))))
                 elif find_hyper_parameters_slim_elastic:
                     tuning_params = {
                         "topK": (100, 100),

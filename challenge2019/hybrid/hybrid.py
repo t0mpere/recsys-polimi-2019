@@ -31,21 +31,21 @@ class Hybrid(object):
         self.fitted = False
 
         self.weights_long = {
-            "SLIM_E": 0.9,
-            "item_cf": 0.99,
-            "user_cf": 0.01,
-            "user_cbf": 0.001,
-            "MF": 0.9794
+            "SLIM_E": 0.8866,
+            "item_cf": 1.997,
+            "user_cf": 0.01468,
+            "user_cbf": 0.001986,
+            "MF": 0.133
         }
 
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
-                "SLIM_E": 1.264,
-                "item_cf": 1.056,
+                "SLIM_E": 0.8161,
+                "item_cf": 1.998,
                 "user_cf": 0.01865,
                 "user_cbf": 0.001,
-                "MF": 0.06
+                "MF": 0.05818
             }
 
         self.weights = weights
@@ -64,7 +64,7 @@ class Hybrid(object):
 
             # self.recommender_SLIM_BPR.fit(URM)
             # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
-            # self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 
@@ -79,7 +79,6 @@ class Hybrid(object):
         if len(liked_items.data) == 0:
             # add top pop? or even substitute
             expected_ratings = self.recommenderTopPop.get_expected_ratings(user_id)
-
         else:
             expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
                                                                                                    normalized_ratings=normalized_ratings) \
@@ -87,7 +86,11 @@ class Hybrid(object):
                                                                                                            normalized_ratings=normalized_ratings) \
                                + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
                                                                                                        normalized_ratings=normalized_ratings) \
+                               + self.weights["user_cbf"] * self.recommenderUserCBF.get_expected_ratings(user_id,
+                                                                                                         normalized_ratings=normalized_ratings) \
                                + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id)
+
+
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
@@ -98,7 +101,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
-               batch_evaluation=False)
+    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=False,
+               batch_evaluation=True)
 
-    # best score-old(rand split 20%) with normalized ratings on seed 69: MAP@10 : 0.03016543118910578
+    # best score on seed 69: MAP@10 : 0.03042666580147029

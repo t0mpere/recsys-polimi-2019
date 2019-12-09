@@ -5,6 +5,7 @@ import pandas as pd
 import scipy.sparse as sps
 from sklearn import feature_extraction
 from tqdm import tqdm
+from challenge2019.Base.IR_feature_weighting import okapi_BM_25
 
 
 class Utils(object):
@@ -156,6 +157,9 @@ class Utils(object):
         plt.plot(res_user[non_zero_user])
         plt.plot(res_item[non_zero_item])
         plt.show()
+
+    def get_URM_BM_25(self, URM):
+        return okapi_BM_25(URM)
 
 
 if __name__ == '__main__':

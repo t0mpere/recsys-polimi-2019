@@ -6,7 +6,7 @@ from sklearn.linear_model import ElasticNet
 from tqdm import tqdm
 
 from challenge2019.utils.run import Runner
-
+from challenge2019.utils.utils import Utils
 
 class SLIMElasticNetRecommender(object):
     """
@@ -87,6 +87,9 @@ class SLIMElasticNetRecommender(object):
     def fit(self, URM, max_iter=200, tol=7.905e-07, topK=100, alpha=0.00101, l1_ratio=0.09723):
 
         self.URM_train = URM
+        utils = Utils()
+        # self.URM_train = utils.get_URM_BM_25(self.URM_train) <--- worst
+        # self.URM_train = utils.get_URM_tfidf(self.URM_train) <--- worst
         self.max_iter = max_iter
         self.tol = tol
         self.topK = topK
@@ -140,4 +143,6 @@ class SLIMElasticNetRecommender(object):
 
 if __name__ == '__main__':
     recommender = SLIMElasticNetRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_type_of_users=True, batch_evaluation=True, loo_split=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_type_of_users=False, batch_evaluation=True)
+
+#0.02327 with seed 69

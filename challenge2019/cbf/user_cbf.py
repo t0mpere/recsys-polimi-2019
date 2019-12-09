@@ -34,7 +34,17 @@ class UserContentBasedFiltering():
         self.UCM_region = utils.get_ucm_region_from_csv()
         self.UCM_age = utils.get_ucm_age_from_csv()
 
+        # self.UCM_region = utils.get_URM_BM_25(self.UCM_region) <-- exact same
+        # self.UCM_region = utils.get_URM_tfidf(self.UCM_region) <-- exact same
+
+        # self.UCM_age = utils.get_URM_BM_25(self.UCM_age) <-- exact same
+        # self.UCM_age = utils.get_URM_tfidf(self.UCM_age) <-- exact same
+
         self.combined_UCM = sps.hstack([self.UCM_age, self.UCM_region])
+
+        # self.combined_UCM = utils.get_URM_BM_25(self.combined_UCM) <-- exact same
+        # self.combined_UCM = utils.get_URM_tfidf(self.combined_UCM) <-- exact same
+
         # TODO: improve UCM (lezione 30/09)
         print("Starting calculating similarity USER_CBF")
 
@@ -81,4 +91,6 @@ class UserContentBasedFiltering():
 
 if __name__ == '__main__':
     recommender = UserContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_region_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_region_of_users=False, batch_evaluation=True)
+
+#0.001146 with seed 69
