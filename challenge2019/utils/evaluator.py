@@ -367,6 +367,17 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
+    def optimize_weights_item_cbf(self, price, asset, sub_class):
+        recommender = self.recommender
+        weights = {
+            "price": price,
+            "asset": asset,
+            "sub_class": sub_class
+        }
+        recommender.fit(self.URM_train, weights=weights)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
     def optimize_hyperparameters_bo_user_cbf(self, knn_region, knn_age, shrink):
         recommender = self.recommender
         recommender.fit(self.URM_train, shrink=int(shrink), knn_age=int(knn_age), knn_region=int(knn_region))

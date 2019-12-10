@@ -22,7 +22,7 @@ class AlternatingLeastSquare:
         self.regularization = None
         self.iterations = None
 
-    def fit(self, URM, n_factors=400, regularization=0.04, iterations=100):
+    def fit(self, URM, n_factors=400, regularization=0.05, iterations=110):
         self.URM = URM
 
         utils = Utils()

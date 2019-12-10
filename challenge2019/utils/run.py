@@ -15,7 +15,7 @@ class Runner(object):
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
             batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False,
-            loo_split=False):
+            loo_split=False, find_weights_item_cbf=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -90,7 +90,15 @@ class Runner(object):
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
-                    # print("MAP@10 : {}".format(evaluator.find_weight_item_cbf(recommender)))
+
+                elif find_weights_item_cbf:
+                    weights = {
+                        "asset": (0, 1),
+                        "price": (0, 1),
+                        "sub_class": (0, 1)
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(weights, evaluator.optimize_weights_item_cbf)
 
                 elif find_hyper_parameters_user_cbf:
                     tuning_params = {
@@ -110,9 +118,9 @@ class Runner(object):
 
                 elif find_hyper_parameters_ALS:
                     tuning_params = {
-                        "n_factors": (400, 700),
+                        "n_factors": (300, 500),
                         "regularization": (0.01, 0.1),
-                        "iterations": (80, 150)
+                        "iterations": (90, 120)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_ALS)

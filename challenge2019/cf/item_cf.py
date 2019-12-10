@@ -1,6 +1,6 @@
 import numpy as np
 
-from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
+from challenge2019.Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython as Compute_Similarity_Python
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
