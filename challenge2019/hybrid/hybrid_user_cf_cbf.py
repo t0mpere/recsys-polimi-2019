@@ -35,7 +35,7 @@ class HybridUserCfCbf(object):
 
 
     def create_similarity_matrix(self, URM, knn, shrink, similarity="cosine"):
-        similarity_object = Compute_Similarity_Python(URM, topK=knn, shrink=shrink, normalize=True,
+        similarity_object = Compute_Similarity_Python(URM, topK=knn, shrink=shrink, normalize=False,
                                                       similarity=similarity)
         return similarity_object.compute_similarity()
 

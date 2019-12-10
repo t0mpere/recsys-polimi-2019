@@ -37,7 +37,7 @@ class Runner(object):
                 if loo_split:
                     evaluator.leave_one_out(URM, seed)
                 else:
-                    evaluator.random_split_to_all_users(URM, seed)
+                    evaluator.random_split(URM, seed)
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
@@ -129,7 +129,7 @@ class Runner(object):
                     tuning_params = {
                         "loss_tolerance": (1e-5, 1e-7),
                         "iteration_limit": (10000, 50000),
-                        "damp_coeff": (0, 0.5),
+                        "damp_coeff": (0, 0.01),
                         "topK": (20,200),
                         "add_zeros_quota": (0, 0.01)
                     }
