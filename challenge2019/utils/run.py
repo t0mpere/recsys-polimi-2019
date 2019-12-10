@@ -14,7 +14,7 @@ class Runner(object):
             find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
-            batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False,
+            batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False,
             loo_split=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
@@ -37,7 +37,7 @@ class Runner(object):
                 if loo_split:
                     evaluator.leave_one_out(URM, seed)
                 else:
-                    evaluator.random_split(URM, seed)
+                    evaluator.random_split_to_all_users(URM, seed)
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
@@ -117,6 +117,17 @@ class Runner(object):
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_ALS)
 
+                elif find_hyper_parameters_fw:
+                    tuning_params = {
+                        "loss_tolerance": (1e-5, 1e-7),
+                        "iteration_limit": (10000, 50000),
+                        "damp_coeff": (0, 0.5),
+                        "topK": (20,200),
+                        "add_zeros_quota": (0, 0.01)
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_fw)
+
                 elif find_hyper_parameters_slim_bpr:
                     tuning_params = {
                         "topK": (100, 1),
@@ -127,21 +138,24 @@ class Runner(object):
 
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_SLIM_bpr)
-                elif evaluate_different_type_of_users:
-                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_length_of_user(recommender))))
-                elif evaluate_different_age_of_users:
-                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_age_of_user(recommender))))
-                elif evaluate_different_region_of_users:
-                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_region_of_user(recommender))))
+
                 elif find_hyper_parameters_slim_elastic:
                     tuning_params = {
-                        "topK": (100, 100),
+                        "max_iter": (50, 300),
+                        "topK": (50, 200),
                         "alpha": (1e-2, 1e-4),
                         "l1_ratio": (0.2, 0.05),
                         "tol": (1e-4, 1e-6)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_SLIM_el)
+
+                elif evaluate_different_type_of_users:
+                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_length_of_user(recommender))))
+                elif evaluate_different_age_of_users:
+                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_age_of_user(recommender))))
+                elif evaluate_different_region_of_users:
+                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_region_of_user(recommender))))
                 elif find_epochs:
                     print("MAP@10 : {}".format(evaluator.find_epochs(recommender)))
                 else:

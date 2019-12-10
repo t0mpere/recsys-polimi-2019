@@ -249,11 +249,11 @@ class CFW_D_Similarity_Linalg():
         self.sparse_weights = True
 
     def get_expected_ratings(self, user_id):
-        scores = np.dot(self.URM_train[user_id], self.W_sparse)
-        print(scores)
-        print(len(scores))
+        scores = self.URM_train[user_id].dot(self.W_sparse)
 
-        return np.squeeze(scores)
+        scores = scores.toarray().ravel()
+
+        return scores
 
     def recommend(self, user_id, at=10):
         user_id = int(user_id)
@@ -269,4 +269,4 @@ class CFW_D_Similarity_Linalg():
 
 if __name__ == '__main__':
     recommender = CFW_D_Similarity_Linalg()
-    Runner.run(recommender, True, batch_evaluation=True)
+    Runner.run(recommender, True, batch_evaluation=True, find_hyper_parameters_fw=True)

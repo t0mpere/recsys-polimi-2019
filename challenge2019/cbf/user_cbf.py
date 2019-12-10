@@ -57,7 +57,7 @@ class UserContentBasedFiltering():
         self.RECS = self.SM.dot(self.URM)
 
 
-    def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=True):
+    def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=False):
         user_id = int(user_id)
         # region_exp_ratings = self.RECS_region[user_id].todense()
         # age_exp_ratings = self.RECS_age[user_id].todense()
@@ -91,6 +91,6 @@ class UserContentBasedFiltering():
 
 if __name__ == '__main__':
     recommender = UserContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_region_of_users=False, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_type_of_users=True, batch_evaluation=True)
 
 #0.001146 with seed 69

@@ -143,6 +143,6 @@ class SLIMElasticNetRecommender(object):
 
 if __name__ == '__main__':
     recommender = SLIMElasticNetRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_type_of_users=False, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=True, evaluate_different_type_of_users=False, batch_evaluation=True)
 
 #0.02327 with seed 69

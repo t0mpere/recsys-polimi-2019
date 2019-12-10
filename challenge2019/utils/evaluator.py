@@ -397,10 +397,15 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_hyperparameters_bo_SLIM_el(self, topK, alpha, l1_ratio, tol):
+    def optimize_hyperparameters_bo_fw(self, loss_tolerance, iteration_limit, damp_coeff, topK, add_zeros_quota):
         recommender = self.recommender
-        recommender.fit(self.URM_train, topK=int(topK), alpha=alpha, l1_ratio=l1_ratio
-                        , tol=tol)
+        recommender.fit(self.URM_train, loss_tolerance=loss_tolerance, iteration_limit=int(iteration_limit), damp_coeff=damp_coeff, topK=int(topK), add_zeros_quota=add_zeros_quota)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_hyperparameters_bo_SLIM_el(self, max_iter, topK, alpha, l1_ratio, tol):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, max_iter=int(max_iter), topK=int(topK), alpha=alpha, l1_ratio=l1_ratio, tol=tol)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 

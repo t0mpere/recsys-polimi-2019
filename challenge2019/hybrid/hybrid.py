@@ -10,6 +10,7 @@ from challenge2019.cbf.user_cbf import *
 from challenge2019.SLIM.SlimElasticNet import *
 from challenge2019.hybrid.hybrid_item_cf_P3alpha import HybridItemCfP3alpha
 from challenge2019.hybrid.hybrid_item_cf_RP3beta import HybridItemCfRP3Beta
+from challenge2019.topPop.topPop_userClasses import TopPopUserClasses
 
 
 class Hybrid(object):
@@ -41,12 +42,10 @@ class Hybrid(object):
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
-                "MF": 0.9629,
-                "SLIM_E": 1.991,
-                "item_cbf": 0.06512,
-                "item_cf": 1.995,
-                "user_cbf": 0.004306,
-                "user_cf": 0.0164
+                "MF": 0.05284,
+                "SLIM_E": 0.9132,
+                "item_cf": 0.9955,
+                "user_cf": 0.005428
             }
 
         self.weights = weights
@@ -64,8 +63,8 @@ class Hybrid(object):
             # self.recommender_pureSVD.fit(URM)
 
             # self.recommender_SLIM_BPR.fit(URM)
-            self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
-            self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
+            # self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 
@@ -86,9 +85,7 @@ class Hybrid(object):
                                                                                                            normalized_ratings=normalized_ratings) \
                                + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
                                                                                                        normalized_ratings=normalized_ratings) \
-                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id) \
-                               + self.weights["item_cbf"] * self.recommenderItemCBF.get_expected_ratings(user_id) \
-                               + self.weights["user_cbf"] * self.recommenderUserCBF.get_expected_ratings(user_id)
+                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id)
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
