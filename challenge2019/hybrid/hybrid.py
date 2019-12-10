@@ -10,6 +10,7 @@ from challenge2019.cbf.user_cbf import *
 from challenge2019.SLIM.SlimElasticNet import *
 from challenge2019.hybrid.hybrid_item_cf_P3alpha import HybridItemCfP3alpha
 from challenge2019.hybrid.hybrid_item_cf_RP3beta import HybridItemCfRP3Beta
+from topPop.topPop_userClasses import TopPopUserClasses
 
 
 class Hybrid(object):
@@ -23,7 +24,7 @@ class Hybrid(object):
         self.recommender_SLIM_BPR = SLIM_BPR_Cython()
         self.recommenderItemCBF = ItemContentBasedFiltering()
         self.recommenderUserCBF = UserContentBasedFiltering()
-        self.recommenderTopPop = TopPop()
+        self.recommenderTopPop = TopPopUserClasses()
         self.recommender_pureSVD = PureSVDRecommender()
         self.recommender_SLIM_E = SLIMElasticNetRecommender()
         self.recommender_ALS = AlternatingLeastSquare()
@@ -41,12 +42,12 @@ class Hybrid(object):
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
-                "SLIM_E": 0.8161,
-                "item_cf": 1.998,
+                "SLIM_E": 1.064,
+                "item_cf": 1.256,
                 "user_cf": 0.01865,
-                "user_cbf": 0.001,
-                "MF": 0.05818,
-                "item_cbf":0.0
+                #"user_cbf": 0.001,
+                "MF": 0.06,
+                #"item_cbf":0.0
             }
 
         self.weights = weights
@@ -64,8 +65,8 @@ class Hybrid(object):
             # self.recommender_pureSVD.fit(URM)
 
             # self.recommender_SLIM_BPR.fit(URM)
-            self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
-            self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            #self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
+            #self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 
@@ -87,10 +88,8 @@ class Hybrid(object):
                                                                                                            normalized_ratings=normalized_ratings) \
                                + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
                                                                                                        normalized_ratings=normalized_ratings) \
-                               + self.weights["user_cbf"] * self.recommenderUserCBF.get_expected_ratings(user_id,
-                                                                                                         normalized_ratings=normalized_ratings) \
-                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id) \
-                               + self.weights["item_cbf"] * self.recommenderItemCBF.get_expected_ratings(user_id)
+                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id)
+                               #+ self.weights["item_cbf"] * self.recommenderItemCBF.get_expected_ratings(user_id)
 
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -102,7 +101,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
+    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
                batch_evaluation=False)
 
     # best score on seed 69: MAP@10 : 0.03042666580147029
