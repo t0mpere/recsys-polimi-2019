@@ -8,13 +8,15 @@ class HybridItemCfRP3Beta(object):
         self.URM = None
         self.SM_item = None
         self.fitted = False
-
+    # .4011
+    # .24
+    #
     def fit(self, URM, fit_once=False, alpha=.2117):
         self.alpha = alpha
         if not (fit_once and self.fitted):
             RP3_beta = RP3betaRecommender()
-            RP3_beta.fit(URM)
-            self.SM_cf = self.create_similarity_matrix(URM, 12, 23, similarity="tanimoto")
+            RP3_beta.fit(URM, normalize_similarity=True)
+            self.SM_cf = self.create_similarity_matrix(URM, 15, 19, similarity="tanimoto")
             self.SM_P3alpha = RP3_beta.get_W()
             self.URM = URM
             utils = Utils()
@@ -53,4 +55,4 @@ class HybridItemCfRP3Beta(object):
 
 if __name__ == '__main__':
     recommender = HybridItemCfRP3Beta()
-    Runner.run(recommender, True, evaluate_different_type_of_users=False, find_weights_hybrid_item=False, batch_evaluation=True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=False, find_weights_hybrid_item=True, batch_evaluation=False)
