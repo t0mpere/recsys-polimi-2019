@@ -1,8 +1,7 @@
 import numpy as np
 import scipy.sparse as sps
 import torch
-
-from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
+from challenge2019.Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython as Compute_Similarity_Python
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
@@ -23,8 +22,8 @@ class ItemContentBasedFiltering():
         self.knn_price = None
         self.knn_sub_class = None
 
-    def create_similarity_matrix(self, ICM, knn=100):
-        similarity_object = Compute_Similarity_Python(ICM.transpose(), topK=knn, shrink=self.shrink,
+    def create_similarity_matrix(self, ICM, knn=100, shrink=2):
+        similarity_object = Compute_Similarity_Python(ICM.transpose(), topK=knn, shrink=shrink,
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
@@ -39,42 +38,31 @@ class ItemContentBasedFiltering():
         self.ICM_asset = utils.get_icm_asset_from_csv()
         self.ICM_price = utils.get_icm_price_from_csv()
         self.ICM_sub_class = utils.get_icm_sub_class_from_csv()
-        self.combined_ICM = sps.hstack([self.ICM_asset, self.ICM_sub_class, self.ICM_price])
 
         # TODO: improve ICM (lezione 30/09)  + ICM DI UNA COLONNA PER TROVARE DISTANZA TRA I VALORI
         print("Starting calculating similarity ITEM_CBF")
 
-        # self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
-        # self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
-        # self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class, knn=self.knn_sub_class)
+        self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
+        self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
+        self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class, knn=self.knn_sub_class)
 
-        self.SM = self.create_similarity_matrix(self.combined_ICM, knn=self.knn)
 
-        # self.RECS_asset = self.URM.dot(self.SM_asset)
-        # self.RECS_price = self.URM.dot(self.SM_price)
-        # self.RECS_sub_class = self.URM.dot(self.SM_sub_class)
 
-        self.RECS = self.URM.dot(self.SM)
+        self.RECS_asset = self.URM.dot(self.SM_asset)
+        self.RECS_price = self.URM.dot(self.SM_price)
+        self.RECS_sub_class = self.URM.dot(self.SM_sub_class)
+
 
     def get_expected_ratings(self, user_id, i=0.3, j=0.3, k=0.4, normalized_ratings=False):
         user_id = int(user_id)
 
-        # expected_ratings_assets = self.RECS_asset[user_id].todense()
-        # expected_ratings_price = self.RECS_price[user_id].todense()
-        # expected_ratings_sub_class = self.RECS_sub_class[user_id].todense()
+        expected_ratings_assets = self.RECS_asset[user_id].todense()
+        expected_ratings_price = self.RECS_price[user_id].todense()
+        expected_ratings_sub_class = self.RECS_sub_class[user_id].todense()
 
-        expected_ratings = self.RECS[user_id].todense()
-
-        # if np.amax(expected_ratings_assets) > 0:
-        #     expected_ratings_assets = expected_ratings_assets / np.linalg.norm(expected_ratings_assets)
-        # if np.amax(expected_ratings_price) > 0:
-        #     expected_ratings_price = expected_ratings_price / np.linalg.norm(expected_ratings_price)
-        # if np.amax(expected_ratings_sub_class) > 0:
-        #     expected_ratings_sub_class = expected_ratings_sub_class / np.linalg.norm(expected_ratings_sub_class)
-
-        # expected_ratings = + (expected_ratings_price * j) \
-        #                    + (expected_ratings_assets * i) \
-        #                    + (expected_ratings_sub_class * k)
+        expected_ratings = + (expected_ratings_price * j) \
+                           + (expected_ratings_assets * i) \
+                           + (expected_ratings_sub_class * k)
 
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
@@ -98,4 +86,4 @@ class ItemContentBasedFiltering():
 
 if __name__ == '__main__':
     recommender = ItemContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_item_cbf=False, evaluate_different_region_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_item_cbf=True, evaluate_different_region_of_users=False, batch_evaluation=True)
