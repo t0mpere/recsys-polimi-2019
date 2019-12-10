@@ -41,15 +41,10 @@ class Utils(object):
         return URM
 
     def get_icm_asset_from_csv(self):
-
-        from sklearn import preprocessing
-        le = preprocessing.LabelEncoder()
-        le.fit(self.item_asset_list)
-
-        tagList_icm = le.transform(self.item_asset_list)
-
+        scale = 1000000
         data_list = list(np.ones(len(self.item_asset_list)))
-        self.item_asset_list = tagList_icm
+        self.item_asset_list = self.item_asset_list * scale
+        self.item_asset_list = self.item_asset_list.astype(int)
 
         ICM_asset = sps.coo_matrix((data_list, (self.item_list_icm_asset, self.item_asset_list)), dtype=np.float64)
         ICM_asset = ICM_asset.tocsr()
