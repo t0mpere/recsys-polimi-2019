@@ -1,8 +1,8 @@
 from lightfm import LightFM
 import numpy as np
 
-from utils.run import Runner
-from utils.utils import Utils
+from challenge2019.utils.run import Runner
+from challenge2019.utils.utils import Utils
 import scipy.sparse as sps
 
 

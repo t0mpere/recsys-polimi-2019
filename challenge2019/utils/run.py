@@ -80,15 +80,13 @@ class Runner(object):
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_RP3beta)
-                elif find_weights_hybrid:
 
+                elif find_weights_hybrid:
                     weights = {
-                        "SLIM_E": (0.8, 2),
-                        "item_cf": (0.8, 2),
-                        "user_cf": (0, 0.02),
-                        "MF": (0, 1),
-                        "user_cbf": (0, 1),
-                        "item_cbf": (0, 1)
+                        "SLIM_E": (0, 1),
+                        "item_cf": (0, 1),
+                        "user_cf": (0, 1),
+                        "MF": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)

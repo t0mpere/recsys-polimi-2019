@@ -10,7 +10,7 @@ class TopPop():
     def __init__(self):
         self.URM = None
 
-    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
+    def fit(self, URM):
         self.URM = URM
         self.occurrencies = np.array(np.zeros(self.URM.shape[1]))
         for i in range(0, self.URM.shape[1]):
@@ -40,4 +40,3 @@ class TopPop():
 if __name__ == '__main__':
     recommender = TopPop()
     Runner.run(recommender, True, evaluate_different_type_of_users=True)
-    recommender.get_expected_ratings(1)

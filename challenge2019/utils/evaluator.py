@@ -412,15 +412,15 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, user_cbf,item_cbf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
-            "MF": MF,
-            "user_cbf": user_cbf,
-            "item_cbf":item_cbf
+            "MF": MF
+            # "user_cbf": user_cbf,
+            # "item_cbf": item_cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
