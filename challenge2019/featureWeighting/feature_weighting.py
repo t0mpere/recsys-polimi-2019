@@ -5,12 +5,12 @@ Created on 08/09/17
 @author: Maurizio Ferrari Dacrema
 """
 
-from challenge2019.Base.Similarity.Compute_Similarity import Compute_Similarity
+
 from challenge2019.Base.BaseSimilarityMatrixRecommender import BaseItemSimilarityMatrixRecommender
 from challenge2019.Base.Recommender_utils import check_matrix
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
-from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
+from challenge2019.Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython as Compute_Similarity_Python
 
 
 from scipy.sparse import linalg
@@ -62,7 +62,7 @@ class CFW_D_Similarity_Linalg():
         start_time_batch = time.time()
 
         # Here is important only the structure
-        self.similarity = Compute_Similarity(self.ICM.T, shrink=0, topK=self.topK, normalize=False)
+        self.similarity = Compute_Similarity_Python(self.ICM.T, shrink=0, topK=self.topK, normalize=False)
         S_matrix_contentKNN = self.similarity.compute_similarity()
         S_matrix_contentKNN = check_matrix(S_matrix_contentKNN, "csr")
 
@@ -180,7 +180,7 @@ class CFW_D_Similarity_Linalg():
         ICM_sub_class = utils.get_icm_sub_class_from_csv()
         ICM = sps.hstack([ICM_asset, ICM_sub_class, ICM_price])
 
-        similarity_object = Compute_Similarity_Python(URM_train, topK=15, shrink=19, normalize=True,
+        similarity_object = Compute_Similarity_Python(ICM.T, topK=15, shrink=19, normalize=True,
                                                       similarity="tanimoto")
         S_matrix_target = similarity_object.compute_similarity()
 
@@ -242,7 +242,7 @@ class CFW_D_Similarity_Linalg():
         else:
             feature_weights = self.D_best
 
-        self.similarity = Compute_Similarity(self.ICM.T, shrink=0, topK=self.topK,
+        self.similarity = Compute_Similarity_Python(self.ICM.T, shrink=0, topK=self.topK,
                                              normalize=self.normalize_similarity, row_weights=feature_weights)
 
         self.W_sparse = self.similarity.compute_similarity()
@@ -269,4 +269,4 @@ class CFW_D_Similarity_Linalg():
 
 if __name__ == '__main__':
     recommender = CFW_D_Similarity_Linalg()
-    Runner.run(recommender, True, batch_evaluation=True, find_hyper_parameters_fw=True)
+    Runner.run(recommender, True, batch_evaluation=True, find_hyper_parameters_fw=False)
