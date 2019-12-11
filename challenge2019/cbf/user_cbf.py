@@ -24,7 +24,7 @@ class UserContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn_age=1000, knn_region=1000, shrink=20, similarity="dice"):
+    def fit(self, URM, knn_age=1000, knn_region=1000, shrink=20, similarity="tversky"):
         utils = Utils()
         self.knn_age = knn_age
         self.knn_region = knn_region
@@ -50,7 +50,7 @@ class UserContentBasedFiltering():
 
         # self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
         # self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
-        self.SM = self.create_similarity_matrix(self.combined_UCM, 1000)
+        self.SM = self.create_similarity_matrix(self.combined_UCM, knn=800)
 
         # self.RECS_region = self.SM_region.dot(self.URM)
         # self.RECS_age = self.SM_age.dot(self.URM)

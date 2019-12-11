@@ -37,7 +37,7 @@ class Runner(object):
                 if loo_split:
                     evaluator.leave_one_out(URM, seed)
                 else:
-                    evaluator.random_split(URM, seed)
+                    evaluator.train_test_holdout(URM)
 
                 if find_hyper_parameters_cf:
                     tuning_params = {

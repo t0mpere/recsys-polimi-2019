@@ -22,10 +22,15 @@ class ItemContentBasedFiltering():
         self.knn_price = None
         self.knn_sub_class = None
         self.weights = None
+
+        self.ICM = None
+        self.RECS = None
+        self.SM = None
+
         self.swag_weights = {
-            "price": 0.3,
-            "asset": 0.3,
-            "sub_class": 0.4
+            "price": 0.15,
+            "asset": 0.35,
+            "sub_class": 0.5
         }
 
     def create_similarity_matrix(self, ICM, knn=100, shrink=2):
@@ -49,31 +54,33 @@ class ItemContentBasedFiltering():
         self.ICM_asset = utils.get_icm_asset_from_csv()
         self.ICM_price = utils.get_icm_price_from_csv()
         self.ICM_sub_class = utils.get_icm_sub_class_from_csv()
+        self.ICM = sps.hstack([self.ICM_asset, self.ICM_sub_class, self.ICM_price])
 
-        # TODO: improve ICM (lezione 30/09)  + ICM DI UNA COLONNA PER TROVARE DISTANZA TRA I VALORI
         print("Starting calculating similarity ITEM_CBF")
 
-        self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
-        self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
-        self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class, knn=self.knn_sub_class)
+        # self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
+        # self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
+        # self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class, knn=self.knn_sub_class)
+        self.SM = self.create_similarity_matrix(self.ICM, knn=20, shrink=20)
 
-
-
-        self.RECS_asset = self.URM.dot(self.SM_asset)
-        self.RECS_price = self.URM.dot(self.SM_price)
-        self.RECS_sub_class = self.URM.dot(self.SM_sub_class)
+        # self.RECS_asset = self.URM.dot(self.SM_asset)
+        # self.RECS_price = self.URM.dot(self.SM_price)
+        # self.RECS_sub_class = self.URM.dot(self.SM_sub_class)
+        self.RECS = self.URM.dot(self.SM)
 
 
     def get_expected_ratings(self, user_id, normalized_ratings=False):
         user_id = int(user_id)
 
-        expected_ratings_assets = self.RECS_asset[user_id].todense()
-        expected_ratings_price = self.RECS_price[user_id].todense()
-        expected_ratings_sub_class = self.RECS_sub_class[user_id].todense()
+        # expected_ratings_assets = self.RECS_asset[user_id].todense()
+        # expected_ratings_price = self.RECS_price[user_id].todense()
+        # expected_ratings_sub_class = self.RECS_sub_class[user_id].todense()
 
-        expected_ratings = + (expected_ratings_price * self.weights["price"]) \
-                           + (expected_ratings_assets * self.weights["asset"]) \
-                           + (expected_ratings_sub_class * self.weights["sub_class"])
+        expected_ratings = self.RECS[user_id].todense()
+
+        # expected_ratings = + (expected_ratings_price * self.weights["price"]) \
+        #                    + (expected_ratings_assets * self.weights["asset"]) \
+        #                    + (expected_ratings_sub_class * self.weights["sub_class"])
 
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
