@@ -38,17 +38,17 @@ class ItemContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn_asset=980, knn_price=68, knn_sub_class=1000, shrink=2, weights=None, similarity="cosine"):
+    def fit(self, URM, weights=None, similarity="cosine"): #knn_asset=980, knn_price=68, knn_sub_class=1000, shrink=2):
         if weights is not None:
             self.weights = weights
         else:
             self.weights = self.swag_weights
 
         utils = Utils()
-        self.knn_asset = knn_asset
-        self.knn_price = knn_price
-        self.knn_sub_class = knn_sub_class
-        self.shrink = shrink
+        # self.knn_asset = knn_asset
+        # self.knn_price = knn_price
+        # self.knn_sub_class = knn_sub_class
+        # self.shrink = shrink
         self.similarity = similarity
         self.URM = URM
         self.ICM_asset = utils.get_icm_asset_from_csv()
@@ -61,7 +61,7 @@ class ItemContentBasedFiltering():
         # self.SM_asset = self.create_similarity_matrix(self.ICM_asset, knn=self.knn_asset)
         # self.SM_price = self.create_similarity_matrix(self.ICM_price, knn=self.knn_price)
         # self.SM_sub_class = self.create_similarity_matrix(self.ICM_sub_class, knn=self.knn_sub_class)
-        self.SM = self.create_similarity_matrix(self.ICM, knn=20, shrink=20)
+        self.SM = self.create_similarity_matrix(self.ICM, knn=5, shrink=120)
 
         # self.RECS_asset = self.URM.dot(self.SM_asset)
         # self.RECS_price = self.URM.dot(self.SM_price)

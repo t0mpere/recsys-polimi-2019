@@ -62,7 +62,7 @@ class CFW_D_Similarity_Linalg():
         start_time_batch = time.time()
 
         # Here is important only the structure
-        self.similarity = Compute_Similarity_Python(self.ICM.T, shrink=0, topK=self.topK, normalize=False)
+        self.similarity = Compute_Similarity_Python(self.ICM.T, shrink=120, topK=5, normalize=False)
         S_matrix_contentKNN = self.similarity.compute_similarity()
         S_matrix_contentKNN = check_matrix(S_matrix_contentKNN, "csr")
 
@@ -181,7 +181,7 @@ class CFW_D_Similarity_Linalg():
         ICM = sps.hstack([ICM_asset, ICM_sub_class, ICM_price])
 
 
-        similarity_object = Compute_Similarity_Python(ICM.T, topK=150, shrink=10, normalize=True,
+        similarity_object = Compute_Similarity_Python(URM_train, topK=15, shrink=19, normalize=True,
                                                       similarity="cosine")
         S_matrix_target = similarity_object.compute_similarity()
 
