@@ -19,7 +19,7 @@ import numpy as np
 import scipy.sparse as sps
 
 
-class CFW_D_Similarity_Linalg():
+class CFW_D_Similarity_Linalg_on_item():
     RECOMMENDER_NAME = "CFW_D_Similarity_Linalg"
 
     def __init__(self):
@@ -175,17 +175,16 @@ class CFW_D_Similarity_Linalg():
             iteration_limit=50000, damp_coeff=0.1, topK=20, add_zeros_quota=0.1, normalize_similarity=False):
 
         utils = Utils()
-        ICM_asset = utils.get_icm_asset_from_csv()
-        ICM_price = utils.get_icm_price_from_csv_single_column()
-        ICM_sub_class = utils.get_icm_sub_class_from_csv()
-        ICM = sps.hstack([ICM_asset, ICM_sub_class, ICM_price])
+        UCM_asset = utils.get_ucm_region_from_csv()
+        UCM_price = utils.get_ucm_age_from_csv()
+        ICM = sps.hstack([UCM_asset, UCM_price])
 
 
-        similarity_object = Compute_Similarity_Python(URM_train, topK=15, shrink=19, normalize=True,
+        similarity_object = Compute_Similarity_Python(URM_train.T, topK=15, shrink=19, normalize=True,
                                                       similarity="cosine")
         S_matrix_target = similarity_object.compute_similarity()
 
-        if (URM_train.shape[1] != ICM.shape[0]):
+        if (URM_train.shape[0] != ICM.shape[0]):
             raise ValueError(
                 "Number of items not consistent. URM contains {} but ICM contains {}".format(URM_train.shape[1],
                                                                                              ICM.shape[0]))
@@ -248,9 +247,10 @@ class CFW_D_Similarity_Linalg():
 
         self.W_sparse = self.similarity.compute_similarity()
         self.sparse_weights = True
+        self.RECS = self.W_sparse.dot(self.URM_train)
 
     def get_expected_ratings(self, user_id):
-        scores = self.URM_train[user_id].dot(self.W_sparse)
+        scores = self.RECS[user_id]
 
         scores = scores.toarray().ravel()
 
@@ -269,5 +269,5 @@ class CFW_D_Similarity_Linalg():
 
 
 if __name__ == '__main__':
-    recommender = CFW_D_Similarity_Linalg()
-    Runner.run(recommender, True, batch_evaluation=True, find_hyper_parameters_fw=False)
+    recommender = CFW_D_Similarity_Linalg_on_item()
+    Runner.run(recommender, True, batch_evaluation=False, find_hyper_parameters_fw=False)

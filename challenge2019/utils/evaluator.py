@@ -25,7 +25,8 @@ class Evaluator(object):
         numInteractions = URM_all.nnz
         URM_all = URM_all.tocoo()
         shape = URM_all.shape
-        np.random.seed(seed)
+        if seed is not None:
+            np.random.seed(seed)
         train_mask = np.random.choice([True, False], numInteractions, p=[train_perc, 1 - train_perc])
 
         URM_train = sps.coo_matrix((URM_all.data[train_mask], (URM_all.row[train_mask], URM_all.col[train_mask])),
@@ -429,15 +430,15 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
-            "MF": MF
+            "MF": MF,
             # "user_cbf": user_cbf,
-            # "item_cbf": item_cbf
+            "item_cbf": item_cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
