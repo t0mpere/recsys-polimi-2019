@@ -99,12 +99,12 @@ class CFW_D_Similarity_Linalg():
 
             target_coordinates = self.S_matrix_target.indices[start_pos_target:end_pos_target]
 
-            # Chech whether the content coordinate is associated to a non zero target value
+            # Check whether the content coordinate is associated to a non zero target value
             # If true, the content coordinate has a collaborative non-zero value
             # if false, the content coordinate has a collaborative zero value
             is_common = np.in1d(content_coordinates, target_coordinates)
 
-            num_common_in_current_row = is_common.sum()
+            num_common_in_current_row = sum(is_common)
             num_common_coordinates += num_common_in_current_row
             for index in range(len(is_common)):
                 if num_samples == estimated_n_samples:
@@ -172,7 +172,7 @@ class CFW_D_Similarity_Linalg():
             data_sum, data_sum / data_nnz, collaborative_sum / collaborative_nnz))
 
     def fit(self, URM_train, show_max_performance=False, logFile=None, loss_tolerance=1e-6,
-            iteration_limit=50000, damp_coeff=0.0, topK=300, add_zeros_quota=0.0, normalize_similarity=False):
+            iteration_limit=50000, damp_coeff=0.1, topK=20, add_zeros_quota=0.1, normalize_similarity=False):
 
         utils = Utils()
         ICM_asset = utils.get_icm_asset_from_csv()
@@ -180,7 +180,8 @@ class CFW_D_Similarity_Linalg():
         ICM_sub_class = utils.get_icm_sub_class_from_csv()
         ICM = sps.hstack([ICM_asset, ICM_sub_class, ICM_price])
 
-        similarity_object = Compute_Similarity_Python(ICM.T, topK=1000, shrink=19, normalize=True,
+
+        similarity_object = Compute_Similarity_Python(ICM.T, topK=150, shrink=10, normalize=True,
                                                       similarity="cosine")
         S_matrix_target = similarity_object.compute_similarity()
 

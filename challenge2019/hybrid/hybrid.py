@@ -64,7 +64,7 @@ class Hybrid(object):
 
             # self.recommender_SLIM_BPR.fit(URM)
             # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
-            # self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 
@@ -97,7 +97,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False,
-               batch_evaluation=False)
+    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=False,
+               batch_evaluation=True)
 
     # best score on seed 69: MAP@10 : 0.03042666580147029

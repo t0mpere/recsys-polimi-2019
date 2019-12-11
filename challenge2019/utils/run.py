@@ -24,7 +24,7 @@ class Runner(object):
             print("Starting testing phase..")
 
             if batch_evaluation:
-                seeds = [69, 420, 666, 777, 619]
+                seeds = [1234, 9754, 7786, 1328, 6190]
             else:
                 seeds = [None]
 

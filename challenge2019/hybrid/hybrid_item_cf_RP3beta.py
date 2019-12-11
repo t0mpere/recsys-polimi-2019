@@ -11,7 +11,7 @@ class HybridItemCfRP3Beta(object):
     # .4011
     # .24
     #
-    def fit(self, URM, fit_once=False, alpha=.2117):
+    def fit(self, URM, fit_once=False, alpha=.2842):
         self.alpha = alpha
         if not (fit_once and self.fitted):
             RP3_beta = RP3betaRecommender()
