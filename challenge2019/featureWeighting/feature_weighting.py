@@ -180,8 +180,8 @@ class CFW_D_Similarity_Linalg():
         ICM_sub_class = utils.get_icm_sub_class_from_csv()
         ICM = sps.hstack([ICM_asset, ICM_sub_class, ICM_price])
 
-        similarity_object = Compute_Similarity_Python(ICM.T, topK=15, shrink=19, normalize=True,
-                                                      similarity="tanimoto")
+        similarity_object = Compute_Similarity_Python(ICM.T, topK=1000, shrink=19, normalize=True,
+                                                      similarity="cosine")
         S_matrix_target = similarity_object.compute_similarity()
 
         if (URM_train.shape[1] != ICM.shape[0]):
