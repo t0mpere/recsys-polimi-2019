@@ -64,6 +64,14 @@ class Utils(object):
         ICM_price = ICM_price.tocsr()
         return ICM_price
 
+    def get_icm_price_from_csv_single_column(self):
+        data_list = np.zeros(len(self.item_price_list))
+        data_list = data_list.astype(int)
+        ICM_price = sps.coo_matrix((self.item_price_list, (self.item_list_icm_price, data_list)), dtype=np.float64)
+        ICM_price = ICM_price.tocsr()
+        return ICM_price
+
+
     def get_icm_sub_class_from_csv(self):
         data_list = list(np.ones(len(self.item_sub_class_list)))
         ICM_sub_class = sps.coo_matrix((data_list, (self.item_list_icm_sub_class, self.item_sub_class_list)),

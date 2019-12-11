@@ -176,7 +176,7 @@ class CFW_D_Similarity_Linalg():
 
         utils = Utils()
         ICM_asset = utils.get_icm_asset_from_csv()
-        ICM_price = utils.get_icm_price_from_csv()
+        ICM_price = utils.get_icm_price_from_csv_single_column()
         ICM_sub_class = utils.get_icm_sub_class_from_csv()
         ICM = sps.hstack([ICM_asset, ICM_sub_class, ICM_price])
 
