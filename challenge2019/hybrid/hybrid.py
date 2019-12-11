@@ -64,7 +64,7 @@ class Hybrid(object):
 
             # self.recommender_SLIM_BPR.fit(URM)
             # self.recommenderItemCBF.fit(URM, knn_asset=100, knn_price=100, knn_sub_class=300, shrink=10)
-            self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            # self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 

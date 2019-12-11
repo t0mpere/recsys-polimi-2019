@@ -20,12 +20,12 @@ class Evaluator(object):
         self.train_test_split = 0.7
         self.recommender = None
 
-    def train_test_holdout(self, URM_all, train_perc=0.8):
+    def train_test_holdout(self, URM_all, seed, train_perc=0.8):
 
         numInteractions = URM_all.nnz
         URM_all = URM_all.tocoo()
         shape = URM_all.shape
-
+        np.random.seed(seed)
         train_mask = np.random.choice([True, False], numInteractions, p=[train_perc, 1 - train_perc])
 
         URM_train = sps.coo_matrix((URM_all.data[train_mask], (URM_all.row[train_mask], URM_all.col[train_mask])),
@@ -285,6 +285,7 @@ class Evaluator(object):
             recommended_items = recommender.recommend(user_id)
             item_left = len(self.URM_train[user_id].data)
             app = self.evaluate(user_id, recommended_items)
+
             if item_left == 0:
                 MAP_lenght[0] += app
                 user_lenght[0] += 1
@@ -321,16 +322,16 @@ class Evaluator(object):
 
             MAP_final += app
 
-        for i in range(0, 10, 1):
-            print("bagaglio until: {}".format(str(i*4)))
-            print(user_lenght[i])
+        for i in range(11):
             if user_lenght[i] > 0:
-                print("MAP@10 for these users: {}".format(str(MAP_lenght[i] / user_lenght[i])))
+                print("MAP@10 for users with < {} interactions: {}".format(i*4, str(MAP_lenght[i] / user_lenght[i])))
+
+                MAP_lenght[i] = MAP_lenght[i] / user_lenght[i]
             else:
-                print("0")
+                print("Empty category")
 
         MAP_final /= len(Utils.get_target_user_list())
-        return MAP_final
+        return MAP_final, MAP_lenght
 
     def find_epochs(self, recommender):
         for i in [5, 10, 20, 30, 50, 70, 100]:

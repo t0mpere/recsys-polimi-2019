@@ -159,7 +159,8 @@ class Runner(object):
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_SLIM_el)
 
                 elif evaluate_different_type_of_users:
-                    print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_length_of_user(recommender))))
+                    MAP, MAP_user = evaluator.fit_and_evaluate_recommender_on_different_length_of_user(recommender)
+                    print("MAP@10 : {}".format(MAP))
                 elif evaluate_different_age_of_users:
                     print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_age_of_user(recommender))))
                 elif evaluate_different_region_of_users:
