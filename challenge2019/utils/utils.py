@@ -167,10 +167,46 @@ class Utils(object):
         plt.plot(res_item[non_zero_item])
         plt.show()
 
+    def users_with_n_interactions(self, n, URM):
+        URM.eliminate_zeros()
+        res = []
+        for user in self.get_user_list():
+            if len(URM[user].data) > n:
+                res.append(user)
+        return res
+
+    def split_long_users(self, URM):
+        threshold = 50
+        users = self.users_with_n_interactions(threshold, URM)
+        URM_partial = sps.csr_matrix((len(users), URM.shape[1]))
+        i = 0
+        for user in users:
+            non_zero = URM[user].nonzero()
+            seed = np.random.randint(100, 10000)
+
+            rows, cols = non_zero
+            np.random.seed(seed)
+            np.random.shuffle(cols)
+
+            cols = cols[:int(len(cols)/2)]
+            URM[user, cols] = 0
+            URM_partial[i, cols] = 1
+            URM.eliminate_zeros()
+            i += 1
+
+        URM = sps.csc_matrix(sps.vstack((URM, URM_partial)))
+        print(len(URM.data))
+        URM.eliminate_zeros()
+        return URM.tocsr()
+
+
+
+
+
     def get_URM_BM_25(self, URM):
         return okapi_BM_25(URM)
 
 
 if __name__ == '__main__':
     utils = Utils()
-    utils.weight_interactions(utils.get_urm_from_csv())
+    utils.split_long_users(utils.get_urm_from_csv())
