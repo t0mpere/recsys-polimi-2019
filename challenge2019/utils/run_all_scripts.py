@@ -18,9 +18,12 @@ class RunAllScripts():
     def run_all_scripts(self):
         utils = Utils()
 
-        recommenders = [ItemCollaborativeFiltering(), ItemContentBasedFiltering(), SLIM_BPR_Cython(), TopPop(),
-                        HybridItemCfRP3Beta(), HybridItemCfP3alpha(), UserContentBasedFiltering(),
-                        UserCollaborativeFiltering(), Hybrid()]
+        recommenders = [ItemCollaborativeFiltering(),
+                        ItemContentBasedFiltering(),
+                        TopPop(),
+                        HybridItemCfRP3Beta(),
+                        UserCollaborativeFiltering(),
+                        Hybrid()]
 
         seeds = [1234, 9754, 7786, 1328, 6190]
 

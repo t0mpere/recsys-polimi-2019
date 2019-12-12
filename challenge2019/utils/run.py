@@ -24,7 +24,7 @@ class Runner(object):
             print("Starting testing phase..")
 
             if batch_evaluation:
-                seeds = [1234, 9754, 7786, 1328, 6190]
+                seeds = [123, 9754, 7786, 1328, 6190]
             else:
                 seeds = [None]
 
@@ -41,8 +41,8 @@ class Runner(object):
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
-                        "knn": (100, 1000),
-                        "shrink": (10, 1000)
+                        "knn": (5, 100),
+                        "shrink": (10, 100)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_cf)

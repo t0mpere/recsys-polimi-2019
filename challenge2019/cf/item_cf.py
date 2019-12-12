@@ -26,6 +26,7 @@ class ItemCollaborativeFiltering():
 
         self.URM = URM
         utils = Utils()
+        #self.URM = utils.split_long_users(URM)
         # self.URM = utils.get_URM_BM_25(self.URM) <--- worst
         # self.URM = utils.get_URM_tfidf(self.URM) <--- worst
 
