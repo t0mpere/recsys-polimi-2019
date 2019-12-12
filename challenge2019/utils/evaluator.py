@@ -430,7 +430,7 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf):
+    def optimize_weights_hybrid(self, item_cf, user_cf, item_cbf, SLIM_E, MF):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
@@ -469,7 +469,7 @@ class Evaluator(object):
 
         optimizer.maximize(
             init_points=5,
-            n_iter=100,
+            n_iter=36,
             acq="ei", xi=1e-4
         )
 

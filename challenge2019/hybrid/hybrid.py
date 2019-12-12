@@ -20,35 +20,40 @@ class Hybrid(object):
         self.URM = None
         self.SM_item = None
         self.recommenderUser = UserCollaborativeFiltering()
-        self.recommenderItem = ItemCollaborativeFiltering()
+        # self.recommenderItem = ItemCollaborativeFiltering()
         self.recommenderHybridItem = HybridItemCfRP3Beta()
-        self.recommender_SLIM_BPR = SLIM_BPR_Cython()
-        self.recommenderItemCBF = CFW_D_Similarity_Linalg_on_item()
-        self.recommenderUserCBF = UserContentBasedFiltering()
+        # self.recommender_SLIM_BPR = SLIM_BPR_Cython()
+        self.recommenderItemCBF = ItemContentBasedFiltering()
+        # self.recommenderUserCBF = UserContentBasedFiltering()
         self.recommenderTopPop = TopPop()
-        self.recommender_pureSVD = PureSVDRecommender()
+        # self.recommender_pureSVD = PureSVDRecommender()
         self.recommender_SLIM_E = SLIMElasticNetRecommender()
         self.recommender_ALS = AlternatingLeastSquare()
         self.divide_recommendations = divide_recommendations
         self.fitted = False
         self.weights = None
-        self.weights_long = {
-            "SLIM_E": 0.8866,
-            "item_cf": 1.997,
-            "user_cf": 0.01468,
-            "user_cbf": 0.001986,
-            "MF": 0.133
-        }
 
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
+            weights_best = {
+                "MF": 0.1816,
+                "SLIM_E": 0.7798,
+                "item_cbf": 0.1296,
+                "item_cf": 2.445,
+                "user_cf": 0.01628
+            }  # 0.05310  seed 1234, values found with random seed
             weights = {
-                "MF": 0.05284,
-                "SLIM_E": 0.9132,
-                "item_cf": 0.9955,
-                "user_cf": 0.005428,
-                "item_cbf": 0.00000
-            }
+                "MF": 0.009341,
+                "SLIM_E": 0.4219,
+                "item_cbf": 1,
+                "item_cf": 1,
+                "user_cf": 0.006311
+            }# 0.05321 seed 1234, values found witandom seed
+            weights_simple = {
+                "item_cbf": 0.9759,
+                "item_cf": 0.9924,
+                "user_cf": 0.006102
+            }  # 0.0527  seed 1234
 
         self.weights = weights
 
@@ -99,8 +104,8 @@ class Hybrid(object):
 
 
 if __name__ == '__main__':
-    recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=False,
-               batch_evaluation=False)
+    for i in range(0, 10):
+        recommender = Hybrid(divide_recommendations=False)
+        Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=False,
+                   batch_evaluation=False)
 
-    # best score on seed 69: MAP@10 : 0.03042666580147029
