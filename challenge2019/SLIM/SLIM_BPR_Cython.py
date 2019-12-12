@@ -80,7 +80,7 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
             **earlystopping_kwargs):
 
         utils = Utils()
-        self.URM_train = utils.split_long_users(URM)
+        self.URM_train = URM
         self.n_users, self.n_items = self.URM_train.shape
 
         # Import compiled module
