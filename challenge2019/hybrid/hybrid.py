@@ -35,14 +35,14 @@ class Hybrid(object):
 
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
-            weights_best = {
-                "MF": 0.1816,
-                "SLIM_E": 0.7798,
-                "item_cbf": 0.1296,
-                "item_cf": 2.445,
-                "user_cf": 0.01628
-            }  # 0.05310  seed 1234, values found with random seed
             weights = {
+                "MF": 0.02294,
+                "SLIM_E": 0.9962,
+                "item_cbf": 0.9306,
+                "item_cf": 0.9985,
+                "user_cf": 0.005833
+            }
+            weights_3484 = {
                 "MF": 0.009341,
                 "SLIM_E": 0.4219,
                 "item_cbf": 1,
@@ -78,7 +78,6 @@ class Hybrid(object):
     def recommend(self, user_id, at=10):
 
         normalized_ratings = False
-        # todo add weight and
 
         self.URM.eliminate_zeros()
         liked_items = self.URM[user_id]
@@ -104,8 +103,6 @@ class Hybrid(object):
 
 
 if __name__ == '__main__':
-    for i in range(0, 10):
-        recommender = Hybrid(divide_recommendations=False)
-        Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=False,
-                   batch_evaluation=False)
+    recommender = Hybrid(divide_recommendations=False)
+    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False, batch_evaluation=False)
 

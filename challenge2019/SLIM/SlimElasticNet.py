@@ -38,6 +38,7 @@ class SLIMElasticNetRecommender(object):
         self.topK = None
         self.positive_only = positive_only
         self.workers = workers
+        self.RECS = None
 
     """ 
         Fit given to each pool thread, to fit the W_sparse 
@@ -115,11 +116,10 @@ class SLIMElasticNetRecommender(object):
             cols.extend(cols_)
 
         self.W_sparse = sps.csc_matrix((values, (rows, cols)), shape=(n_items, n_items), dtype=np.float32)
+        self.RECS = self.URM_train.dot(self.W_sparse)
 
     def get_expected_ratings(self, user_id, normalized_ratings=False):
-        user_id = int(user_id)
-        user_profile = self.URM_train[user_id]
-        expected_ratings = user_profile.dot(self.W_sparse).toarray().ravel()
+        expected_ratings = self.RECS[user_id].toarray().ravel()
 
         # # EDIT
         # Normalize ratings

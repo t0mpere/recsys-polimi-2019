@@ -15,7 +15,7 @@ class Runner(object):
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
             batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False,
-            loo_split=False, find_weights_item_cbf=False):
+            find_weights_hybrid_all_item=False, loo_split=False, find_weights_hybrid_20=False, find_weights_item_cbf=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -92,6 +92,25 @@ class Runner(object):
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
 
+                elif find_weights_hybrid_20:
+                    weights = {
+                        "MF": (0, 1),
+                        "item": (0, 1),
+                        "user_cf": (0.004, 0.007),
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
+
+                elif find_weights_hybrid_all_item:
+                    weights = {
+                        "SLIM_E": (0, 1),
+                        "cf": (0, 1),
+                        "RP3": (0, 1),
+                        "cbf": (0, 1)
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid_all_item)
+
                 elif find_weights_item_cbf:
                     weights = {
                         "asset": (0, 1),
@@ -121,7 +140,8 @@ class Runner(object):
                     tuning_params = {
                         "n_factors": (300, 500),
                         "regularization": (0.01, 0.1),
-                        "iterations": (90, 120)
+                        "iterations": (90, 120),
+                        "alpha": (5, 50)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_ALS)

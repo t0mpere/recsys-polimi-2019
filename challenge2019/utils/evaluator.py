@@ -404,9 +404,9 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_hyperparameters_bo_ALS(self, n_factors, regularization, iterations):
+    def optimize_hyperparameters_bo_ALS(self, n_factors, regularization, iterations, alpha):
         recommender = self.recommender
-        recommender.fit(self.URM_train, n_factors=int(n_factors), regularization=regularization, iterations=int(iterations))
+        recommender.fit(self.URM_train, n_factors=int(n_factors), regularization=regularization, iterations=int(iterations), alpha=alpha)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
@@ -439,6 +439,29 @@ class Evaluator(object):
             "MF": MF,
             # "user_cbf": user_cbf,
             "item_cbf": item_cbf
+        }
+        recommender.fit(self.URM_train, fit_once=True, weights=weights)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_weights_hybrid(self, item, user_cf, MF):
+        recommender = self.recommender
+        weights = {
+            "user_cf": user_cf,
+            "MF": MF,
+            "item": item
+        }
+        recommender.fit(self.URM_train, fit_once=True, weights=weights)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_weights_hybrid_all_item(self, cf, SLIM_E, RP3, cbf):
+        recommender = self.recommender
+        weights = {
+            "SLIM_E": SLIM_E,
+            "RP3": RP3,
+            "cf": cf,
+            "cbf": cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
         MAP = self.evaluate_recommender(recommender)
