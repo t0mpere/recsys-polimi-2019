@@ -55,4 +55,4 @@ class HybridItemCfRP3Beta(object):
 
 if __name__ == '__main__':
     recommender = HybridItemCfRP3Beta()
-    Runner.run(recommender, True, evaluate_different_type_of_users=False, find_weights_hybrid_item=True, batch_evaluation=False)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False, batch_evaluation=True)

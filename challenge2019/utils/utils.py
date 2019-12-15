@@ -203,10 +203,18 @@ class Utils(object):
 
 
 
-    def get_URM_BM_25(self, URM):
-        return okapi_BM_25(URM)
+    def get_URM_BM_25(self, URM, B=0.75, K1=1):
+        return okapi_BM_25(URM, K1=K1, B=B)
 
+    def plot_item_per_user(self, URM):
+        import matplotlib.pyplot as plt
+        item_list = list(np.arange(URM.shape[1]))
+        data = list()
+        for i in tqdm(item_list):
+            data.append(len(URM[:, i].data))
+        plt.plot(data)
+        plt.show()
 
 if __name__ == '__main__':
     utils = Utils()
-    utils.split_long_users(utils.get_urm_from_csv())
+    utils.plot_item_per_user(utils.get_urm_from_csv())

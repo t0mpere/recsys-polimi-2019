@@ -276,12 +276,13 @@ class Evaluator(object):
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
 
-    def fit_and_evaluate_recommender_on_different_length_of_user(self, recommender):
+    def evaluate_recommender_on_different_length_of_user(self, recommender, fit=True):
         # used to evaluate an already trained model
         MAP_lenght = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         user_lenght = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
-        recommender.fit(self.URM_train)
+        if fit:
+            recommender.fit(self.URM_train)
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             item_left = len(self.URM_train[user_id].data)
@@ -314,7 +315,7 @@ class Evaluator(object):
             elif item_left < 32:
                 MAP_lenght[8] += app
                 user_lenght[8] += 1
-            elif item_left < 36:
+            elif item_left < 50:
                 MAP_lenght[9] += app
                 user_lenght[9] += 1
             else:
@@ -395,8 +396,8 @@ class Evaluator(object):
     def optimize_hyperparameters_bo_RP3beta(self, topk, alpha, beta):
         recommender = self.recommender
         recommender.fit(self.URM_train, topK=int(topk), alpha=alpha, beta=beta)
-        MAP = self.evaluate_recommender(recommender)
-        return MAP
+        MAP, MAP_Long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
+        return MAP_Long[10]
 
     def optimize_hyperparameters_bo_pure_svd(self, num_factors):
         recommender = self.recommender
@@ -472,6 +473,12 @@ class Evaluator(object):
         recommender.fit(self.URM_train, alpha=alpha, fit_once=True)
         MAP = self.evaluate_recommender(recommender)
         return MAP
+
+    def optimize_long_item_cf(self, knn, shrink):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
+        MAP, MAP_lenght = self.evaluate_recommender_on_different_length_of_user(recommender,fit=False)
+        return MAP_lenght[10]
 
     #
     #

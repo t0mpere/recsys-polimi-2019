@@ -41,11 +41,11 @@ class Runner(object):
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
-                        "knn": (5, 100),
-                        "shrink": (10, 100)
+                        "knn": (1, 37),
+                        "shrink": (1, 35)
                     }
                     evaluator.set_recommender_to_tune(recommender)
-                    evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_cf)
+                    evaluator.optimize_bo(tuning_params, evaluator.optimize_long_item_cf)
 
                 elif find_hyper_parameters_item_cbf:
                     tuning_params = {
@@ -74,9 +74,9 @@ class Runner(object):
 
                 elif find_hyper_parameters_RP3beta:
                     tuning_params = {
-                        "topk": (1, 200),
-                        "alpha": (0.01, 1),
-                        "beta": (0.01, 1)
+                        "topk": (70, 150),
+                        "alpha": (0.01, 0.9),
+                        "beta": (0.01, 0.9)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_RP3beta)
@@ -180,7 +180,7 @@ class Runner(object):
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_SLIM_el)
 
                 elif evaluate_different_type_of_users:
-                    MAP, MAP_user = evaluator.fit_and_evaluate_recommender_on_different_length_of_user(recommender)
+                    MAP, MAP_user = evaluator.evaluate_recommender_on_different_length_of_user(recommender)
                     print("MAP@10 : {}".format(MAP))
                 elif evaluate_different_age_of_users:
                     print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_age_of_user(recommender))))

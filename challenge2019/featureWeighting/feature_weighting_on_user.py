@@ -24,7 +24,7 @@ class CFW_D_Similarity_Linalg_on_item():
 
     def __init__(self):
         self.S_matrix_target = None
-        self.ICM = None
+        self.UCM = None
         self.URM_train = None
 
         self.n_items = None
@@ -62,7 +62,7 @@ class CFW_D_Similarity_Linalg_on_item():
         start_time_batch = time.time()
 
         # Here is important only the structure
-        self.similarity = Compute_Similarity_Python(self.ICM.T, shrink=120, topK=5, normalize=False)
+        self.similarity = Compute_Similarity_Python(self.UCM.T, shrink=120, topK=5, normalize=False)
         S_matrix_contentKNN = self.similarity.compute_similarity()
         S_matrix_contentKNN = check_matrix(S_matrix_contentKNN, "csr")
 
@@ -74,7 +74,7 @@ class CFW_D_Similarity_Linalg_on_item():
 
         if self.normalize_similarity:
             # Compute sum of squared
-            sum_of_squared_features = np.array(self.ICM.T.power(2).sum(axis=0)).ravel()
+            sum_of_squared_features = np.array(self.UCM.T.power(2).sum(axis=0)).ravel()
             sum_of_squared_features = np.sqrt(sum_of_squared_features)
 
         num_common_coordinates = 0
@@ -168,8 +168,8 @@ class CFW_D_Similarity_Linalg_on_item():
         collaborative_sum = sum(self.S_matrix_target.data)
 
         self._writeLog(self.RECOMMENDER_NAME + ": Nonzero collaborative cell sum is: {:.2E}, average is: {:.2E}, "
-                                               "average over all collaborative data is {:.2E}".format(
-            data_sum, data_sum / data_nnz, collaborative_sum / collaborative_nnz))
+                                              "average over all collaborative data is {:.2E}".format(
+          data_sum, data_sum / data_nnz, collaborative_sum / collaborative_nnz))
 
     def fit(self, URM_train, show_max_performance=False, logFile=None, loss_tolerance=1e-6,
             iteration_limit=50000, damp_coeff=0.1, topK=20, add_zeros_quota=0.1, normalize_similarity=False):
@@ -177,36 +177,36 @@ class CFW_D_Similarity_Linalg_on_item():
         utils = Utils()
         UCM_asset = utils.get_ucm_region_from_csv()
         UCM_price = utils.get_ucm_age_from_csv()
-        ICM = sps.hstack([UCM_asset, UCM_price])
+        UCM = sps.hstack([UCM_asset, UCM_price])
 
 
-        similarity_object = Compute_Similarity_Python(URM_train.T, topK=15, shrink=19, normalize=True,
-                                                      similarity="cosine")
+        similarity_object = Compute_Similarity_Python(UCM.T, topK=784, shrink=10, normalize=True,
+                                                      similarity="pearson")
         S_matrix_target = similarity_object.compute_similarity()
 
-        if (URM_train.shape[0] != ICM.shape[0]):
+        if (URM_train.shape[0] != UCM.shape[0]):
             raise ValueError(
                 "Number of items not consistent. URM contains {} but ICM contains {}".format(URM_train.shape[1],
-                                                                                             ICM.shape[0]))
+                                                                                             UCM.shape[0]))
 
         if (S_matrix_target.shape[0] != S_matrix_target.shape[1]):
             raise ValueError(
                 "Items imilarity matrix is not square: rows are {}, columns are {}".format(S_matrix_target.shape[0],
                                                                                            S_matrix_target.shape[1]))
 
-        if (S_matrix_target.shape[0] != ICM.shape[0]):
+        if (S_matrix_target.shape[0] != UCM.shape[0]):
             raise ValueError("Number of items not consistent. S_matrix contains {} but ICM contains {}".format(
                 S_matrix_target.shape[0],
-                ICM.shape[0]))
+                UCM.shape[0]))
 
         self.URM_train = URM_train
 
         self.S_matrix_target = check_matrix(S_matrix_target, 'csr')
-        self.ICM = check_matrix(ICM, 'csr')
+        self.UCM = check_matrix(UCM, 'csr')
 
         self.n_items = self.URM_train.shape[1]
         self.n_users = self.URM_train.shape[0]
-        self.n_features = self.ICM.shape[1]
+        self.n_features = self.UCM.shape[1]
 
         self.sparse_weights = True
 
@@ -218,7 +218,7 @@ class CFW_D_Similarity_Linalg_on_item():
 
         self._generateTrainData_low_ram()
 
-        commonFeatures = self.ICM[self.row_list].multiply(self.ICM[self.col_list])
+        commonFeatures = self.UCM[self.row_list].multiply(self.UCM[self.col_list])
 
         linalg_result = linalg.lsqr(commonFeatures, self.data_list, show=False, atol=loss_tolerance,
                                     btol=loss_tolerance,
@@ -242,7 +242,7 @@ class CFW_D_Similarity_Linalg_on_item():
         else:
             feature_weights = self.D_best
 
-        self.similarity = Compute_Similarity_Python(self.ICM.T, shrink=0, topK=self.topK,
+        self.similarity = Compute_Similarity_Python(self.URM_train, shrink=0, topK=self.topK,
                                              normalize=self.normalize_similarity, row_weights=feature_weights)
 
         self.W_sparse = self.similarity.compute_similarity()

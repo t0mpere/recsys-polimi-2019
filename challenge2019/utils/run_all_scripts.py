@@ -35,7 +35,7 @@ class RunAllScripts():
             import matplotlib.pyplot as plt
             for recommender in recommenders:
 
-                MAP, MAP_User = evaluator.fit_and_evaluate_recommender_on_different_length_of_user(recommender)
+                MAP, MAP_User = evaluator.evaluate_recommender_on_different_length_of_user(recommender)
                 res[recommender.__class__] = MAP_User
                 plt.plot(MAP_User, label=recommender.__class__)
 

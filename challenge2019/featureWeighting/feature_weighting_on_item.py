@@ -221,7 +221,7 @@ class CFW_D_Similarity_Linalg_on_item():
 
         commonFeatures = self.ICM[self.row_list].multiply(self.ICM[self.col_list])
 
-        linalg_result = linalg.lsqr(commonFeatures, self.data_list, show=False, atol=loss_tolerance,
+        linalg_result = linalg.lsqr(commonFeatures, self.data_list, show=True, atol=loss_tolerance,
                                     btol=loss_tolerance,
                                     iter_lim=iteration_limit, damp=damp_coeff)
 

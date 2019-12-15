@@ -1,6 +1,7 @@
 import numpy as np
 
-from challenge2019.Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython as Compute_Similarity_Python
+from challenge2019.Base.Similarity.Compute_Similarity_Cython import \
+    Compute_Similarity_Cython as Compute_Similarity_Python
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
@@ -26,9 +27,9 @@ class ItemCollaborativeFiltering():
 
         self.URM = URM
         utils = Utils()
-        #self.URM = utils.split_long_users(URM)
-        # self.URM = utils.get_URM_BM_25(self.URM) <--- worst
-        # self.URM = utils.get_URM_tfidf(self.URM) <--- worst
+        # self.URM = utils.split_long_users(URM)
+        # self.URM = utils.get_URM_BM_25(self.URM, K1=3, B=0.9) #<--- worst
+        # self.URM = utils.get_URM_tfidf(self.URM) #<--- worst
 
         self.SM_item = self.create_similarity_matrix()
         self.RECS = self.URM.dot(self.SM_item)
@@ -57,6 +58,8 @@ class ItemCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
+               batch_evaluation=True)
 
-#0.02888 with seed 69
+# 0.02888 with seed 69
+# 0.19801094350783785 long seed 123
