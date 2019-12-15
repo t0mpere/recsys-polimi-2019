@@ -11,6 +11,7 @@ class TopPop():
         self.URM = None
 
     def fit(self, URM):
+        print("Starting calculating TOP_POP")
         self.URM = URM
         self.occurrencies = np.array(np.zeros(self.URM.shape[1]))
         for i in range(0, self.URM.shape[1]):
@@ -26,7 +27,6 @@ class TopPop():
             expected_ratings[item] = data[recommended_items.index(item)]
         return expected_ratings
 
-
     def recommend(self, user_id, at=10):
         expected_ratings = self.occurrencies
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
@@ -39,4 +39,4 @@ class TopPop():
 
 if __name__ == '__main__':
     recommender = TopPop()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True,batch_evaluation=True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True)

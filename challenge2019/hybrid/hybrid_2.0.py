@@ -25,6 +25,11 @@ class Hybrid(object):
                 "item": 0.7551,
                 "user_cf": 0.006994
             }  # 0.05236
+            weights_to_try_in_submit = {
+                "MF": 0.005171,
+                "item": 0.9976,
+                "user_cf": 0.00531
+            }  # 0.05236
 
         self.weights = weights
 
@@ -66,4 +71,4 @@ class Hybrid(object):
 if __name__ == '__main__':
     for i in range(0, 10):
         recommender = Hybrid(divide_recommendations=False)
-        Runner.run(recommender, True, find_weights_hybrid_20=False, batch_evaluation=True)
+        Runner.run(recommender, True, find_weights_hybrid_20=True, batch_evaluation=False)

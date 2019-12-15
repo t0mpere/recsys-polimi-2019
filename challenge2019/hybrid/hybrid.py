@@ -24,7 +24,7 @@ class Hybrid(object):
         self.recommenderHybridItem = HybridItemCfRP3Beta()
         # self.recommender_SLIM_BPR = SLIM_BPR_Cython()
         self.recommenderItemCBF = ItemContentBasedFiltering()
-        # self.recommenderUserCBF = UserContentBasedFiltering()
+        self.recommenderUserCBF = UserContentBasedFiltering()
         self.recommenderTopPop = TopPop()
         # self.recommender_pureSVD = PureSVDRecommender()
         self.recommender_SLIM_E = SLIMElasticNetRecommender()
@@ -35,20 +35,27 @@ class Hybrid(object):
 
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
+            weights_bad = {
+                "MF": 0.01249,
+                "SLIM_E": 0.03593,
+                "item_cbf": 0.178,
+                "item_cf": 0.9892,
+                "user_cf": 0.004807
+            }
             weights = {
                 "MF": 0.02294,
                 "SLIM_E": 0.9962,
                 "item_cbf": 0.9306,
                 "item_cf": 0.9985,
                 "user_cf": 0.005833
-            }
+            }  # 0.052? best online2
             weights_3484 = {
                 "MF": 0.009341,
                 "SLIM_E": 0.4219,
                 "item_cbf": 1,
                 "item_cf": 1,
                 "user_cf": 0.006311
-            }# 0.05321 seed 1234, values found witandom seed
+            }  # 0.05321 seed 1234, values found witandom seed
             weights_simple = {
                 "item_cbf": 0.9759,
                 "item_cf": 0.9924,
@@ -71,7 +78,7 @@ class Hybrid(object):
 
             # self.recommender_SLIM_BPR.fit(URM)
             self.recommenderItemCBF.fit(URM)
-            # self.recommenderUserCBF.fit(URM, knn_age=700, knn_region=700, shrink=20)
+            self.recommenderUserCBF.fit(URM)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
 
@@ -83,7 +90,17 @@ class Hybrid(object):
         liked_items = self.URM[user_id]
 
         if len(liked_items.data) == 0:
-            expected_ratings = self.recommenderTopPop.get_expected_ratings(user_id)
+            recommended_items = []
+            expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=15)
+            expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=15)
+            recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
+
+            i = 0
+            while len(recommended_items) < 10:
+                if expected_items_top_pop[i] not in recommended_items:
+                    recommended_items.append(expected_items_top_pop[i])
+                i += 1
+
         else:
             expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
                                                                                                    normalized_ratings=normalized_ratings) \
@@ -94,15 +111,14 @@ class Hybrid(object):
                                + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id) \
                                + self.weights["item_cbf"] * self.recommenderItemCBF.get_expected_ratings(user_id)
 
-        recommended_items = np.flip(np.argsort(expected_ratings), 0)
+            recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
-        unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
+            unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
                                     assume_unique=True, invert=True)
-        recommended_items = recommended_items[unseen_items_mask]
+            recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, False, find_weights_hybrid=True, evaluate_different_type_of_users=False, batch_evaluation=False)
-
+    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=True, batch_evaluation=True)

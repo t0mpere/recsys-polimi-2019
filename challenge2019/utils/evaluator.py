@@ -444,7 +444,7 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item, user_cf, MF):
+    def optimize_weights_hybrid_20(self, item, user_cf, MF):
         recommender = self.recommender
         weights = {
             "user_cf": user_cf,

@@ -99,7 +99,7 @@ class Runner(object):
                         "user_cf": (0.004, 0.007),
                     }
                     evaluator.set_recommender_to_tune(recommender)
-                    evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
+                    evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid_20)
 
                 elif find_weights_hybrid_all_item:
                     weights = {
