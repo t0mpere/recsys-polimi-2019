@@ -4,6 +4,7 @@ import implicit
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
+
 class AlternatingLeastSquare:
     """
     ALS implemented with implicit following guideline of
@@ -22,12 +23,12 @@ class AlternatingLeastSquare:
         self.regularization = None
         self.iterations = None
 
-    def fit(self, URM, n_factors=300, regularization=0.08, iterations=90, alpha=24):
+    def fit(self, URM, n_factors=300, regularization=0.08, iterations=30, alpha=24):
         self.URM = URM
 
         utils = Utils()
         # self.URM = utils.get_URM_BM_25(self.URM)
-        self.URM = utils.get_URM_tfidf(self.URM)  #good
+        self.URM = utils.get_URM_tfidf(self.URM)  # good
 
         self.n_factors = n_factors
         self.regularization = regularization
@@ -36,8 +37,9 @@ class AlternatingLeastSquare:
         sparse_item_user = self.URM.T
 
         # Initialize the als model and fit it using the sparse item-user matrix
-        model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization, iterations=self.iterations,use_gpu=False)
-
+        model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization,
+                                                     iterations=self.iterations, use_gpu=False,
+                                                     calculate_training_loss=True)
 
         alpha_val = alpha
         # Calculate the confidence by multiplying it by our alpha value.
@@ -45,12 +47,11 @@ class AlternatingLeastSquare:
         data_conf = (sparse_item_user * alpha_val).astype('double')
 
         # Fit the model
-        model.fit(data_conf)
+        model.fit(data_conf, show_progress=True)
 
         # Get the user and item vectors from our trained model
         self.user_factors = model.user_factors
         self.item_factors = model.item_factors
-
 
     def get_expected_ratings(self, user_id):
         scores = np.dot(self.user_factors[user_id], self.item_factors.T)
@@ -70,7 +71,8 @@ class AlternatingLeastSquare:
 
 
 if __name__ == '__main__':
-     recommender = AlternatingLeastSquare()
-     Runner.run(recommender, True, find_hyper_parameters_ALS=True, batch_evaluation=False)
+    recommender = AlternatingLeastSquare()
+    Runner.run(recommender, True, find_hyper_parameters_ALS=False, evaluate_different_type_of_users=True,
+               batch_evaluation=True, split='random_all')
 
-#0.02331 with seed 69
+# 0.02331 with seed 69

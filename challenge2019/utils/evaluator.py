@@ -22,6 +22,7 @@ class Evaluator(object):
 
     def train_test_holdout(self, URM_all, seed, train_perc=0.8):
 
+        print("Splitting using 2080 \n Splitting...")
         numInteractions = URM_all.nnz
         URM_all = URM_all.tocoo()
         shape = URM_all.shape
@@ -84,7 +85,7 @@ class Evaluator(object):
     def random_split_to_all_users(self, URM, seed):
         user_indexes = np.arange(URM.shape[0])
         tmp = 0
-        print("MATTEO I COPIA INCOLLA\n---------------------")
+        print("Splitting, 20% of all users\n---------------------")
         for user_index in tqdm(user_indexes, desc="Splitting dataset: "):
             # FOREACH USER
             item_left = len(URM[user_index].data)

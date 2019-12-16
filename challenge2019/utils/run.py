@@ -15,7 +15,7 @@ class Runner(object):
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
             batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False,
-            find_weights_hybrid_all_item=False, loo_split=False, find_weights_hybrid_20=False, find_weights_item_cbf=False):
+            find_weights_hybrid_all_item=False, split='random', find_weights_hybrid_20=False, find_weights_item_cbf=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -34,9 +34,14 @@ class Runner(object):
                 URM = utils.get_urm_from_csv()
                 evaluator = Evaluator()
 
-                if loo_split:
+                assert split in ['loo', 'random', 'random_all', '2080']
+                if split is 'loo':
                     evaluator.leave_one_out(URM, seed)
-                else:
+                elif split is 'random_all':
+                    evaluator.random_split_to_all_users(URM, seed)
+                elif split is 'random':
+                    evaluator.random_split(URM, seed)
+                elif split is '2080':
                     evaluator.train_test_holdout(URM, seed)
 
                 if find_hyper_parameters_cf:

@@ -67,7 +67,7 @@ class SLIMElasticNetRecommender(object):
         rows = []
         cols = []
         if (currentItem % 3000) == 0:
-            print(currentItem/iterations * 100)
+            print("Progress: {}%".format(int(currentItem/iterations * 100)))
         if np.max(y) > 0:
 
             model.fit(X_j, y)
@@ -98,7 +98,7 @@ class SLIMElasticNetRecommender(object):
         self.l1_ratio = l1_ratio
 
         n_items = self.URM_train.shape[1]
-        print("Iterating for " + str(n_items) + "times")
+        print("Iterating for " + str(n_items) + " items")
         warm_users = list(range(0, n_items))
         # something wrong here
 

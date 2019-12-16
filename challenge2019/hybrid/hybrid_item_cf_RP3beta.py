@@ -14,15 +14,23 @@ class HybridItemCfRP3Beta(object):
     def fit(self, URM, fit_once=False, alpha=.2842):
         self.alpha = alpha
         if not (fit_once and self.fitted):
-            RP3_beta = RP3betaRecommender()
-            RP3_beta.fit(URM, normalize_similarity=True)
-            self.SM_cf = self.create_similarity_matrix(URM, 15, 19, similarity="tanimoto")
-            self.SM_P3alpha = RP3_beta.get_W()
             self.URM = URM
+
             utils = Utils()
+
+            self.ICM = utils.get_icm()
+            print(self.URM.shape, self.ICM.transpose().shape)
+            self.URM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
+
+            RP3_beta = RP3betaRecommender()
+            RP3_beta.fit(self.URM, normalize_similarity=True)
+
+            self.SM_cf = self.create_similarity_matrix(self.URM, 15, 19, similarity="tanimoto")
+            self.SM_RP3beta = RP3_beta.get_W()
+
             self.fitted = True
 
-        self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_P3alpha
+        self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_RP3beta
 
         self.RECS = self.URM.dot(self.SM)
 
@@ -55,4 +63,4 @@ class HybridItemCfRP3Beta(object):
 
 if __name__ == '__main__':
     recommender = HybridItemCfRP3Beta()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False, batch_evaluation=True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False, batch_evaluation=True, split='random')

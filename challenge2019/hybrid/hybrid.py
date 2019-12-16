@@ -98,18 +98,25 @@ class Hybrid(object):
                 recommended_items = np.concatenate(
                     (intersection, expected_items_top_pop[:5], expected_items_user_cbf[:5]))
 
-
         # elif len(liked_items.data) > 50:
         #   expected_ratings = self.RP3Beta.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
         else:
-            expected_ratings = self.weights["user_cf"] * self.recommenderUser.get_expected_ratings(user_id,
-                                                                                                   normalized_ratings=normalized_ratings) \
-                               + self.weights["item_cf"] * self.recommenderHybridItem.get_expected_ratings(user_id,
-                                                                                                           normalized_ratings=normalized_ratings) \
-                               + self.weights["SLIM_E"] * self.recommender_SLIM_E.get_expected_ratings(user_id,
-                                                                                                       normalized_ratings=normalized_ratings) \
-                               + self.weights["MF"] * self.recommender_ALS.get_expected_ratings(user_id) \
-                               + self.weights["item_cbf"] * self.recommenderItemCBF.get_expected_ratings(user_id)
+
+            er_item_cf = self.recommenderHybridItem.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
+            er_user_cf = self.recommenderUser.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
+            er_SLIM_E = self.recommender_SLIM_E.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
+            er_MF = self.recommender_ALS.get_expected_ratings(user_id)
+            er_item_cbf = self.recommenderItemCBF.get_expected_ratings(user_id)
+
+            # print("liked items: {} Sums: item_cf {}, user_cf {}, SLIM {}, MF {}, item_cbf {}".format(
+            #    len(liked_items.data),
+            #    er_item_cf.sum(), er_user_cf.sum(), er_SLIM_E.sum(), er_MF.sum(), er_item_cbf.sum()))
+
+            expected_ratings = self.weights["user_cf"] * er_user_cf \
+                               + self.weights["item_cf"] * er_item_cf \
+                               + self.weights["SLIM_E"] * er_SLIM_E \
+                               + self.weights["MF"] * er_MF \
+                               + self.weights["item_cbf"] * er_item_cbf
 
             recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -121,8 +128,8 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=True,
-               batch_evaluation=True)
+    Runner.run(recommender, False, find_weights_hybrid=False, evaluate_different_type_of_users=True,
+               batch_evaluation=True, split='random_all')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029
     # 0.03298346361837503

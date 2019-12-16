@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse as sps
 
 from challenge2019.Base.Similarity.Compute_Similarity_Cython import \
     Compute_Similarity_Cython as Compute_Similarity_Python
@@ -27,6 +28,10 @@ class ItemCollaborativeFiltering():
 
         self.URM = URM
         utils = Utils()
+        self.ICM = utils.get_icm()
+        print(self.URM.shape,self.ICM.transpose().shape)
+        self.URM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
+
         # self.URM = utils.split_long_users(URM)
         # self.URM = utils.get_URM_BM_25(self.URM, K1=3, B=0.9) #<--- worst
         # self.URM = utils.get_URM_tfidf(self.URM) #<--- worst
@@ -37,6 +42,7 @@ class ItemCollaborativeFiltering():
     def get_expected_ratings(self, user_id, normalized_ratings=False):
         expected_ratings = self.RECS[user_id].todense()
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
+
         # Normalize ratings
         if normalized_ratings and np.amax(expected_ratings) > 0:
             expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
@@ -59,7 +65,7 @@ class ItemCollaborativeFiltering():
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
     Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
-               batch_evaluation=True)
+               batch_evaluation=True, split='random')
 
 # 0.02888 with seed 69
 # 0.19801094350783785 long seed 123

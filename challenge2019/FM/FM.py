@@ -10,20 +10,29 @@ class FM(object):
     def __init__(self):
         self.utils = Utils()
         self.URM = None
-        self.model = LightFM(no_components=100, loss='warp-kos')
+        self.model = LightFM(no_components=100, loss='warp-kos', k=5, n=10, learning_schedule='adagrad',
+                             learning_rate=0.005, rho=0.95, epsilon=1e-06, item_alpha=0.1, user_alpha=0.1,
+                             max_sampled=10, random_state=None)
+
         self.ICM_asset = self.utils.get_icm_asset_from_csv()
         self.ICM_price = self.utils.get_icm_price_from_csv()
-        self.ICM_sub_class = self.utils.get_icm_sub_class_from_csv()
-        self.combined_ICM = sps.hstack([self.ICM_asset, self.ICM_sub_class, self.ICM_price])
+        self.ICM_sub_class = self.utils.get_icm_price_from_csv_single_column()
+        self.combined_ICM = sps.hstack((self.ICM_asset, self.ICM_sub_class, self.ICM_price))
+        self.UCM_region = self.utils.get_ucm_region_from_csv()
+        self.UCM_age = self.utils.get_ucm_age_from_csv()
+        self.combined_UCM = sps.hstack((self.UCM_region, self.UCM_age))
 
     def fit(self, URM):
         self.URM = URM
-        self.model.fit(URM.tocoo(), item_features=self.ICM_sub_class.tocsr(), epochs=30, num_threads=12, verbose=True)
+        self.model.fit(URM.tocoo(), item_features=self.combined_ICM.tocsr(), user_features=self.combined_UCM.tocsr(),
+                       epochs=4, num_threads=12, verbose=True)
 
     def get_expected_ratings(self, user_id, normalized_ratings=False):
-        expected_ratings = self.model.predict(user_id, np.arange(self.ICM_sub_class.shape[0]),
-                                              item_features=self.ICM_sub_class.tocsr())
-        return expected_ratings
+        exp_ratings = self.model.predict(user_id, np.arange(self.URM.shape[1]),
+                                         item_features=self.combined_ICM.tocsr(),
+                                         user_features=self.combined_UCM.tocsr())
+        print(max(exp_ratings), min(exp_ratings), self.URM.shape[1])
+        return exp_ratings
 
     def recommend(self, user_id, at=10):
         expected_ratings = self.get_expected_ratings(user_id)
@@ -33,7 +42,7 @@ class FM(object):
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
                                     assume_unique=True, invert=True)
         recommended_items = recommended_items[unseen_items_mask]
-        print(recommended_items)
+        # print(recommended_items)
         return recommended_items[0:at]
 
 

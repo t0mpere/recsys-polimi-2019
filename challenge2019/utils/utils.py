@@ -79,6 +79,9 @@ class Utils(object):
         ICM_sub_class = ICM_sub_class.tocsr()
         return ICM_sub_class
 
+    def get_icm(self):
+        return sps.hstack([self.get_icm_asset_from_csv(), self.get_icm_sub_class_from_csv()]).tocsr()
+
     def get_ucm_age_from_csv(self):
         data_list = np.zeros(len(self.user_age_list))
         data_list = data_list.astype(int)
