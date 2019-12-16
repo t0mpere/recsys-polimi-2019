@@ -46,8 +46,8 @@ class Runner(object):
 
                 if find_hyper_parameters_cf:
                     tuning_params = {
-                        "knn": (1, 37),
-                        "shrink": (1, 35)
+                        "knn": (1, 100),
+                        "shrink": (1, 100)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_long_item_cf)
@@ -64,7 +64,7 @@ class Runner(object):
 
                 elif find_weights_hybrid_item:
                     tuning_params = {
-                        "alpha": (0, 1),
+                        "alpha": (0.3, 0.5),
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_weights_hybrid_item)

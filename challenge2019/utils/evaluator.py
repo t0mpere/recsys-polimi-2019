@@ -398,7 +398,7 @@ class Evaluator(object):
         recommender = self.recommender
         recommender.fit(self.URM_train, topK=int(topk), alpha=alpha, beta=beta)
         MAP, MAP_Long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
-        return MAP_Long[10]
+        return MAP
 
     def optimize_hyperparameters_bo_pure_svd(self, num_factors):
         recommender = self.recommender
@@ -443,7 +443,7 @@ class Evaluator(object):
             "item_cbf": item_cbf
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
-        MAP = self.evaluate_recommender(recommender)
+        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender,fit=False)
         return MAP
 
     def optimize_weights_hybrid_20(self, item, user_cf, MF):
@@ -479,7 +479,7 @@ class Evaluator(object):
         recommender = self.recommender
         recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
         MAP, MAP_lenght = self.evaluate_recommender_on_different_length_of_user(recommender,fit=False)
-        return MAP_lenght[10]
+        return MAP
 
     #
     #

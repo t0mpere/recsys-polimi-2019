@@ -79,8 +79,13 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
             sgd_mode='sgd', gamma=0.995, beta_1=0.9, beta_2=0.999,
             **earlystopping_kwargs):
 
-        utils = Utils()
         self.URM_train = URM
+        utils = Utils()
+
+        self.ICM = utils.get_icm()
+        print(self.URM_train.shape, self.ICM.transpose().shape)
+        self.URM_train = sps.vstack([self.URM_train, self.ICM.transpose()]).tocsr()
+
         self.n_users, self.n_items = self.URM_train.shape
 
         # Import compiled module
@@ -231,5 +236,5 @@ class SLIM_BPR_Cython(Incremental_Training_Early_Stopping):
 
 if __name__ == '__main__':
     recommender = SLIM_BPR_Cython(recompile_cython=False)
-    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=True, evaluate_different_type_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=True, batch_evaluation=True)
 # MAP@10 : 0.025514333334597267

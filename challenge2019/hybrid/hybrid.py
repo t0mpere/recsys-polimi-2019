@@ -128,7 +128,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, False, find_weights_hybrid=False, evaluate_different_type_of_users=True,
+    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=True,
                batch_evaluation=True, split='random_all')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029

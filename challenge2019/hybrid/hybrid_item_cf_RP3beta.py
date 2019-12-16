@@ -2,16 +2,18 @@ from challenge2019.GraphBased.RP3beta import RP3betaRecommender
 from challenge2019.cbf.user_cbf import *
 from challenge2019.utils.utils import Utils
 
+
 class HybridItemCfRP3Beta(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
         self.SM_item = None
         self.fitted = False
+
     # .4011
     # .24
     #
-    def fit(self, URM, fit_once=False, alpha=.2842):
+    def fit(self, URM, fit_once=False, alpha=0.4413):
         self.alpha = alpha
         if not (fit_once and self.fitted):
             self.URM = URM
@@ -25,15 +27,14 @@ class HybridItemCfRP3Beta(object):
             RP3_beta = RP3betaRecommender()
             RP3_beta.fit(self.URM, normalize_similarity=True)
 
-            self.SM_cf = self.create_similarity_matrix(self.URM, 15, 19, similarity="tanimoto")
+            self.SM_cf = self.create_similarity_matrix(self.URM, 5, 44, similarity="tanimoto")
             self.SM_RP3beta = RP3_beta.get_W()
 
             self.fitted = True
 
-        self.SM = self.alpha * self.SM_cf + (1-self.alpha) * self.SM_RP3beta
+        self.SM = self.alpha * self.SM_cf + (1 - self.alpha) * self.SM_RP3beta
 
         self.RECS = self.URM.dot(self.SM)
-
 
     def create_similarity_matrix(self, URM, knn, shrink, similarity="cosine"):
         similarity_object = Compute_Similarity_Python(URM, topK=knn, shrink=shrink, normalize=True,
@@ -54,13 +55,14 @@ class HybridItemCfRP3Beta(object):
         expected_ratings = self.RECS[user_id].todense()
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
-
         # Normalize ratings
         if normalized_ratings and np.amax(expected_ratings) > 0:
             expected_ratings = expected_ratings / np.linalg.norm(expected_ratings)
 
         return expected_ratings
 
+
 if __name__ == '__main__':
     recommender = HybridItemCfRP3Beta()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False, batch_evaluation=True, split='random')
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=True,
+               batch_evaluation=True, split='random')
