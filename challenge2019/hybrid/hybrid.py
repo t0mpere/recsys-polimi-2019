@@ -1,4 +1,4 @@
-from GraphBased.RP3beta import RP3betaRecommender
+from challenge2019.GraphBased.RP3beta import RP3betaRecommender
 from challenge2019.MF.ALS import AlternatingLeastSquare
 from challenge2019.MF.pureSVD import PureSVDRecommender
 from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
