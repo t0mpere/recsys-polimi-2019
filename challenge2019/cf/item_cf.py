@@ -65,7 +65,7 @@ class ItemCollaborativeFiltering():
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
     Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
-               batch_evaluation=True, split='random')
+               batch_evaluation=True, split='2080')
 
 # 0.02888 with seed 69
 # 0.19801094350783785 long seed 123

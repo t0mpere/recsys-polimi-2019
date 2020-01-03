@@ -15,7 +15,7 @@ class HybridItemCfRP3Beta(object):
 
         self.RP3_beta_short = RP3betaRecommender()
         self.RP3_beta_long = RP3betaRecommender()
-        self.RP3_beta_short.fit(self.URM, alpha=.528, beta=0.1592,topK=72, use_ICM=True)
+        self.RP3_beta_short.fit(self.URM, alpha=.528, beta=0.1592, topK=72, use_ICM=True)
         self.RP3_beta_long.fit(self.URM, alpha=.02069, beta=0.03782, topK=77, use_ICM=False)
 
     def get_expected_ratings(self, user_id):

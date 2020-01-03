@@ -23,7 +23,7 @@ class AlternatingLeastSquare:
         self.regularization = None
         self.iterations = None
 
-    def fit(self, URM, n_factors=300, regularization=0.08, iterations=30, alpha=24):
+    def fit(self, URM, n_factors=300, regularization=0.08, iterations=37, alpha=24):
         self.URM = URM
 
         utils = Utils()
@@ -39,7 +39,7 @@ class AlternatingLeastSquare:
         # Initialize the als model and fit it using the sparse item-user matrix
         model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization,
                                                      iterations=self.iterations, use_gpu=False,
-                                                     calculate_training_loss=True)
+                                                     calculate_training_loss=True, use_cg=True)
 
         alpha_val = alpha
         # Calculate the confidence by multiplying it by our alpha value.
@@ -72,7 +72,7 @@ class AlternatingLeastSquare:
 
 if __name__ == '__main__':
     recommender = AlternatingLeastSquare()
-    Runner.run(recommender, True, find_hyper_parameters_ALS=False, evaluate_different_type_of_users=True,
-               batch_evaluation=True, split='random_all')
+    Runner.run(recommender, True, find_hyper_parameters_ALS=True, evaluate_different_type_of_users=True,
+               batch_evaluation=True, split='2080')
 
 # 0.02331 with seed 69

@@ -276,7 +276,6 @@ class MatrixFactorization_BPR_Theano(object):
             items.add(item)
         return data_dict, set(data_dict.keys()), items
 
-
 if __name__ == '__main__':
     utils = Utils()
     urm = utils.get_urm_from_csv()

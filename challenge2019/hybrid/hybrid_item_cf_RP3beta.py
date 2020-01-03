@@ -1,6 +1,7 @@
 from challenge2019.GraphBased.RP3beta import RP3betaRecommender
 from challenge2019.cbf.user_cbf import *
 from challenge2019.utils.utils import Utils
+from challenge2019.hybrid.hybrid_itemcf import hybridItemCF
 
 
 class HybridItemCfRP3Beta(object):
@@ -22,12 +23,14 @@ class HybridItemCfRP3Beta(object):
 
             self.ICM = utils.get_icm()
             print(self.URM.shape, self.ICM.transpose().shape)
-            self.URM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
+            self.URM_ICM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
 
             RP3_beta = RP3betaRecommender()
-            RP3_beta.fit(self.URM, normalize_similarity=True)
+            RP3_beta.fit(self.URM_ICM, normalize_similarity=True)
+            hybrid_itemcf = hybridItemCF()
+            hybrid_itemcf.fit(self.URM)
 
-            self.SM_cf = self.create_similarity_matrix(self.URM, 5, 44, similarity="tanimoto")
+            self.SM_cf = hybrid_itemcf.get_similarity()
             self.SM_RP3beta = RP3_beta.get_W()
 
             self.fitted = True
@@ -64,5 +67,5 @@ class HybridItemCfRP3Beta(object):
 
 if __name__ == '__main__':
     recommender = HybridItemCfRP3Beta()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=True,
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False,
                batch_evaluation=True, split='random')
