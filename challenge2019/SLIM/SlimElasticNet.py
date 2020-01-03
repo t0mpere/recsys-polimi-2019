@@ -89,8 +89,12 @@ class SLIMElasticNetRecommender(object):
 
         self.URM_train = URM
         utils = Utils()
+        self.ICM = utils.get_icm()
+        print(self.URM_train.shape, self.ICM.transpose().shape)
+        self.URM_train = sps.vstack([self.URM_train, self.ICM.transpose()]).tocsr()
         # self.URM_train = utils.get_URM_BM_25(self.URM_train) <--- worst
         # self.URM_train = utils.get_URM_tfidf(self.URM_train) <--- worst
+
         self.max_iter = max_iter
         self.tol = tol
         self.topK = topK
@@ -110,7 +114,7 @@ class SLIMElasticNetRecommender(object):
 
         # res contains a vector of (values, rows, cols) tuples
         values, rows, cols = [], [], []
-        for values_, rows_, cols_ in tqdm(res):
+        for values_, rows_, cols_ in res:
             values.extend(values_)
             rows.extend(rows_)
             cols.extend(cols_)
@@ -143,6 +147,7 @@ class SLIMElasticNetRecommender(object):
 
 if __name__ == '__main__':
     recommender = SLIMElasticNetRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_type_of_users=False, batch_evaluation=False)
+    Runner.run(recommender, True, find_hyper_parameters_slim_elastic=False, evaluate_different_type_of_users=True,
+               batch_evaluation=True, split="random")
 
 #0.02327 with seed 69

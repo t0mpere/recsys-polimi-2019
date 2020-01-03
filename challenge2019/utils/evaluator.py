@@ -46,7 +46,7 @@ class Evaluator(object):
             self.test_dictionary[user_index] = non_zero
 
         self.URM_train = URM_train
-
+        return URM_test, URM_train
 
     # Split random, 20% of each user
     def random_split(self, URM, seed):
@@ -78,8 +78,10 @@ class Evaluator(object):
                 self.test_dictionary[user_index] = []
 
         self.URM_train = URM
+
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
+        return self.URM_test, self.URM_train
 
     # TODO matteo scrivi come funziona
     def random_split_to_all_users(self, URM, seed):
@@ -137,6 +139,7 @@ class Evaluator(object):
         self.URM_train = URM
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
+        return self.URM_test, self.URM_train
 
     def leave_one_out(self, URM, seed):
         user_indexes = np.arange(URM.shape[0])
@@ -167,6 +170,7 @@ class Evaluator(object):
         self.URM_train = URM
         print('Number of element in test : {} \nNumber of elements in training : {}'.format(tmp,
                                                                                             len(URM.data)))
+        return self.URM_test, self.URM_train
 
     def MAP(self, recommended_items, relevant_items):
         # print(recommended_items)
@@ -382,10 +386,10 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_hyperparameters_bo_user_cbf(self, knn_region, knn_age, shrink):
+    def optimize_hyperparameters_bo_user_cbf(self, knn, shrink):
         recommender = self.recommender
-        recommender.fit(self.URM_train, shrink=int(shrink), knn_age=int(knn_age), knn_region=int(knn_region))
-        MAP = self.evaluate_recommender(recommender)
+        recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
+        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
         return MAP
 
     def optimize_hyperparameters_bo_P3alpha(self, topk, alpha):
@@ -397,7 +401,7 @@ class Evaluator(object):
     def optimize_hyperparameters_bo_RP3beta(self, topk, alpha, beta):
         recommender = self.recommender
         recommender.fit(self.URM_train, topK=int(topk), alpha=alpha, beta=beta)
-        MAP, MAP_Long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
+        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
         return MAP
 
     def optimize_hyperparameters_bo_pure_svd(self, num_factors):
@@ -432,18 +436,18 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, item_cbf, SLIM_E, MF):
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
             "item_cf": item_cf,
             "user_cf": user_cf,
             "MF": MF,
-            # "user_cbf": user_cbf,
             "item_cbf": item_cbf
+            # "user_cbf": user_cbf,
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
-        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender,fit=False)
+        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
         return MAP
 
     def optimize_weights_hybrid_20(self, item, user_cf, MF):
@@ -503,6 +507,7 @@ class Evaluator(object):
             n_iter=36,
             acq="ei", xi=1e-4
         )
+        print(optimizer.max)
 
     def set_recommender_to_tune(self, recommender):
         self.recommender = recommender
