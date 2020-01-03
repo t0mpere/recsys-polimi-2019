@@ -64,7 +64,7 @@ class Runner(object):
 
                 elif find_weights_hybrid_item:
                     tuning_params = {
-                        "alpha": (0.3, 0.5),
+                        "alpha": (0.6, 0.75),
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_weights_hybrid_item)

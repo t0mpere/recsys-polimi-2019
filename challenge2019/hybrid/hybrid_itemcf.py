@@ -1,9 +1,9 @@
 import numpy as np
 import scipy.sparse as sps
 
-from Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython
-from utils.run import Runner
-from utils.utils import Utils
+from challenge2019.Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython
+from challenge2019.utils.run import Runner
+from challenge2019.utils.utils import Utils
 
 
 class hybridItemCF(object):

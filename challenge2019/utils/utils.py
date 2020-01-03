@@ -90,14 +90,21 @@ class Utils(object):
         UCM_age = UCM_age.tocsr()
         return UCM_age
 
-    def get_ucm_region_from_csv(self):
+    def get_ucm_age_from_csv_one_hot_encoding(self):
+        data_list = list(np.ones(len(self.user_age_list)))
+
+        UCM_age = sps.coo_matrix((data_list, (self.user_list_ucm_age, self.user_age_list)), dtype=np.float64)
+        UCM_age = UCM_age.tocsr()
+        return UCM_age
+
+    def get_ucm_region_from_csv_one_hot_encoding(self):
         data_list = list(np.ones(len(self.user_region_list)))
 
         UCM_region = sps.coo_matrix((data_list, (self.user_list_ucm_region, self.user_region_list)), dtype=np.float64)
         UCM_region = UCM_region.tocsr()
         return UCM_region
 
-    def get_ucm_region_from_csv_in_different_format(self):
+    def get_ucm_region_from_csv(self):
         data_list = np.zeros(len(self.user_region_list))
         data_list = data_list.astype(int)
 

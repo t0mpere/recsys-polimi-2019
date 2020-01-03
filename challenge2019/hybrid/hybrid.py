@@ -100,8 +100,8 @@ class Hybrid(object):
         #        expected_items_user_cbf = np.setdiff1d(expected_items_user_cbf, intersection)
         #        recommended_items = np.concatenate(
         #            (expected_items_top_pop[:5], intersection, expected_items_user_cbf[:5]))
-
-            recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
+            if np.sum(self.recommenderUserCBF.get_expected_ratings(user_id)) > 0:
+                recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
 
             i = 0
             while len(recommended_items) < 10:

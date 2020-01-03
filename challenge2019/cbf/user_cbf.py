@@ -25,14 +25,14 @@ class UserContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=100, shrink=20, similarity="tversky"):
+    def fit(self, URM, knn=1000, shrink=20, similarity="tversky"):
         utils = Utils()
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
         self.URM = URM
-        self.UCM_region = utils.get_ucm_region_from_csv()
-        self.UCM_age = utils.get_ucm_age_from_csv()
+        self.UCM_region = utils.get_ucm_region_from_csv_one_hot_encoding()
+        self.UCM_age = utils.get_ucm_age_from_csv_one_hot_encoding()
 
         # self.UCM_region = utils.get_URM_BM_25(self.UCM_region) <-- exact same
         # self.UCM_region = utils.get_URM_tfidf(self.UCM_region) <-- exact same

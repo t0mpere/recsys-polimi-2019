@@ -3,7 +3,7 @@ from challenge2019.cbf.user_cbf import *
 from challenge2019.utils.utils import Utils
 
 
-class HybridItemCfRP3Beta(object):
+class HybridRP3Beta(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
