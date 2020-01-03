@@ -17,9 +17,10 @@ from challenge2019.topPop.topPop_userClasses import TopPopUserClasses
 
 class Hybrid(object):
 
-    def __init__(self, divide_recommendations=False):
+    def __init__(self, divide_recommendations=False, only_cold=False):
         self.URM = None
         self.SM_item = None
+        self.only_cold = only_cold
         self.recommenderUser = UserCollaborativeFiltering()
         # self.recommenderItem = ItemCollaborativeFiltering()
         self.RP3Beta = RP3betaRecommender()
@@ -38,19 +39,19 @@ class Hybrid(object):
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
+                "MF": 0.02419,
+                "SLIM_E": 0.09704,
+                "item_cbf": 0.04245,
+                "item_cf": 0.9958,
+                "user_cf": 0.004202
+            }
+            weights_old = {
                 "MF": 0.02294,
                 "SLIM_E": 0.9962,
                 "item_cbf": 0.9306,
                 "item_cf": 0.9985,
                 "user_cf": 0.005833
-            }  # 0.052? best online2
-            weights_3484 = {
-                "MF": 0.009341,
-                "SLIM_E": 0.4219,
-                "item_cbf": 1,
-                "item_cf": 1,
-                "user_cf": 0.006311
-            }  # 0.05321 seed 1234, values found witandom seed
+            }  # w for 0.03498 pre changing URM
             weights_simple = {
                 "item_cbf": 0.9759,
                 "item_cf": 0.9924,
@@ -64,16 +65,18 @@ class Hybrid(object):
             if self.divide_recommendations:
                 True
 
-            self.recommenderUser.fit(URM, knn=784, shrink=10)
-            # self.RP3Beta.fit(URM, alpha=0.203, beta=.1879, topK=108)
-            # self.recommenderItem.fit(URM, knn=12, shrink=23)
-            self.recommenderHybridItem.fit(URM)
-            self.recommender_SLIM_E.fit(URM)
-            self.recommender_ALS.fit(URM)
-            # self.recommender_pureSVD.fit(URM)
+            if not self.only_cold:
+                self.recommenderUser.fit(URM, knn=784, shrink=10)
+                # self.RP3Beta.fit(URM, alpha=0.203, beta=.1879, topK=108)
+                # self.recommenderItem.fit(URM, knn=12, shrink=23)
+                self.recommenderHybridItem.fit(URM)
+                self.recommender_SLIM_E.fit(URM)
+                self.recommender_ALS.fit(URM)
+                # self.recommender_pureSVD.fit(URM)
 
-            # self.recommender_SLIM_BPR.fit(URM)
-            self.recommenderItemCBF.fit(URM)
+                # self.recommender_SLIM_BPR.fit(URM)
+                self.recommenderItemCBF.fit(URM)
+
             self.recommenderUserCBF.fit(URM)
             self.recommenderTopPop.fit(URM)
             self.fitted = True
@@ -89,14 +92,22 @@ class Hybrid(object):
             recommended_items = []
             expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=20)
             expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=20)
-            intersection = np.intersect1d(expected_items_user_cbf, expected_items_top_pop)
-            if len(intersection) == 0:
-                recommended_items = np.concatenate((expected_items_top_pop[:5], expected_items_top_pop[:5]))
-            else:
-                expected_items_top_pop = np.setdiff1d(expected_items_top_pop, intersection)
-                expected_items_user_cbf = np.setdiff1d(expected_items_user_cbf, intersection)
-                recommended_items = np.concatenate(
-                    (intersection, expected_items_top_pop[:5], expected_items_user_cbf[:5]))
+        #    intersection = np.intersect1d(expected_items_user_cbf, expected_items_top_pop)
+        #    if len(intersection) == 0:
+        #        recommended_items = expected_items_top_pop[:10]
+        #    else:
+        #        expected_items_top_pop = np.setdiff1d(expected_items_top_pop, intersection)
+        #        expected_items_user_cbf = np.setdiff1d(expected_items_user_cbf, intersection)
+        #        recommended_items = np.concatenate(
+        #            (expected_items_top_pop[:5], intersection, expected_items_user_cbf[:5]))
+
+            recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
+
+            i = 0
+            while len(recommended_items) < 10:
+                if expected_items_top_pop[i] not in recommended_items:
+                    recommended_items.append(expected_items_top_pop[i])
+                i += 1
 
         # elif len(liked_items.data) > 50:
         #   expected_ratings = self.RP3Beta.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
@@ -112,11 +123,11 @@ class Hybrid(object):
             #    len(liked_items.data),
             #    er_item_cf.sum(), er_user_cf.sum(), er_SLIM_E.sum(), er_MF.sum(), er_item_cbf.sum()))
 
-            expected_ratings = self.weights["user_cf"] * er_user_cf \
-                               + self.weights["item_cf"] * er_item_cf \
-                               + self.weights["SLIM_E"] * er_SLIM_E \
-                               + self.weights["MF"] * er_MF \
-                               + self.weights["item_cbf"] * er_item_cbf
+            expected_ratings = self.weights["user_cf"] * er_user_cf
+            expected_ratings += self.weights["item_cf"] * er_item_cf
+            expected_ratings += self.weights["SLIM_E"] * er_SLIM_E
+            expected_ratings += self.weights["MF"] * er_MF
+            expected_ratings += self.weights["item_cbf"] * er_item_cbf
 
             recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
@@ -127,9 +138,9 @@ class Hybrid(object):
 
 
 if __name__ == '__main__':
-    recommender = Hybrid(divide_recommendations=False)
-    Runner.run(recommender, True, find_weights_hybrid=True, evaluate_different_type_of_users=True,
-               batch_evaluation=True, split='random_all')
+    recommender = Hybrid(divide_recommendations=False, only_cold=False)
+    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=True,
+               batch_evaluation=True, split='2080')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029
     # 0.03298346361837503

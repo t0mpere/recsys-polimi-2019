@@ -1,7 +1,8 @@
 import numpy as np
 import scipy.sparse as sps
 
-from challenge2019.Base.Similarity.Compute_Similarity_Cython import Compute_Similarity_Cython as Compute_Similarity_Python
+from challenge2019.Base.Similarity.Compute_Similarity_Cython import \
+    Compute_Similarity_Cython as Compute_Similarity_Python
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
 
@@ -24,10 +25,9 @@ class UserContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn_age=1000, knn_region=1000, shrink=20, similarity="tversky"):
+    def fit(self, URM, knn=100, shrink=20, similarity="tversky"):
         utils = Utils()
-        self.knn_age = knn_age
-        self.knn_region = knn_region
+        self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
         self.URM = URM
@@ -50,12 +50,11 @@ class UserContentBasedFiltering():
 
         # self.SM_age = self.create_similarity_matrix(self.UCM_age, self.knn_age)
         # self.SM_region = self.create_similarity_matrix(self.UCM_region, self.knn_region)
-        self.SM = self.create_similarity_matrix(self.combined_UCM, knn=800)
+        self.SM = self.create_similarity_matrix(self.combined_UCM, knn=self.knn)
 
         # self.RECS_region = self.SM_region.dot(self.URM)
         # self.RECS_age = self.SM_age.dot(self.URM)
         self.RECS = self.SM.dot(self.URM)
-
 
     def get_expected_ratings(self, user_id, i=0.5, normalized_ratings=False):
         user_id = int(user_id)
@@ -89,8 +88,10 @@ class UserContentBasedFiltering():
         recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
+
 if __name__ == '__main__':
     recommender = UserContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_type_of_users=True, batch_evaluation=True, split='random_all')
+    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_type_of_users=True,
+               batch_evaluation=True, split='2080')
 
-#0.001146 with seed 69
+# 0.001146 with seed 69

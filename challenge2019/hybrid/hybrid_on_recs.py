@@ -10,7 +10,7 @@ class HybridOnRecs(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
-        self.recommender_item_cf = SLIM_BPR_Cython()
+        self.recommender_item_cf = ItemCollaborativeFiltering()
         self.recommender_rp3beta = HybridItemCfRP3Beta()
 
     # .4011
@@ -23,8 +23,8 @@ class HybridOnRecs(object):
     def recommend(self, user_id, at=10):
 
         recommended_items = []
-        expected_items_rp3beta = self.recommender_rp3beta.recommend(user_id, at=10)
-        expected_items_item_cf = self.recommender_item_cf.recommend(user_id, at=10)
+        expected_items_rp3beta = self.recommender_rp3beta.recommend(user_id, at=40)
+        expected_items_item_cf = self.recommender_item_cf.recommend(user_id, at=40)
         intersection = np.intersect1d(expected_items_item_cf, expected_items_rp3beta)
         if len(intersection) == 0:
 
@@ -53,4 +53,4 @@ class HybridOnRecs(object):
 
 if __name__ == '__main__':
     recommender = HybridOnRecs()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False, batch_evaluation=True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False, batch_evaluation=True, split="2080")

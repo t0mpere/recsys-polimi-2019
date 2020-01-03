@@ -39,4 +39,4 @@ class TopPop():
 
 if __name__ == '__main__':
     recommender = TopPop()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True, split="random_all")
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True, split="2080")

@@ -90,9 +90,9 @@ class Runner(object):
                     weights = {
                         "MF": (0, 1),
                         "SLIM_E": (0, 1),
-                        "item_cbf": (0, 1),
                         "item_cf": (0, 1),
-                        "user_cf": (0.004, 0.007),
+                        "user_cf": (0.004, 1),
+                        "item_cbf": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
@@ -127,9 +127,8 @@ class Runner(object):
 
                 elif find_hyper_parameters_user_cbf:
                     tuning_params = {
-                        "shrink": (0, 30),
-                        "knn_age": (50, 1000),
-                        "knn_region": (50, 1000),
+                        "shrink": (0, 100),
+                        "knn": (1, 1000)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_user_cbf)
@@ -143,9 +142,9 @@ class Runner(object):
 
                 elif find_hyper_parameters_ALS:
                     tuning_params = {
-                        "n_factors": (300, 500),
-                        "regularization": (0.01, 0.1),
-                        "iterations": (90, 120),
+                        "n_factors": (100, 500),
+                        "regularization": (0.001, 0.1),
+                        "iterations": (50, 50),
                         "alpha": (5, 50)
                     }
                     evaluator.set_recommender_to_tune(recommender)
