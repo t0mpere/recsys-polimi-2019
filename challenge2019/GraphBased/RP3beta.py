@@ -30,15 +30,16 @@ class RP3betaRecommender():
             self.beta, self.min_rating, self.topK,
             self.implicit, self.normalize_similarity)
 
-    def fit(self, URM_train, alpha=.528, beta=0.1592, min_rating=0, topK=72, implicit=True, normalize_similarity=True):
+    def fit(self, URM_train, alpha=.528, beta=0.1592, min_rating=0, topK=72, implicit=True, normalize_similarity=True, use_ICM=True):
 
 
         utils = Utils()
         self.URM_train = URM_train
         utils = Utils()
         self.ICM = utils.get_icm()
-        print("Using UCM + ICM")
-        self.URM_train = sps.vstack([self.URM_train, self.ICM.transpose()]).tocsr()
+        if use_ICM:
+            print("Using UCM + ICM")
+            self.URM_train = sps.vstack([self.URM_train, self.ICM.transpose()]).tocsr()
 
         # self.URM_train = utils.get_URM_BM_25(self.URM_train) <--- worst
         # self.URM_train = utils.get_URM_tfidf(self.URM_train) <--- worst
@@ -185,7 +186,7 @@ class RP3betaRecommender():
 
 if __name__ == '__main__':
     recommender = RP3betaRecommender()
-    Runner.run(recommender, True, find_hyper_parameters_RP3beta=True, evaluate_different_type_of_users=True, batch_evaluation=True)
+    Runner.run(recommender, True, find_hyper_parameters_RP3beta=False, evaluate_different_type_of_users=True, batch_evaluation=True, split='2080')
 
 # 0.02890 with seed 69
 # 0.024040110720532526 long 123
