@@ -112,6 +112,11 @@ class Utils(object):
         UCM_age = UCM_age.tocsr()
         return UCM_age
 
+    def get_ucm(self):
+        UCM_region = self.get_ucm_region_from_csv_one_hot_encoding()
+        UCM_age = self.get_ucm_age_from_csv_one_hot_encoding()
+
+        return sps.hstack([UCM_age, UCM_region])
 
     def get_user_list(self):
         return set(self.user_list)
