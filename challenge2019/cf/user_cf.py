@@ -14,8 +14,8 @@ class UserCollaborativeFiltering():
         self.URM = None
         self.SM_item = None
 
-    def create_similarity_matrix(self):
-        similarity_object = Compute_Similarity_Python(self.URM.transpose(), topK=self.knn, shrink=self.shrink,
+    def create_similarity_matrix(self, URM):
+        similarity_object = Compute_Similarity_Python(URM.transpose(), topK=self.knn, shrink=self.shrink,
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
@@ -30,7 +30,7 @@ class UserCollaborativeFiltering():
         self.URM = utils.get_URM_BM_25(self.URM)    #good
         # self.URM = utils.get_URM_tfidf(self.URM) <--- worst
 
-        self.SM_user = self.create_similarity_matrix()
+        self.SM_user = self.create_similarity_matrix(self.URM)
         self.RECS = self.SM_user.dot(self.URM)
 
     def get_expected_ratings(self, user_id, normalized_ratings=False):
@@ -57,6 +57,6 @@ class UserCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = UserCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, batch_evaluation=True, split='random_all')
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, batch_evaluation=True, split='2080')
 
     # 0.02308 with seed 69
