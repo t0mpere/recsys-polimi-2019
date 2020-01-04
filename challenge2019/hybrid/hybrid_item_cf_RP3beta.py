@@ -51,23 +51,23 @@ class HybridItemCfRP3Beta(object):
         if len(liked_items.data) == 0:
             recommended_items = []
             expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=20)
-            expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=20)
-            #    intersection = np.intersect1d(expected_items_user_cbf, expected_items_top_pop)
-            #    if len(intersection) == 0:
-            #        recommended_items = expected_items_top_pop[:10]
-            #    else:
-            #        expected_items_top_pop = np.setdiff1d(expected_items_top_pop, intersection)
-            #        expected_items_user_cbf = np.setdiff1d(expected_items_user_cbf, intersection)
-            #        recommended_items = np.concatenate(
-            #            (expected_items_top_pop[:5], intersection, expected_items_user_cbf[:5]))
+            expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=10)
+
             if np.flip(np.sort(self.recommenderUserCBF.get_expected_ratings(user_id)))[0] > 0:
                 recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
 
-            i = 0
-            while len(recommended_items) < 10:
-                if expected_items_top_pop[i] not in recommended_items:
-                    recommended_items.append(expected_items_top_pop[i])
-                i += 1
+                i = 0
+                while len(recommended_items) < 10:
+                    if expected_items_user_cbf[i] not in recommended_items:
+                        recommended_items.append(expected_items_user_cbf[i])
+                    i += 1
+
+            else:
+                i = 0
+                while len(recommended_items) < 10:
+                    if expected_items_top_pop[i] not in recommended_items:
+                        recommended_items.append(expected_items_top_pop[i])
+                    i += 1
 
         else:
 
@@ -93,7 +93,7 @@ class HybridItemCfRP3Beta(object):
 
 if __name__ == '__main__':
     recommender = HybridItemCfRP3Beta()
-    Runner.run(recommender, False, evaluate_different_type_of_users=True, find_weights_hybrid_item=False,
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False,
                batch_evaluation=True, split='2080')
 
 # seed 123

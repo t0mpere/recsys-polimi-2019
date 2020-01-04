@@ -11,7 +11,7 @@ class Runner(object):
     @staticmethod
     def run(recommender, is_test=True, find_hyper_parameters_cf=False, find_hyper_parameters_item_cbf=False,
             find_hyper_parameters_user_cbf=False, find_epochs=False, find_hyper_parameters_slim_elastic=False,
-            find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
+            find_weights_hybrid_cold_users=False, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
             batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False,
@@ -171,6 +171,15 @@ class Runner(object):
 
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_SLIM_bpr)
+
+                elif find_weights_hybrid_cold_users:
+                    tuning_params = {
+                        "at": (10, 100),
+                        "threshold": (0, 15)
+                    }
+
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(tuning_params, evaluator.optimize_weights_hybrid_cold_users)
 
                 elif find_hyper_parameters_slim_elastic:
                     tuning_params = {

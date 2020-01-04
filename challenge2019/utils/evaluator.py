@@ -436,6 +436,12 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
+    def optimize_weights_hybrid_cold_users(self, at, threshold):
+        recommender = self.recommender
+        recommender.fit(self.URM_train, fit_once=True, at=at, threshold=threshold)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
     def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf):
         recommender = self.recommender
         weights = {
