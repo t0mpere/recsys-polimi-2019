@@ -36,7 +36,7 @@ class Hybrid(object):
         if weights is None:
             weights = {
                 "MF": 0.02419,
-                "SLIM_E": 0.09704,                
+                "SLIM_E": 0.09704,
                 "item_cbf": 0.04245,
                 "item_cf": 0.9958,
                 "user_cf": 0.004202
