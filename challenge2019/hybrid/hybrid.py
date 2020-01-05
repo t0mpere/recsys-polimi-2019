@@ -22,14 +22,10 @@ class Hybrid(object):
         self.SM_item = None
         self.only_cold = only_cold
         self.recommenderUser = UserCollaborativeFiltering()
-        # self.recommenderItem = ItemCollaborativeFiltering()
-        self.RP3Beta = RP3betaRecommender()
         self.recommenderHybridItem = HybridItemCfRP3Beta()
-        # self.recommender_SLIM_BPR = SLIM_BPR_Cython()
         self.recommenderItemCBF = ItemContentBasedFiltering()
         self.recommenderUserCBF = UserContentBasedFiltering()
         self.recommenderTopPop = TopPop()
-        # self.recommender_pureSVD = PureSVDRecommender()
         self.recommender_SLIM_E = SLIMElasticNetRecommender()
         self.recommender_ALS = AlternatingLeastSquare()
         self.divide_recommendations = divide_recommendations
@@ -39,11 +35,11 @@ class Hybrid(object):
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
-                "MF": 0.01,
-                "SLIM_E": 0.9,
-                "item_cbf": 0.6,
-                "item_cf": 1,
-                "user_cf": 0.005
+                "MF": 0.02419,
+                "SLIM_E": 0.09704,                
+                "item_cbf": 0.04245,
+                "item_cf": 0.9958,
+                "user_cf": 0.004202
             }
             weights_old = {
                 "MF": 0.02294,
@@ -67,14 +63,9 @@ class Hybrid(object):
 
             if not self.only_cold:
                 self.recommenderUser.fit(URM, knn=784, shrink=10)
-                # self.RP3Beta.fit(URM, alpha=0.203, beta=.1879, topK=108)
-                # self.recommenderItem.fit(URM, knn=12, shrink=23)
                 self.recommenderHybridItem.fit(URM)
                 self.recommender_SLIM_E.fit(URM)
                 self.recommender_ALS.fit(URM)
-                # self.recommender_pureSVD.fit(URM)
-
-                # self.recommender_SLIM_BPR.fit(URM)
                 self.recommenderItemCBF.fit(URM)
 
             self.recommenderUserCBF.fit(URM)
@@ -121,11 +112,18 @@ class Hybrid(object):
             #    len(liked_items.data),
             #    er_item_cf.sum(), er_user_cf.sum(), er_SLIM_E.sum(), er_MF.sum(), er_item_cbf.sum()))
 
-            expected_ratings = self.weights["user_cf"] * er_user_cf
-            expected_ratings += self.weights["item_cf"] * er_item_cf
-            expected_ratings += self.weights["SLIM_E"] * er_SLIM_E
-            expected_ratings += self.weights["MF"] * er_MF
-            expected_ratings += self.weights["item_cbf"] * er_item_cbf
+            expected_ratings = self.weights["item_cf"] * er_item_cf
+
+            if np.flip(np.sort(expected_ratings))[0] <= 0.1:
+                expected_ratings += self.weights["user_cf"] * er_user_cf
+                expected_ratings += self.weights["SLIM_E"] * er_SLIM_E
+                expected_ratings += self.weights["MF"] * er_MF
+                expected_ratings += self.weights["item_cbf"] * er_item_cbf
+
+
+
+            if np.sum(expected_ratings) == 0:
+                print("ah vettore vuoto")
 
             recommended_items = np.flip(np.argsort(expected_ratings), 0)
 

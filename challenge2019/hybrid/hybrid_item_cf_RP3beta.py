@@ -16,9 +16,6 @@ class HybridItemCfRP3Beta(object):
         self.hybrid_itemcf = None
         self.fitted = False
 
-        self.recommenderUserCBF = UserContentBasedFiltering()
-        self.recommenderTopPop = TopPop()
-
     # .4011
     # .24
     #
@@ -38,46 +35,16 @@ class HybridItemCfRP3Beta(object):
             self.hybrid_itemcf = hybridItemCF()
             self.hybrid_itemcf.fit(self.URM)
 
-            self.recommenderUserCBF.fit(URM)
-            self.recommenderTopPop.fit(URM)
-
             self.fitted = True
 
-
     def recommend(self, user_id, at=10):
+        expected_ratings = self.get_expected_ratings(user_id)
 
-        liked_items = self.URM[user_id]
+        recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
-        if len(liked_items.data) == 0:
-            recommended_items = []
-            expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=20)
-            expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=10)
-
-            if np.flip(np.sort(self.recommenderUserCBF.get_expected_ratings(user_id)))[0] > 0:
-                recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
-
-                i = 0
-                while len(recommended_items) < 10:
-                    if expected_items_user_cbf[i] not in recommended_items:
-                        recommended_items.append(expected_items_user_cbf[i])
-                    i += 1
-
-            else:
-                i = 0
-                while len(recommended_items) < 10:
-                    if expected_items_top_pop[i] not in recommended_items:
-                        recommended_items.append(expected_items_top_pop[i])
-                    i += 1
-
-        else:
-
-            expected_ratings = self.get_expected_ratings(user_id)
-
-            recommended_items = np.flip(np.argsort(expected_ratings), 0)
-
-            unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
-                                        assume_unique=True, invert=True)
-            recommended_items = recommended_items[unseen_items_mask]
+        unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,
+                                    assume_unique=True, invert=True)
+        recommended_items = recommended_items[unseen_items_mask]
         return recommended_items[0:at]
 
     def get_expected_ratings(self, user_id, normalized_ratings=False):

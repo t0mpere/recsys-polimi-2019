@@ -104,4 +104,5 @@ class ItemContentBasedFiltering():
 
 if __name__ == '__main__':
     recommender = ItemContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_item_cbf=False, find_weights_item_cbf=False, batch_evaluation=True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_hyper_parameters_item_cbf=False,
+               find_weights_item_cbf=False, batch_evaluation=True, split='2080')

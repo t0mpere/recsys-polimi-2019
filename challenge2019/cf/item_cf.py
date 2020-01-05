@@ -20,7 +20,7 @@ class ItemCollaborativeFiltering():
                                                       similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=5, shrink=45, similarity="tanimoto"):
+    def fit(self, URM, knn=19, shrink=20, similarity="tanimoto"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
@@ -29,7 +29,6 @@ class ItemCollaborativeFiltering():
         self.URM = URM
         utils = Utils()
         self.ICM = utils.get_icm()
-        print(self.URM.shape,self.ICM.transpose().shape)
         self.URM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
 
         # self.URM = utils.split_long_users(URM)

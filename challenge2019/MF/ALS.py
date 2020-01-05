@@ -72,7 +72,7 @@ class AlternatingLeastSquare:
 
 if __name__ == '__main__':
     recommender = AlternatingLeastSquare()
-    Runner.run(recommender, True, find_hyper_parameters_ALS=True, evaluate_different_type_of_users=True,
+    Runner.run(recommender, True, find_hyper_parameters_ALS=False, evaluate_different_type_of_users=True,
                batch_evaluation=True, split='2080')
 
 # 0.02331 with seed 69

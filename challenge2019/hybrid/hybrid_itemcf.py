@@ -60,13 +60,14 @@ class hybridItemCF(object):
 
         self.results = self.create_similarity_matrices(weights)
         i = 0
+        self.SM_item = None
         for res in self.results:
             if self.SM_item is None:
                 self.SM_item = weights_sum[i] * res
             else:
                 self.SM_item += weights_sum[i] * res
             i += 1
-        self.RECS = self.URM_ICM.dot(self.SM_item)
+        self.RECS = self.URM.dot(self.SM_item)
 
     def get_similarity(self):
         return self.SM_item
