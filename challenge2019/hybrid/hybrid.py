@@ -35,11 +35,11 @@ class Hybrid(object):
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
-                "MF": 0.02419,
-                "SLIM_E": 0.09704,                
-                "item_cbf": 0.04245,
-                "item_cf": 0.9958,
-                "user_cf": 0.004202
+                "MF": 0.08276,
+                "SLIM_E": 0.02607,
+                "item_cbf": 0.9773,
+                "item_cf": 0.9023,
+                "user_cf": 0.004709
             }
             weights_old = {
                 "MF": 0.02294,
@@ -113,12 +113,10 @@ class Hybrid(object):
             #    er_item_cf.sum(), er_user_cf.sum(), er_SLIM_E.sum(), er_MF.sum(), er_item_cbf.sum()))
 
             expected_ratings = self.weights["item_cf"] * er_item_cf
-
-            if np.flip(np.sort(expected_ratings))[0] <= 0.1:
-                expected_ratings += self.weights["user_cf"] * er_user_cf
-                expected_ratings += self.weights["SLIM_E"] * er_SLIM_E
-                expected_ratings += self.weights["MF"] * er_MF
-                expected_ratings += self.weights["item_cbf"] * er_item_cbf
+            expected_ratings += self.weights["user_cf"] * er_user_cf
+            expected_ratings += self.weights["SLIM_E"] * er_SLIM_E
+            expected_ratings += self.weights["MF"] * er_MF
+            expected_ratings += self.weights["item_cbf"] * er_item_cbf
 
 
 
@@ -135,7 +133,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False, only_cold=False)
-    Runner.run(recommender, True, find_weights_hybrid=False, evaluate_different_type_of_users=False,
+    Runner.run(recommender, False, find_weights_hybrid=False, evaluate_different_type_of_users=False,
                batch_evaluation=True, split='2080')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029

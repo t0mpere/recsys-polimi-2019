@@ -197,11 +197,10 @@ class Evaluator(object):
         print("Start recommending...")
         # with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
         #     res = pool.map(_prec, Utils.get_target_user_list())
-        i = 0
+
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
-            i += 1
 
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final
@@ -320,7 +319,7 @@ class Evaluator(object):
             elif item_left < 32:
                 MAP_lenght[8] += app
                 user_lenght[8] += 1
-            elif item_left < 50:
+            elif item_left < 36:
                 MAP_lenght[9] += app
                 user_lenght[9] += 1
             else:

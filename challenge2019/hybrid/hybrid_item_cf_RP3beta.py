@@ -15,6 +15,8 @@ class HybridItemCfRP3Beta(object):
         self.hybrid_RP3_beta = None
         self.hybrid_itemcf = None
         self.fitted = False
+        self.ICM = None
+        self.URM_ICM = None
 
     # .4011
     # .24
