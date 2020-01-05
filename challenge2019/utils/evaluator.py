@@ -186,6 +186,7 @@ class Evaluator(object):
         relevant_items = self.test_dictionary[user_id]
         if (len(relevant_items) is not 0):
             map = self.MAP(recommended_items, relevant_items)
+            print("User: {} MAP: {}".format(user_id, map))
             return map
         else:
             return 0

@@ -50,7 +50,8 @@ class HybridItemCfRP3Beta(object):
         return recommended_items[0:at]
 
     def get_expected_ratings(self, user_id, normalized_ratings=False):
-        expected_ratings = self.alpha * self.hybrid_RP3_beta.get_expected_ratings(user_id) + (1 - self.alpha) * self.hybrid_itemcf.get_expected_ratings(user_id)
+        expected_ratings = self.alpha * self.hybrid_RP3_beta.get_expected_ratings(user_id) + \
+                           (1 - self.alpha) * self.hybrid_itemcf.get_expected_ratings(user_id)
         expected_ratings = np.squeeze(np.asarray(expected_ratings))
 
         # Normalize ratings

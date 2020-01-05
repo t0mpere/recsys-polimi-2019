@@ -88,6 +88,7 @@ class SLIMElasticNetRecommender(object):
     def fit(self, URM, max_iter=200, tol=7.905e-07, topK=100, alpha=0.00101, l1_ratio=0.09723):
 
         self.URM_train = URM
+
         # self.URM_train = utils.get_URM_BM_25(self.URM_train) <--- worst
         # self.URM_train = utils.get_URM_tfidf(self.URM_train) <--- worst
 
