@@ -14,8 +14,9 @@ class Runner(object):
             find_weights_hybrid_cold_users=False, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
-            batch_evaluation=False, find_hyper_parameters_RP3beta=False, find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False,
-            find_weights_hybrid_all_item=False, split='random', find_weights_hybrid_20=False, find_weights_item_cbf=False):
+            find_weights_new_hybrid = False, batch_evaluation=False, find_hyper_parameters_RP3beta=False,
+            find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False, find_weights_hybrid_all_item=False,
+            split='2080', find_weights_hybrid_20=False, find_weights_item_cbf=False):
         # URM_csv = pd.read_csv("../dataset/data_train.csv")
         utils = Utils()
         # TODO: see if this line changes something
@@ -93,6 +94,18 @@ class Runner(object):
                         "item_cf": (0, 1),
                         "user_cf": (0, 1),
                         "item_cbf": (0, 1)
+                    }
+                    evaluator.set_recommender_to_tune(recommender)
+                    evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)
+
+                elif find_weights_new_hybrid:
+                    weights = {
+                        "MF": (0, 1),
+                        "SLIM_E": (0, 1),
+                        "item_cf": (0, 1),
+                        "user_cf": (0, 1),
+                        "item_cbf": (0, 1),
+                        "RP3beta": (0,1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)

@@ -20,7 +20,7 @@ class ItemCollaborativeFiltering():
                                                       similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=19, shrink=20, similarity="tanimoto"):
+    def fit(self, URM, knn=5, shrink=45, similarity="tanimoto"):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity

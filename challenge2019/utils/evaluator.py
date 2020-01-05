@@ -186,7 +186,7 @@ class Evaluator(object):
         relevant_items = self.test_dictionary[user_id]
         if (len(relevant_items) is not 0):
             map = self.MAP(recommended_items, relevant_items)
-            print("User: {} MAP: {}".format(user_id, map))
+            #print("User: {} MAP: {}".format(user_id, map))
             return map
         else:
             return 0
@@ -453,7 +453,21 @@ class Evaluator(object):
             # "user_cbf": user_cbf,
         }
         recommender.fit(self.URM_train, fit_once=True, weights=weights)
-        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
+        MAP = self.evaluate_recommender(recommender)
+        return MAP
+
+    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf, RP3beta):
+        recommender = self.recommender
+        weights = {
+            "SLIM_E": SLIM_E,
+            "item_cf": item_cf,
+            "user_cf": user_cf,
+            "MF": MF,
+            "item_cbf": item_cbf,
+            "RP3beta": RP3beta
+        }
+        recommender.fit(self.URM_train, fit_once=True, weights=weights)
+        MAP = self.evaluate_recommender(recommender)
         return MAP
 
     def optimize_weights_hybrid_20(self, item, user_cf, MF):

@@ -43,20 +43,14 @@ class hybridItemCF(object):
             "knn": 5,
             "shrink": 45
         }
-        weights2 = {
-            "URM": self.URM,
-            "similarity": "tversky",
-            "knn": 15,
-            "shrink": 10
-        }
         weights3 = {
             "URM": self.URM,
             "similarity": "tanimoto",
             "knn": 19,
             "shrink": 20
         }
-        weights = [weights1, weights2, weights3]
-        weights_sum = [0.9, 0.2, 0.2]
+        weights = [weights1, weights3]
+        weights_sum = [0.75, 0.25]
 
         self.results = self.create_similarity_matrices(weights)
         i = 0
@@ -97,4 +91,4 @@ class hybridItemCF(object):
 if __name__ == '__main__':
     recommender = hybridItemCF()
     Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
-               batch_evaluation=True, split='random_all')
+               batch_evaluation=True, split='2080')
