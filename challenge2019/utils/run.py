@@ -100,12 +100,12 @@ class Runner(object):
 
                 elif find_weights_new_hybrid:
                     weights = {
-                        "MF": (0, 1),
+                        "MF": (0.01, 0.09),
+                        "RP3beta": (0, 1),
                         "SLIM_E": (0, 1),
-                        "item_cf": (0, 1),
-                        "user_cf": (0, 1),
                         "item_cbf": (0, 1),
-                        "RP3beta": (0,1)
+                        "item_cf": (0, 1),
+                        "user_cf": (0.002, 0.007)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_hybrid)

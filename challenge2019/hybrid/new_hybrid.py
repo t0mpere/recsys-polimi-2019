@@ -36,12 +36,12 @@ class Hybrid(object):
     def fit(self, URM, fit_once=False, weights=None):
         if weights is None:
             weights = {
-                "MF": 0.08276,
-                "RP3beta": 1000000,
-                "SLIM_E": 0.02607,
-                "item_cbf": 0.9773,
-                "item_cf": 0.9023,
-                "user_cf": 0.004709
+                "MF": 0.07564,
+                "RP3beta": 0.9994,
+                "SLIM_E": 0.96,
+                "item_cbf": 0.9985,
+                "item_cf": 0.9569,
+                "user_cf": 0.003546
             }
 
         self.weights = weights
@@ -126,7 +126,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False, only_cold=False)
-    Runner.run(recommender, True, find_weights_new_hybrid=True, evaluate_different_type_of_users=False,
+    Runner.run(recommender, True, find_weights_new_hybrid=False, evaluate_different_type_of_users=False,
                batch_evaluation=True, split='2080')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029

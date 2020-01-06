@@ -182,6 +182,22 @@ class Evaluator(object):
         # if map_score == 0: print(recommended_items,relevant_items)
         return map_score
 
+    def recall(self, user_id, recommended_items):
+        relevant_items = self.test_dictionary[user_id]
+        is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+
+        recall_score = np.sum(is_relevant, dtype=np.float32) / len(relevant_items)
+
+        return recall_score
+
+    def precision(self, user_id, recommended_items):
+        relevant_items = self.test_dictionary[user_id]
+        is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+
+        precision_score = np.sum(is_relevant, dtype=np.float32) / len(is_relevant)
+
+        return precision_score
+
     def evaluate(self, user_id, recommended_items):
         relevant_items = self.test_dictionary[user_id]
         if (len(relevant_items) is not 0):
@@ -193,6 +209,9 @@ class Evaluator(object):
 
     def evaluate_recommender(self, recommender):
         MAP_final = 0
+        precision_final = 0
+        recall_final = 0
+        n_eval = 0
         #_prec = partial(self.recommender.recommend)
 
         print("Start recommending...")
@@ -202,13 +221,21 @@ class Evaluator(object):
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
+            precision_final += self.precision(user_id, recommended_items)
+            recall_final += self.recall(user_id, recommended_items)
+            n_eval += 1
 
-        MAP_final /= len(Utils.get_target_user_list())
+        MAP_final /= n_eval
+        precision_final /= len(Utils.get_target_user_list())
+        recall_final /= len(Utils.get_target_user_list())
+        print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
         return MAP_final
 
     def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
-        utils = Utils()
+        precision_final = 0
+        recall_final = 0
+        n_eval = 0
 
         recommender.fit(self.URM_train)
         # _prec = partial(recommender.recommend)
@@ -216,13 +243,18 @@ class Evaluator(object):
         print("Start recommending...")
         # with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
         #     res = pool.map(_prec, Utils.get_target_user_list())
-        i = 0
+
         for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
             MAP_final += self.evaluate(user_id, recommended_items)
-            i += 1
+            precision_final += self.precision(user_id, recommended_items)
+            recall_final += self.recall(user_id, recommended_items)
+            n_eval += 1
 
-        MAP_final /= len(Utils.get_target_user_list())
+        MAP_final /= n_eval
+        precision_final /= len(Utils.get_target_user_list())
+        recall_final /= len(Utils.get_target_user_list())
+        print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
         return MAP_final
 
     def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
