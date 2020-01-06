@@ -41,11 +41,9 @@ class Evaluator(object):
         URM_test = URM_test.tocsr()
 
         user_indexes = np.arange(URM_all.shape[0])
-        for user_index in user_indexes:
-            non_zero = URM_test[user_index].nonzero()
-            self.test_dictionary[user_index] = non_zero
 
         self.URM_train = URM_train
+        self.URM_test = URM_test
         return URM_test, URM_train
 
     # Split random, 20% of each user
@@ -172,62 +170,55 @@ class Evaluator(object):
                                                                                             len(URM.data)))
         return self.URM_test, self.URM_train
 
-    def MAP(self, recommended_items, relevant_items):
-        # print(recommended_items)
-        is_relevant = np.isin(recommended_items, relevant_items, assume_unique=True)
+    def MAP(self, relevant_items, is_relevant):
         # Cumulative sum: precision at 1, at 2, at 3 ...
-        p_at_k = is_relevant * np.cumsum(is_relevant, dtype=np.float32) / (1 + np.arange(len(is_relevant)))
+        p_at_k = is_relevant * np.cumsum(is_relevant, dtype=np.float32) / (1 + np.arange(is_relevant.shape[0]))
         # print(recommended_items, relevant_items)
-        map_score = np.sum(p_at_k) / np.min([len(relevant_items), len(is_relevant)])
+        map_score = np.sum(p_at_k) / np.min([relevant_items.shape[0], is_relevant.shape[0]])
         # if map_score == 0: print(recommended_items,relevant_items)
         return map_score
 
-    def recall(self, user_id, recommended_items):
-        relevant_items = self.test_dictionary[user_id]
-        is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+    def recall(self, relevant_items, is_relevant):
 
-        recall_score = np.sum(is_relevant, dtype=np.float32) / len(relevant_items)
+        recall_score = np.sum(is_relevant, dtype=np.float32) / relevant_items.shape[0]
 
         return recall_score
 
-    def precision(self, user_id, recommended_items):
-        relevant_items = self.test_dictionary[user_id]
-        is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+    def precision(self, relevant_items, is_relevant):
 
         precision_score = np.sum(is_relevant, dtype=np.float32) / len(is_relevant)
 
         return precision_score
-
-    def evaluate(self, user_id, recommended_items):
-        relevant_items = self.test_dictionary[user_id]
-        if (len(relevant_items) is not 0):
-            map = self.MAP(recommended_items, relevant_items)
-            # print("User: {} MAP: {}".format(user_id, map))
-            return map
-        else:
-            return 0
 
     def evaluate_recommender(self, recommender):
         MAP_final = 0
         precision_final = 0
         recall_final = 0
         n_eval = 0
-        #_prec = partial(self.recommender.recommend)
 
         print("Start recommending...")
-        # with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
-        #     res = pool.map(_prec, Utils.get_target_user_list())
 
-        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+        utils = Utils()
+        URM = utils.get_urm_from_csv()
+        user_indexes = np.arange(URM.shape[0])
+
+        for user_id in tqdm(user_indexes, desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
-            MAP_final += self.evaluate(user_id, recommended_items)
-            precision_final += self.precision(user_id, recommended_items)
-            recall_final += self.recall(user_id, recommended_items)
-            n_eval += 1
+            start_pos = self.URM_test.indptr[user_id]
+            end_pos = self.URM_test.indptr[user_id + 1]
+            if end_pos - start_pos > 0:
+                relevant_items = self.URM_test.indices[start_pos:end_pos]
+                is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+
+                MAP_final += self.MAP(relevant_items, is_relevant)
+                precision_final += self.precision(relevant_items, is_relevant)
+                recall_final += self.recall(relevant_items, is_relevant)
+
+                n_eval += 1
 
         MAP_final /= n_eval
-        precision_final /= len(Utils.get_target_user_list())
-        recall_final /= len(Utils.get_target_user_list())
+        precision_final /= n_eval
+        recall_final /= n_eval
         print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
         return MAP_final
 
@@ -237,23 +228,31 @@ class Evaluator(object):
         recall_final = 0
         n_eval = 0
 
+        utils = Utils()
+        URM = utils.get_urm_from_csv()
+        user_indexes = np.arange(URM.shape[0])
+
         recommender.fit(self.URM_train)
-        # _prec = partial(recommender.recommend)
 
         print("Start recommending...")
-        # with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
-        #     res = pool.map(_prec, Utils.get_target_user_list())
 
-        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+        for user_id in tqdm(user_indexes, desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
-            MAP_final += self.evaluate(user_id, recommended_items)
-            precision_final += self.precision(user_id, recommended_items)
-            recall_final += self.recall(user_id, recommended_items)
-            n_eval += 1
+            start_pos = self.URM_test.indptr[user_id]
+            end_pos = self.URM_test.indptr[user_id + 1]
+            if end_pos - start_pos > 0:
+                relevant_items = self.URM_test.indices[start_pos:end_pos]
+                is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+
+                MAP_final += self.MAP(relevant_items, is_relevant)
+                precision_final += self.precision(relevant_items, is_relevant)
+                recall_final += self.recall(relevant_items, is_relevant)
+
+                n_eval += 1
 
         MAP_final /= n_eval
-        precision_final /= len(Utils.get_target_user_list())
-        recall_final /= len(Utils.get_target_user_list())
+        precision_final /= n_eval
+        recall_final /= n_eval
         print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
         return MAP_final
 

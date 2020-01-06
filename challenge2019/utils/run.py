@@ -102,7 +102,7 @@ class Runner(object):
                     weights = {
                         "MF": (0.01, 0.09),
                         "RP3beta": (0, 1),
-                        "SLIM_E": (0, 1),
+                        "SLIM_E": (0, 0.5),
                         "item_cbf": (0, 1),
                         "item_cf": (0, 1),
                         "user_cf": (0.002, 0.007)

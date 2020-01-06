@@ -29,11 +29,7 @@ class HybridCold(object):
             recommended_items = expected_items_user_cbf
 
         else:
-            i = 0
-            while len(recommended_items) < 10:
-                if expected_items_top_pop[i] not in recommended_items:
-                    recommended_items.append(expected_items_top_pop[i])
-                i += 1
+            recommended_items = expected_items_top_pop
 
         return recommended_items[0:at]
 

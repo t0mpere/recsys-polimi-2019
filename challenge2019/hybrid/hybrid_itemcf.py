@@ -90,5 +90,5 @@ class hybridItemCF(object):
 
 if __name__ == '__main__':
     recommender = hybridItemCF()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=False,
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
                batch_evaluation=True, split='2080')
