@@ -229,7 +229,7 @@ class Evaluator(object):
         precision_final /= len(Utils.get_target_user_list())
         recall_final /= len(Utils.get_target_user_list())
         print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
-        return MAP_final
+        return precision_final
 
     def fit_and_evaluate_recommender(self, recommender):
         MAP_final = 0
@@ -255,7 +255,7 @@ class Evaluator(object):
         precision_final /= len(Utils.get_target_user_list())
         recall_final /= len(Utils.get_target_user_list())
         print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
-        return MAP_final
+        return precision_final
 
     def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
         MAP_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -488,7 +488,7 @@ class Evaluator(object):
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
-    def optimize_weights_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf, RP3beta):
+    def optimize_weights_new_hybrid(self, item_cf, user_cf, SLIM_E, MF, item_cbf, RP3beta):
         recommender = self.recommender
         weights = {
             "SLIM_E": SLIM_E,
@@ -534,7 +534,7 @@ class Evaluator(object):
     def optimize_long_item_cf(self, knn, shrink):
         recommender = self.recommender
         recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
-        MAP, MAP_lenght = self.evaluate_recommender_on_different_length_of_user(recommender,fit=False)
+        MAP = self.evaluate_recommender(recommender)
         return MAP
 
     #

@@ -57,6 +57,6 @@ class UserCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = UserCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True, batch_evaluation=True, split='2080')
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=False, batch_evaluation=True, split='2080')
 
     # 0.02308 with seed 69
