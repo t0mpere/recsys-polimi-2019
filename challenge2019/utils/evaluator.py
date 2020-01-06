@@ -202,7 +202,7 @@ class Evaluator(object):
         relevant_items = self.test_dictionary[user_id]
         if (len(relevant_items) is not 0):
             map = self.MAP(recommended_items, relevant_items)
-            #print("User: {} MAP: {}".format(user_id, map))
+            # print("User: {} MAP: {}".format(user_id, map))
             return map
         else:
             return 0
@@ -255,7 +255,7 @@ class Evaluator(object):
         precision_final /= len(Utils.get_target_user_list())
         recall_final /= len(Utils.get_target_user_list())
         print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
-        return precision_final
+        return MAP_final
 
     def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
         MAP_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
