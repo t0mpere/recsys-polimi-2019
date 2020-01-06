@@ -169,4 +169,4 @@ class P3alphaRecommender():
 if __name__ == '__main__':
     recommender = P3alphaRecommender()
     Runner.run(recommender, True, find_hyper_parameters_P3alpha=False, evaluate_different_region_of_users=False,
-               batch_evaluation=False)
+               batch_evaluation=True, split='2080')

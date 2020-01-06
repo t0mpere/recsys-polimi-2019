@@ -20,7 +20,7 @@ class ItemCollaborativeFiltering():
                                                       similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=5, shrink=45, similarity="tanimoto"):
+    def fit(self, URM, knn=19, shrink=20, similarity="tanimoto", use_ICM=True):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
@@ -28,8 +28,10 @@ class ItemCollaborativeFiltering():
 
         self.URM = URM
         utils = Utils()
-        self.ICM = utils.get_icm()
-        self.URM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
+        if use_ICM:
+            print("Using UCM + ICM")
+            self.ICM = utils.get_icm()
+            self.URM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
 
         # self.URM = utils.split_long_users(URM)
         # self.URM = utils.get_URM_BM_25(self.URM, K1=3, B=0.9) #<--- worst
@@ -63,7 +65,7 @@ class ItemCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=False,
+    Runner.run(recommender, True, find_hyper_parameters_cf=True, evaluate_different_type_of_users=False,
                batch_evaluation=True, split='2080')
 
 # 0.02888 with seed 69
