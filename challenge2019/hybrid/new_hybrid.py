@@ -1,18 +1,11 @@
-from challenge2019.GraphBased.RP3beta import RP3betaRecommender
 from challenge2019.MF.ALS import AlternatingLeastSquare
-from challenge2019.MF.pureSVD import PureSVDRecommender
-from challenge2019.SLIM.SlimElasticNet import SLIMElasticNetRecommender
-from challenge2019.cf.user_cf import *
-from challenge2019.cf.item_cf import *
-from challenge2019.cbf.item_cbf import *
-from challenge2019.SLIM.SLIM_BPR_Cython import *
-from challenge2019.topPop.topPop import *
-from challenge2019.cbf.user_cbf import *
 from challenge2019.SLIM.SlimElasticNet import *
+from challenge2019.cbf.item_cbf import *
+from challenge2019.cf.user_cf import *
 from challenge2019.featureWeighting.feature_weighting_on_item import *
-from challenge2019.hybrid.hybrid_itemcf import hybridItemCF
 from challenge2019.hybrid.hybrid_RP3beta import RP3betaRecommender
-from challenge2019.topPop.topPop_userClasses import TopPopUserClasses
+from challenge2019.hybrid.hybrid_itemcf import hybridItemCF
+from challenge2019.hybrid.hybrid_cold import HybridCold
 
 
 class Hybrid(object):
@@ -27,8 +20,7 @@ class Hybrid(object):
         self.recommenderItemCBF = ItemContentBasedFiltering()
         self.recommender_SLIM_E = SLIMElasticNetRecommender()
         self.recommender_ALS = AlternatingLeastSquare()
-        self.recommenderUserCBF = UserContentBasedFiltering()
-        self.recommenderTopPop = TopPop()
+        self.hybrid_cold = HybridCold()
         self.divide_recommendations = divide_recommendations
         self.fitted = False
         self.weights = None
@@ -59,8 +51,7 @@ class Hybrid(object):
                 self.recommender_ALS.fit(URM)
                 self.recommenderItemCBF.fit(URM)
 
-            self.recommenderUserCBF.fit(URM)
-            self.recommenderTopPop.fit(URM)
+            self.hybrid_cold.fit(URM)
             self.fitted = True
 
     def recommend(self, user_id, at=10):
@@ -70,29 +61,10 @@ class Hybrid(object):
         self.URM.eliminate_zeros()
         liked_items = self.URM[user_id]
 
-        if len(liked_items.data) == 0:
-            recommended_items = []
-            expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=20)
-            expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=10)
-
-            if np.flip(np.sort(self.recommenderUserCBF.get_expected_ratings(user_id)))[0] > 0:
-                recommended_items = list(set(expected_items_user_cbf).intersection(set(expected_items_top_pop)))
-
-                i = 0
-                while len(recommended_items) < 10:
-                    if expected_items_user_cbf[i] not in recommended_items:
-                        recommended_items.append(expected_items_user_cbf[i])
-                    i += 1
-
-            else:
-                i = 0
-                while len(recommended_items) < 10:
-                    if expected_items_top_pop[i] not in recommended_items:
-                        recommended_items.append(expected_items_top_pop[i])
-                    i += 1
+        if len(liked_items.data) == 0 or self.only_cold:
+            recommended_items = self.hybrid_cold.recommend(user_id)
 
         else:
-
             er_item_cf = self.recommenderItemCF.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
             er_user_cf = self.recommenderUser.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
             er_SLIM_E = self.recommender_SLIM_E.get_expected_ratings(user_id, normalized_ratings=normalized_ratings)
