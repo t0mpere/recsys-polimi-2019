@@ -106,9 +106,9 @@ class SLIMElasticNetRecommender(object):
         #create a copy of the URM since each _pfit will modify it
 
         _pfit = partial(self._partial_fit, X=self.URM_train, iterations=n_items)
-        with multiprocessing.Pool(self.workers) as pool:
+        with multiprocessing.Pool(self.workers-1) as pool:
             res = pool.map(_pfit, warm_users)
-
+        pool.close()
         # res contains a vector of (values, rows, cols) tuples
         values, rows, cols = [], [], []
         for values_, rows_, cols_ in res:
