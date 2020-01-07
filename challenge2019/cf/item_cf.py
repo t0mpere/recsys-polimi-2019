@@ -20,7 +20,7 @@ class ItemCollaborativeFiltering():
                                                       similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=10, shrink=10, similarity="cosine", use_ICM=False):
+    def fit(self, URM, knn=5, shrink=50, similarity="tanimoto", use_ICM=True):
         self.knn = knn
         self.shrink = shrink
         self.similarity = similarity
@@ -65,7 +65,7 @@ class ItemCollaborativeFiltering():
 
 if __name__ == '__main__':
     recommender = ItemCollaborativeFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=False,
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
                batch_evaluation=True, split='2080')
 
 # 0.02888 with seed 69

@@ -10,7 +10,7 @@ class Runner(object):
 
     @staticmethod
     def run(recommender, is_test=True, find_hyper_parameters_cf=False, find_hyper_parameters_item_cbf=False,
-            find_hyper_parameters_user_cbf=False, find_epochs=False, find_hyper_parameters_slim_elastic=False,
+            find_hyper_parameters_user_cbf=False, find_hyper_parameters_slim_elastic=False,
             find_weights_hybrid_cold_users=False, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
             evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
             find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
@@ -212,8 +212,6 @@ class Runner(object):
                     print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_age_of_user(recommender))))
                 elif evaluate_different_region_of_users:
                     print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_region_of_user(recommender))))
-                elif find_epochs:
-                    print("MAP@10 : {}".format(evaluator.find_epochs(recommender)))
                 else:
                     print("MAP@10 : {}".format(evaluator.fit_and_evaluate_recommender(recommender)))
 

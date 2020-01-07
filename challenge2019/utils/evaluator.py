@@ -317,75 +317,71 @@ class Evaluator(object):
         MAP_lenght = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         user_lenght = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         MAP_final = 0
+        n_eval = 0
+
+        utils = Utils()
+        URM = utils.get_urm_from_csv()
+        user_indexes = np.arange(URM.shape[0])
+
         if fit:
             recommender.fit(self.URM_train)
-        for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
+        for user_id in tqdm(user_indexes, desc='Computing Recommendations: '):
+            start_pos = self.URM_test.indptr[user_id]
+            end_pos = self.URM_test.indptr[user_id + 1]
             recommended_items = recommender.recommend(user_id)
-            item_left = len(self.URM_train[user_id].data)
-            app = self.evaluate(user_id, recommended_items)
+            if end_pos - start_pos > 0:
+                item_left = len(self.URM_train[user_id].data)
+                relevant_items = self.URM_test.indices[start_pos:end_pos]
+                is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
+                app = self.MAP(relevant_items, is_relevant)
 
-            if item_left == 0:
-                MAP_lenght[0] += app
-                user_lenght[0] += 1
-            elif item_left < 4:
-                MAP_lenght[1] += app
-                user_lenght[1] += 1
-            elif item_left < 8:
-                MAP_lenght[2] += app
-                user_lenght[2] += 1
-            elif item_left < 12:
-                MAP_lenght[3] += app
-                user_lenght[3] += 1
-            elif item_left < 16:
-                MAP_lenght[4] += app
-                user_lenght[4] += 1
-            elif item_left < 20:
-                MAP_lenght[5] += app
-                user_lenght[5] += 1
-            elif item_left < 24:
-                MAP_lenght[6] += app
-                user_lenght[6] += 1
-            elif item_left < 28:
-                MAP_lenght[7] += app
-                user_lenght[7] += 1
-            elif item_left < 32:
-                MAP_lenght[8] += app
-                user_lenght[8] += 1
-            elif item_left < 36:
-                MAP_lenght[9] += app
-                user_lenght[9] += 1
-            else:
-                MAP_lenght[10] += app
-                user_lenght[10] += 1
+                if item_left == 0:
+                    MAP_lenght[0] += app
+                    user_lenght[0] += 1
+                elif item_left < 4:
+                    MAP_lenght[1] += app
+                    user_lenght[1] += 1
+                elif item_left < 8:
+                    MAP_lenght[2] += app
+                    user_lenght[2] += 1
+                elif item_left < 12:
+                    MAP_lenght[3] += app
+                    user_lenght[3] += 1
+                elif item_left < 16:
+                    MAP_lenght[4] += app
+                    user_lenght[4] += 1
+                elif item_left < 20:
+                    MAP_lenght[5] += app
+                    user_lenght[5] += 1
+                elif item_left < 24:
+                    MAP_lenght[6] += app
+                    user_lenght[6] += 1
+                elif item_left < 28:
+                    MAP_lenght[7] += app
+                    user_lenght[7] += 1
+                elif item_left < 32:
+                    MAP_lenght[8] += app
+                    user_lenght[8] += 1
+                elif item_left < 36:
+                    MAP_lenght[9] += app
+                    user_lenght[9] += 1
+                else:
+                    MAP_lenght[10] += app
+                    user_lenght[10] += 1
 
-            MAP_final += app
+                MAP_final += app
+                n_eval += 1
 
         for i in range(11):
             if user_lenght[i] > 0:
                 print("MAP@10 for users with < {} interactions: {}".format(i*4, str(MAP_lenght[i] / user_lenght[i])))
-
                 MAP_lenght[i] = MAP_lenght[i] / user_lenght[i]
             else:
                 print("Empty category")
 
-        MAP_final /= len(Utils.get_target_user_list())
+        MAP_final /= n_eval
         return MAP_final, MAP_lenght
 
-    def find_epochs(self, recommender):
-        for i in [5, 10, 20, 30, 50, 70, 100]:
-            print(i)
-            MAP_final = 0
-            recommender.fit(self.URM_train, epochs=i)
-            count = 0
-            for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-                recommended_items = recommender.recommend(user_id)
-                MAP_final += self.evaluate(user_id, recommended_items)
-
-            MAP_final /= len(Utils.get_target_user_list())
-            print('epochs' + str(i))
-            print(MAP_final)
-            print('\n\n')
-        return MAP_final
 
     #
     #
