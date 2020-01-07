@@ -29,10 +29,10 @@ class Hybrid(object):
         if weights is None:
             weights = {
                 "MF": 0.08906,
-                "RP3beta": 0.8941,
+                "RP3beta": 0.9,
                 "SLIM_E": 0.3903,
                 "item_cbf": 0.9087,
-                "item_cf": 0.5744,
+                "item_cf": 0.6,
                 "user_cf": 0.002807
             }
 
@@ -98,7 +98,7 @@ class Hybrid(object):
 
 if __name__ == '__main__':
     recommender = Hybrid(divide_recommendations=False, only_cold=False)
-    Runner.run(recommender, False, find_weights_new_hybrid=True, evaluate_different_type_of_users=False,
+    Runner.run(recommender, True, find_weights_new_hybrid=True, evaluate_different_type_of_users=True,
                batch_evaluation=True, split='2080')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029
