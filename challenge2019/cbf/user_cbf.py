@@ -19,13 +19,16 @@ class UserContentBasedFiltering():
         self.UCM_age = None
         self.SM_region = None
         self.SM_age = None
+        self.SM = None
+        self.combined_UCM = None
+        self.RECS = None
 
     def create_similarity_matrix(self, UCM, knn=100):
         similarity_object = Compute_Similarity_Python(UCM.transpose(), topK=knn, shrink=self.shrink,
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=1000, shrink=20, similarity="tversky"):
+    def fit(self, URM, knn=1000, shrink=100, similarity="tversky", use_URM=True):
         utils = Utils()
         self.knn = knn
         self.shrink = shrink
@@ -40,7 +43,10 @@ class UserContentBasedFiltering():
         # self.UCM_age = utils.get_URM_BM_25(self.UCM_age) <-- exact same
         # self.UCM_age = utils.get_URM_tfidf(self.UCM_age) <-- exact same
 
-        self.combined_UCM = sps.hstack([self.UCM_age, self.UCM_region])
+        self.combined_UCM = sps.hstack([self.UCM_age, self.UCM_region]).tocsr()
+        if use_URM:
+            print("Using UCM + URM")
+            self.combined_UCM = sps.hstack([self.URM, self.combined_UCM]).tocsr()
 
         # self.combined_UCM = utils.get_URM_BM_25(self.combined_UCM) <-- exact same
         # self.combined_UCM = utils.get_URM_tfidf(self.combined_UCM) <-- exact same

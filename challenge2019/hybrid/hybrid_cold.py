@@ -5,28 +5,32 @@ from challenge2019.topPop.topPop import *
 class HybridCold(object):
 
     def __init__(self):
-        self.URM = None
+        self.alpha = None
+        self.fitted = False
 
-        self.recommenderUserCBF = UserContentBasedFiltering()
+        self.UserContentBasedFilteringSenzaURM = UserContentBasedFiltering()
+        self.UserContentBasedFilteringConURM = UserContentBasedFiltering()
         self.recommenderTopPop = TopPop()
 
-    def fit(self, URM):
+    def fit(self, URM, alpha=0.2, fit_once=False):
+        self.alpha = alpha
+        if not (fit_once and self.fitted):
 
-        self.URM = URM
+            self.UserContentBasedFilteringSenzaURM.fit(URM, use_URM=False)
+            self.UserContentBasedFilteringConURM.fit(URM, use_URM=True)
+            self.recommenderTopPop.fit(URM)
 
-        self.recommenderUserCBF.fit(URM)
-        self.recommenderTopPop.fit(URM)
+            self.fitted = True
 
     def recommend(self, user_id, at=10):
-        self.URM.eliminate_zeros()
 
-        recommended_items = []
-        expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=20)
-        expected_items_user_cbf = self.recommenderUserCBF.recommend(user_id, at=10)
+        expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=10)
+        expected_items_user_cbf_senza_URM = self.UserContentBasedFilteringSenzaURM.recommend(user_id, at=10)
+        expected_items_user_cbf_con_URM = self.UserContentBasedFilteringConURM.recommend(user_id, at=10)
 
-        if np.flip(np.sort(self.recommenderUserCBF.get_expected_ratings(user_id)))[0] > 0:
+        if np.flip(np.sort(self.UserContentBasedFilteringSenzaURM.get_expected_ratings(user_id)))[0] > 0:
 
-            recommended_items = expected_items_user_cbf
+            recommended_items = expected_items_user_cbf_senza_URM
 
         else:
             recommended_items = expected_items_top_pop
@@ -36,7 +40,7 @@ class HybridCold(object):
 
 if __name__ == '__main__':
     recommender = HybridCold()
-    Runner.run(recommender, True,
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False,
                batch_evaluation=True, split='2080')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029

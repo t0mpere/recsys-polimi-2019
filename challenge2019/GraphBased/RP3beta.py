@@ -31,7 +31,7 @@ class RP3betaRecommender():
             self.implicit, self.normalize_similarity)
 
     def fit(self, URM_train, alpha=.5, beta=0.1, min_rating=0, topK=60, implicit=True, normalize_similarity=True, use_ICM=True):
-
+        print("Starting RP3beta")
         utils = Utils()
         self.URM_train = URM_train
         utils = Utils()

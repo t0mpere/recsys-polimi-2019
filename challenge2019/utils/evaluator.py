@@ -403,7 +403,7 @@ class Evaluator(object):
     def optimize_hyperparameters_bo_user_cbf(self, knn, shrink):
         recommender = self.recommender
         recommender.fit(self.URM_train, shrink=int(shrink), knn=int(knn))
-        MAP, MAP_long = self.evaluate_recommender_on_different_length_of_user(recommender, fit=False)
+        MAP = self.evaluate_recommender(recommender)
         return MAP
 
     def optimize_hyperparameters_bo_P3alpha(self, topk, alpha):
@@ -540,7 +540,7 @@ class Evaluator(object):
 
         optimizer.maximize(
             init_points=5,
-            n_iter=36,
+            n_iter=100,
             acq="ei", xi=1e-4
         )
         print(optimizer.max)
