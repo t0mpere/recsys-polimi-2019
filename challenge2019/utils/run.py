@@ -2,7 +2,7 @@ import pandas as pd
 from tqdm import tqdm
 import numpy as np
 
-from challenge2019.utils.evaluator import Evaluator
+from challenge2019.utils.evaluator import Evaluator, bcolors
 from challenge2019.utils.utils import Utils
 
 
@@ -213,7 +213,7 @@ class Runner(object):
                 elif evaluate_different_region_of_users:
                     print("MAP@10 : {}".format((evaluator.fit_and_evaluate_recommender_on_different_region_of_user(recommender))))
                 else:
-                    print("MAP@10 : {}".format(evaluator.fit_and_evaluate_recommender(recommender)))
+                    print(bcolors.color("MAP@10 : {}".format(evaluator.fit_and_evaluate_recommender(recommender)), 3))
 
 
         else:

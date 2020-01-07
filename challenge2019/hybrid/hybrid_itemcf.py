@@ -31,7 +31,6 @@ class hybridItemCF(object):
         self.URM = URM
         utils = Utils()
         self.ICM = utils.get_icm()
-        print(self.URM.shape, self.ICM.transpose().shape)
         self.URM_ICM = sps.vstack([self.URM, self.ICM.transpose()]).tocsr()
 
         # self.URM = utils.split_long_users(URM)
@@ -43,14 +42,26 @@ class hybridItemCF(object):
             "knn": 5,
             "shrink": 45
         }
-        weights3 = {
-            "URM": self.URM,
-            "similarity": "tanimoto",
-            "knn": 19,
-            "shrink": 20
+        weights2 = {
+            "URM": utils.get_URM_tfidf(self.URM),
+            "similarity": "cosine",
+            "knn": 30,
+            "shrink": 40
         }
-        weights = [weights1, weights3]
-        weights_sum = [0.65, 0.35]
+        weights4 = {
+            "URM": utils.get_URM_BM_25(self.URM_ICM, K1=3, B=0.9),
+            "similarity": "jaccard",
+            "knn": 5,
+            "shrink": 45
+        }
+        weights5 = {
+            "URM": self.URM_ICM,
+            "similarity": "jaccard",
+            "knn": 40,
+            "shrink": 30
+        }
+        weights = [weights1, weights2, weights4, weights5]
+        weights_sum = [0.75, 0.3, 0.01, 0.45]
 
         self.results = self.create_similarity_matrices(weights)
         i = 0
@@ -90,5 +101,5 @@ class hybridItemCF(object):
 
 if __name__ == '__main__':
     recommender = hybridItemCF()
-    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=True,
+    Runner.run(recommender, True, find_hyper_parameters_cf=False, evaluate_different_type_of_users=False,
                batch_evaluation=True, split='2080')
