@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import implicit
 
@@ -23,7 +25,7 @@ class AlternatingLeastSquare:
         self.regularization = None
         self.iterations = None
 
-    def fit(self, URM, n_factors=300, regularization=0.08, iterations=37, alpha=24):
+    def fit(self, URM, n_factors=339, regularization=0.00187, iterations=50, alpha=24):
         self.URM = URM
 
         utils = Utils()
@@ -35,7 +37,7 @@ class AlternatingLeastSquare:
         self.iterations = iterations
 
         sparse_item_user = self.URM.T
-
+        os.environ["OPENBLAS_NUM_THREADS"] = "1"
         # Initialize the als model and fit it using the sparse item-user matrix
         model = implicit.als.AlternatingLeastSquares(factors=self.n_factors, regularization=self.regularization,
                                                      iterations=self.iterations, use_gpu=False,
@@ -73,6 +75,6 @@ class AlternatingLeastSquare:
 if __name__ == '__main__':
     recommender = AlternatingLeastSquare()
     Runner.run(recommender, True, find_hyper_parameters_ALS=True, evaluate_different_type_of_users=False,
-               batch_evaluation=True, split='2080')
+               batch_evaluation=False, split='2080')
 
 # 0.02331 with seed 69
