@@ -7,26 +7,28 @@ class HybridRP3Beta(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
-        self.RP3_beta_short = None
-        self.RP3_beta_long = None
+        self.RP3_beta_URM_ICM = None
+        self.RP3_beta_URM = None
+        self.alpha = None
+        self.fitted = False
 
-    def fit(self, URM):
+    def fit(self, URM, alpha=0.65, fit_once=False):
         self.URM = URM
+        self.alpha = alpha
 
-        self.RP3_beta_short = RP3betaRecommender()
-        self.RP3_beta_long = RP3betaRecommender()
-        self.RP3_beta_short.fit(self.URM, alpha=.528, beta=0.1592, topK=72, use_ICM=True)
-        self.RP3_beta_long.fit(self.URM, alpha=.02069, beta=0.03782, topK=77, use_ICM=False)
+        if not (fit_once and self.fitted):
+            self.RP3_beta_URM_ICM = RP3betaRecommender()
+            self.RP3_beta_URM = RP3betaRecommender()
+            self.RP3_beta_URM_ICM.fit(self.URM, alpha=.5, beta=0.1, topK=60, use_ICM=True)
+            self.RP3_beta_URM.fit(self.URM, alpha=.3, beta=0.1, topK=90, use_ICM=False)
+            self.fitted = True
 
     def get_expected_ratings(self, user_id):
         user_id = int(user_id)
 
         liked_items = self.URM[user_id]
 
-        if len(liked_items.data) <= 32:
-            expected_ratings = self.RP3_beta_short.get_expected_ratings(user_id)
-        else:
-            expected_ratings = self.RP3_beta_long.get_expected_ratings(user_id)
+        expected_ratings = self.RP3_beta_URM_ICM.get_expected_ratings(user_id) * self.alpha + self.RP3_beta_URM.get_expected_ratings(user_id) * (1 - self.alpha)
 
         return expected_ratings
 
@@ -42,5 +44,5 @@ class HybridRP3Beta(object):
 
 if __name__ == '__main__':
     recommender = HybridRP3Beta()
-    Runner.run(recommender, True, evaluate_different_type_of_users=False, find_weights_hybrid_item=False,
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False,
                batch_evaluation=True, split='2080')
