@@ -7,7 +7,7 @@ from challenge2019.cbf.user_cbf import *
 from challenge2019.topPop.topPop import *
 
 
-class HybridItemCfRP3Beta(object):
+class HybridCold2(object):
 
     def __init__(self, divide_recommendations=False):
         self.URM = None
@@ -58,7 +58,7 @@ class HybridItemCfRP3Beta(object):
         return recommended_items[0:10]
 
 if __name__ == '__main__':
-    recommender = HybridItemCfRP3Beta()
+    recommender = HybridCold2()
     Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_cold_users=False,
                batch_evaluation=True, split='2080')
 

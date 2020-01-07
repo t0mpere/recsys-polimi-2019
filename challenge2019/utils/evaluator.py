@@ -9,6 +9,21 @@ import scipy.sparse as sps
 from .utils import Utils
 from challenge2019.Base.Evaluation.Evaluator import EvaluatorProf
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    colors = [HEADER, OKBLUE, OKGREEN, WARNING, FAIL, BOLD, UNDERLINE]
+
+    @staticmethod
+    def color(msg, color):
+        assert 0 < color < len(bcolors.colors)
+        return bcolors.colors[color] + msg + bcolors.ENDC
 
 class Evaluator(object):
 
@@ -22,7 +37,7 @@ class Evaluator(object):
 
     def train_test_holdout(self, URM_all, seed, train_perc=0.8):
 
-        print("Splitting using 2080 \n Splitting...")
+        print(bcolors.color("Splitting using 2080 \n Splitting...", 1))
         numInteractions = URM_all.nnz
         URM_all = URM_all.tocoo()
         shape = URM_all.shape
@@ -190,7 +205,7 @@ class Evaluator(object):
 
         return precision_score
 
-    def evaluate_recommender(self, recommender):
+    def evaluate_recommender(self, recommender, fit=False):
         MAP_final = 0
         precision_final = 0
         recall_final = 0
@@ -201,6 +216,9 @@ class Evaluator(object):
         utils = Utils()
         URM = utils.get_urm_from_csv()
         user_indexes = np.arange(URM.shape[0])
+
+        if fit:
+            recommender.fit(self.URM_train)
 
         for user_id in tqdm(user_indexes, desc='Computing Recommendations: '):
             recommended_items = recommender.recommend(user_id)
@@ -219,42 +237,11 @@ class Evaluator(object):
         MAP_final /= n_eval
         precision_final /= n_eval
         recall_final /= n_eval
-        print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
+        print(bcolors.color('Recall : {} \nPrecision : {}'.format(recall_final, precision_final), 2))
         return MAP_final
 
     def fit_and_evaluate_recommender(self, recommender):
-        MAP_final = 0
-        precision_final = 0
-        recall_final = 0
-        n_eval = 0
-
-        utils = Utils()
-        URM = utils.get_urm_from_csv()
-        user_indexes = np.arange(URM.shape[0])
-
-        recommender.fit(self.URM_train)
-
-        print("Start recommending...")
-
-        for user_id in tqdm(user_indexes, desc='Computing Recommendations: '):
-            recommended_items = recommender.recommend(user_id)
-            start_pos = self.URM_test.indptr[user_id]
-            end_pos = self.URM_test.indptr[user_id + 1]
-            if end_pos - start_pos > 0:
-                relevant_items = self.URM_test.indices[start_pos:end_pos]
-                is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
-
-                MAP_final += self.MAP(relevant_items, is_relevant)
-                precision_final += self.precision(relevant_items, is_relevant)
-                recall_final += self.recall(relevant_items, is_relevant)
-
-                n_eval += 1
-
-        MAP_final /= n_eval
-        precision_final /= n_eval
-        recall_final /= n_eval
-        print('Recall : {} \nPrecision : {}'.format(recall_final, precision_final))
-        return MAP_final
+        return self.evaluate_recommender(recommender, fit=True)
 
     def fit_and_evaluate_recommender_on_different_age_of_user(self, recommender):
         MAP_age = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -362,7 +349,7 @@ class Evaluator(object):
 
         for i in range(11):
             if user_lenght[i] > 0:
-                print("MAP@10 for users with < {} interactions: {}".format(i*4, str(MAP_lenght[i] / user_lenght[i])))
+                print("MAP@10 for users with < {} interactions: {}".format(i * 4, str(MAP_lenght[i] / user_lenght[i])))
 
                 MAP_lenght[i] = MAP_lenght[i] / user_lenght[i]
             else:
@@ -370,22 +357,6 @@ class Evaluator(object):
 
         MAP_final /= len(Utils.get_target_user_list())
         return MAP_final, MAP_lenght
-
-    def find_epochs(self, recommender):
-        for i in [5, 10, 20, 30, 50, 70, 100]:
-            print(i)
-            MAP_final = 0
-            recommender.fit(self.URM_train, epochs=i)
-            count = 0
-            for user_id in tqdm(Utils.get_target_user_list(), desc='Computing Recommendations: '):
-                recommended_items = recommender.recommend(user_id)
-                MAP_final += self.evaluate(user_id, recommended_items)
-
-            MAP_final /= len(Utils.get_target_user_list())
-            print('epochs' + str(i))
-            print(MAP_final)
-            print('\n\n')
-        return MAP_final
 
     #
     #
@@ -443,13 +414,15 @@ class Evaluator(object):
 
     def optimize_hyperparameters_bo_ALS(self, n_factors, regularization, iterations, alpha):
         recommender = self.recommender
-        recommender.fit(self.URM_train, n_factors=int(n_factors), regularization=regularization, iterations=int(iterations), alpha=alpha)
+        recommender.fit(self.URM_train, n_factors=int(n_factors), regularization=regularization,
+                        iterations=int(iterations), alpha=alpha)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
     def optimize_hyperparameters_bo_fw(self, loss_tolerance, iteration_limit, damp_coeff, topK, add_zeros_quota):
         recommender = self.recommender
-        recommender.fit(self.URM_train, loss_tolerance=loss_tolerance, iteration_limit=int(iteration_limit), damp_coeff=damp_coeff, topK=int(topK), add_zeros_quota=add_zeros_quota)
+        recommender.fit(self.URM_train, loss_tolerance=loss_tolerance, iteration_limit=int(iteration_limit),
+                        damp_coeff=damp_coeff, topK=int(topK), add_zeros_quota=add_zeros_quota)
         MAP = self.evaluate_recommender(recommender)
         return MAP
 
