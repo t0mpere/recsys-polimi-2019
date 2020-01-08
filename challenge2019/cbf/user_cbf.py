@@ -28,7 +28,7 @@ class UserContentBasedFiltering():
                                                       normalize=True, similarity=self.similarity)
         return similarity_object.compute_similarity()
 
-    def fit(self, URM, knn=1000, shrink=100, similarity="tversky", use_URM=True):
+    def fit(self, URM, knn=1000, shrink=50, similarity="tversky", use_URM=True):
         utils = Utils()
         self.knn = knn
         self.shrink = shrink

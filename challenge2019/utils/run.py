@@ -100,12 +100,12 @@ class Runner(object):
 
                 elif find_weights_new_hybrid:
                     weights = {
-                        "MF": (0.01, 0.09),
+                        "MF": (0, 1),
                         "RP3beta": (0, 1),
-                        "SLIM_E": (0, 0.5),
+                        "SLIM_E": (0, 1),
                         "item_cbf": (0, 1),
                         "item_cf": (0, 1),
-                        "user_cf": (0.002, 0.007)
+                        "user_cf": (0, 1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_new_hybrid)
@@ -140,8 +140,8 @@ class Runner(object):
 
                 elif find_hyper_parameters_user_cbf:
                     tuning_params = {
-                        "shrink": (0, 100),
-                        "knn": (1, 1000)
+                        "shrink": (0, 50),
+                        "knn": (100, 2000)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(tuning_params, evaluator.optimize_hyperparameters_bo_user_cbf)

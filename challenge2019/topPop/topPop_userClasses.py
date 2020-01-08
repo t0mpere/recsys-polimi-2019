@@ -14,8 +14,8 @@ class TopPopUserClasses():
 
     def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
         utils = Utils()
-        self.UCM_age = utils.get_ucm_age_from_csv()
-        self.UCM_region = utils.get_ucm_region_from_csv()
+        self.UCM_age = utils.get_ucm_region_from_csv_one_hot_encoding()
+        self.UCM_region = utils.get_ucm_age_from_csv_one_hot_encoding()
         age_dict = dict()
         reg_dict = dict()
         for i in utils.get_user_list():
@@ -70,5 +70,5 @@ class TopPopUserClasses():
 
 if __name__ == '__main__':
     recommender = TopPopUserClasses()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True,batch_evaluation=True)
+    Runner.run(recommender, True, evaluate_different_type_of_users=True, batch_evaluation=True)
     recommender.get_expected_ratings(1)

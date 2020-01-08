@@ -1,5 +1,6 @@
 from challenge2019.cbf.user_cbf import *
 from challenge2019.topPop.topPop import *
+from challenge2019.topPop.topPop_userClasses import *
 
 
 class HybridCold(object):
@@ -10,10 +11,11 @@ class HybridCold(object):
 
         self.UserContentBasedFilteringSenzaURM = UserContentBasedFiltering()
         self.UserContentBasedFilteringConURM = UserContentBasedFiltering()
-        self.recommenderTopPop = TopPop()
+        self.recommenderTopPop = TopPopUserClasses()
 
     def fit(self, URM, alpha=0.2, fit_once=False):
         self.alpha = alpha
+        self.URM = URM
         if not (fit_once and self.fitted):
 
             self.UserContentBasedFilteringSenzaURM.fit(URM, use_URM=False)
@@ -23,18 +25,19 @@ class HybridCold(object):
             self.fitted = True
 
     def recommend(self, user_id, at=10):
-
+        liked_items = self.URM[user_id]
         expected_items_top_pop = self.recommenderTopPop.recommend(user_id, at=10)
         expected_items_user_cbf_senza_URM = self.UserContentBasedFilteringSenzaURM.recommend(user_id, at=10)
         expected_items_user_cbf_con_URM = self.UserContentBasedFilteringConURM.recommend(user_id, at=10)
 
         if np.flip(np.sort(self.UserContentBasedFilteringSenzaURM.get_expected_ratings(user_id)))[0] > 0:
 
-            recommended_items = expected_items_user_cbf_senza_URM
+            recommended_items = expected_items_user_cbf_con_URM
 
-        else:
+        elif len(liked_items.data) == 0:
             recommended_items = expected_items_top_pop
-
+        else:
+            recommended_items = expected_items_user_cbf_con_URM
         return recommended_items[0:at]
 
 
