@@ -97,7 +97,7 @@ class UserContentBasedFiltering():
 
 if __name__ == '__main__':
     recommender = UserContentBasedFiltering()
-    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_type_of_users=True,
-               batch_evaluation=True, split='2080')
+    Runner.run(recommender, True, find_hyper_parameters_user_cbf=False, evaluate_different_region_of_users=True,
+               evaluate_different_type_of_users=True, batch_evaluation=True, split='2080')
 
 # 0.001146 with seed 69

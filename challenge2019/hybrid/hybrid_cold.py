@@ -11,7 +11,7 @@ class HybridCold(object):
 
         self.UserContentBasedFilteringSenzaURM = UserContentBasedFiltering()
         self.UserContentBasedFilteringConURM = UserContentBasedFiltering()
-        self.recommenderTopPop = TopPopUserClasses()
+        self.recommenderTopPop = TopPop()
 
     def fit(self, URM, alpha=0.2, fit_once=False):
         self.alpha = alpha
@@ -34,16 +34,14 @@ class HybridCold(object):
 
             recommended_items = expected_items_user_cbf_con_URM
 
-        elif len(liked_items.data) == 0:
-            recommended_items = expected_items_top_pop
         else:
-            recommended_items = expected_items_user_cbf_con_URM
+            recommended_items = expected_items_top_pop
         return recommended_items[0:at]
 
 
 if __name__ == '__main__':
     recommender = HybridCold()
-    Runner.run(recommender, True, evaluate_different_type_of_users=True, find_weights_hybrid_item=False,
+    Runner.run(recommender, True, evaluate_different_age_of_users=True, find_weights_hybrid_item=False,
                batch_evaluation=True, split='2080')
 
     # best score on seed 69: MAP@10 : 0.03042666580147029
