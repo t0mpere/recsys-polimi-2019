@@ -5,42 +5,37 @@ from tqdm import tqdm
 from challenge2019.Base.Similarity.Compute_Similarity_Python import Compute_Similarity_Python
 from challenge2019.utils.run import Runner
 from challenge2019.utils.utils import Utils
+from challenge2019.topPop.topPop import TopPop
 
 
 class TopPopUserClasses():
 
     def __init__(self):
         self.URM = None
+        self.TopPop = TopPop()
 
-    def fit(self, URM, knn=100, shrink=5, similarity="cosine"):
-        utils = Utils()
-        self.UCM_age = utils.get_ucm_region_from_csv_one_hot_encoding()
-        self.UCM_region = utils.get_ucm_age_from_csv_one_hot_encoding()
-        age_dict = dict()
-        reg_dict = dict()
-        for i in utils.get_user_list():
-            if len(self.UCM_age[i].data) is not 0:
-                age_dict.setdefault(int(self.UCM_age[i].data[0]), []).append(i)
-            if len(self.UCM_region[i].data) is not 0:
-                non_zero_cols = self.UCM_region[i].nonzero()[1]
-                if len(non_zero_cols) > 1:
-                    for nzc in non_zero_cols:
-                        reg_dict.setdefault(nzc, []).append(i)
-                else: reg_dict.setdefault(non_zero_cols[0], []).append(i)
+    def fit(self, URM):
         self.URM = URM
+        self.utils = Utils()
+        self.UCM_age = self.utils.get_ucm_age_from_csv_one_hot_encoding()
+        self.UCM_region = self.utils.get_ucm_region_from_csv_one_hot_encoding()
+        self.TopPop.fit(URM)
 
-        self.reg_occurrencies = self.get_frequencies(reg_dict)
-        self.age_occurrencies = self.get_frequencies(age_dict)
+        self.recommenders_age = self.get_fitted_recommenders(self.UCM_age, URM.copy())
+        self.recommenders_region = self.get_fitted_recommenders(self.UCM_age, URM.copy())
 
-    def get_expected_ratings(self, user_id):
-        data = np.arange(0.1, 1.1, 0.1)
-        data = np.flip(data, 0)
 
-        recommended_items = list(self.recommend(user_id))
-        expected_ratings = np.zeros(self.URM.shape[1])
-        for item in recommended_items:
-            expected_ratings[item] = data[recommended_items.index(item)]
-        return expected_ratings
+
+    def get_fitted_recommenders(self, UCM, URM):
+        recommenders_list = list()
+        for i in range(UCM.shape[1]):
+            mask = self.UCM_age.getcol(i).todense()
+            mask = mask.astype(dtype=bool)
+            toppop = TopPop()
+            indices = np.where(mask)[0]
+            toppop.fit(URM[indices,:], verbose=False)
+            recommenders_list.append(toppop)
+        return recommenders_list
 
     def get_frequencies(self, dict):
         occurrencies = np.array(np.zeros(shape=(len(dict.keys()) + 1, self.URM.shape[1])))
@@ -51,15 +46,23 @@ class TopPopUserClasses():
         return occurrencies
 
     def recommend(self, user_id, at=10):
-        if len(self.UCM_age[user_id].data):
-            age = self.UCM_age[user_id].data[0]
+        UCM_age = self.utils.get_ucm_age_from_csv()
+        if len(UCM_age[user_id].data):
+            age = UCM_age[user_id].data[0]
         else:
             age = 0
-        if len(self.UCM_region[user_id].data):
-            reg = self.UCM_region[user_id].data[0]
-        else:
-            reg = 0
-        expected_ratings = self.age_occurrencies[int(age)] + self.reg_occurrencies[int(reg)]
+
+        expected_ratings = self.recommenders_age[int(age)].get_occurrencies()
+
+        UCM_region = self.utils.get_ucm_region_from_csv()
+        region = UCM_region[user_id].data
+        if len(UCM_region[user_id].data):
+            for i in UCM_region[user_id].data:
+                expected_ratings += self.recommenders_region[int(region)].get_occurrencies()
+
+        if sum(expected_ratings) == 0:
+            expected_ratings = self.TopPop.get_occurrencies()
+
         recommended_items = np.flip(np.argsort(expected_ratings), 0)
 
         unseen_items_mask = np.in1d(recommended_items, self.URM[user_id].indices,

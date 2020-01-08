@@ -11,7 +11,7 @@ class HybridCold(object):
 
         self.UserContentBasedFilteringSenzaURM = UserContentBasedFiltering()
         self.UserContentBasedFilteringConURM = UserContentBasedFiltering()
-        self.recommenderTopPop = TopPop()
+        self.recommenderTopPop = TopPopUserClasses()
 
     def fit(self, URM, alpha=0.2, fit_once=False):
         self.alpha = alpha
