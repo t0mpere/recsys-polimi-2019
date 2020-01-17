@@ -7,7 +7,10 @@ from challenge2019.hybrid.hybrid_RP3beta import RP3betaRecommender
 from challenge2019.hybrid.hybrid_itemcf import hybridItemCF
 from challenge2019.hybrid.hybrid_cold import HybridCold
 
-
+"""
+Best algorithm found
+last sub: 0.03613
+"""
 class Hybrid(object):
 
     def __init__(self, divide_recommendations=False, only_cold=False):

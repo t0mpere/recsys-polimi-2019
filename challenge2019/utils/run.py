@@ -8,18 +8,52 @@ from challenge2019.utils.utils import Utils
 
 class Runner(object):
 
+    """
+    Runner is the class responsible for the handling of a recommender object
+    :parameter is_test :decides weather to run the test suite or to create a csv for submission
+    """
     @staticmethod
-    def run(recommender, is_test=True, find_hyper_parameters_cf=False, find_hyper_parameters_item_cbf=False,
-            find_hyper_parameters_user_cbf=False, find_hyper_parameters_slim_elastic=False,
-            find_weights_hybrid_cold_users=False, find_hyper_parameters_slim_bpr=False, evaluate_different_type_of_users=False,
-            evaluate_different_age_of_users=False, evaluate_different_region_of_users=False, find_weights_hybrid=False,
-            find_hyper_parameters_P3alpha=False, find_hyper_parameters_pureSVD=False, find_weights_hybrid_item = False,
-            find_weights_new_hybrid = False, batch_evaluation=False, find_hyper_parameters_RP3beta=False,
-            find_hyper_parameters_ALS=False, find_hyper_parameters_fw=False, find_weights_hybrid_all_item=False,
-            split='2080', find_weights_hybrid_20=False, find_weights_item_cbf=False):
-        # URM_csv = pd.read_csv("../dataset/data_train.csv")
+    def run(recommender,
+
+            is_test=True,
+
+            #
+            # PARAMETER FOR BAYESIAN OPTIMIZATION
+            #
+            find_hyper_parameters_cf=False,
+            find_hyper_parameters_item_cbf=False,
+            find_hyper_parameters_user_cbf=False,
+            find_hyper_parameters_slim_elastic=False,
+            find_weights_hybrid_cold_users=False,
+            find_hyper_parameters_slim_bpr=False,
+            find_weights_hybrid=False,
+            find_hyper_parameters_RP3beta=False,
+            find_hyper_parameters_ALS=False,
+            find_hyper_parameters_fw=False,
+            find_weights_hybrid_all_item=False,
+            find_hyper_parameters_P3alpha=False,
+            find_hyper_parameters_pureSVD=False,
+            find_weights_hybrid_item=False,
+            find_weights_new_hybrid=False,
+            find_weights_hybrid_20=False,
+            find_weights_item_cbf=False,
+
+            #
+            # PARAMETERS FOR EVALUATION METHODS
+            #
+            evaluate_different_type_of_users=False,
+            evaluate_different_age_of_users=False,
+            evaluate_different_region_of_users=False,
+            batch_evaluation=False,
+
+            #
+            # SPLIT SELECT
+            # 2080: Random selection of 20% of the dataset
+            # random: Random selection of 20% of interactions for all users with more than 4
+            # random_all: Random selection of 20% of interactions for all users
+            #
+            split='2080'):
         utils = Utils()
-        # TODO: see if this line changes something
 
         if is_test:
             print("Starting testing phase..")
@@ -100,12 +134,12 @@ class Runner(object):
 
                 elif find_weights_new_hybrid:
                     weights = {
-                        "MF": (0, 1),
-                        "RP3beta": (0, 1),
-                        "SLIM_E": (0, 1),
-                        "item_cbf": (0, 1),
-                        "item_cf": (0, 1),
-                        "user_cf": (0, 1)
+                        "MF": (0, 2),
+                        "RP3beta": (0, 10),
+                        "SLIM_E": (0, 5),
+                        "item_cbf": (0, 10),
+                        "item_cf": (0, 10),
+                        "user_cf": (0, 0.1)
                     }
                     evaluator.set_recommender_to_tune(recommender)
                     evaluator.optimize_bo(weights, evaluator.optimize_weights_new_hybrid)
